@@ -1,0 +1,88 @@
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { PokemonService } from '../../core/services/pokemon.service';
+import { PokemonDetail, PokemonListItem } from '../../core/models/pokemon.model';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+
+const MAX_SUGGESTIONS = 8;
+
+@Component({
+  selector: 'app-compare',
+  standalone: true,
+  imports: [
+    RouterLink,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    LoadingSpinnerComponent,
+  ],
+  templateUrl: './compare.component.html',
+  styleUrl: './compare.component.scss',
+})
+export class CompareComponent {
+  private pokemonService = inject(PokemonService);
+
+  allNames = signal<PokemonListItem[]>([]);
+
+  queryA = signal('');
+  queryB = signal('');
+
+  pokemonA = signal<PokemonDetail | null>(null);
+  pokemonB = signal<PokemonDetail | null>(null);
+  loadingA = signal(false);
+  loadingB = signal(false);
+
+  suggestionsA = computed(() => this.suggestionsFor(this.queryA()));
+  suggestionsB = computed(() => this.suggestionsFor(this.queryB()));
+
+  constructor() {
+    this.pokemonService.getAllPokemonListItems().subscribe((items) => this.allNames.set(items));
+  }
+
+  private suggestionsFor(query: string): PokemonListItem[] {
+    const term = query.trim().toLowerCase();
+    if (!term) {
+      return [];
+    }
+    return this.allNames()
+      .filter((item) => item.name.toLowerCase().includes(term))
+      .slice(0, MAX_SUGGESTIONS);
+  }
+
+  onQueryAChange(value: string): void {
+    this.queryA.set(value);
+  }
+
+  onQueryBChange(value: string): void {
+    this.queryB.set(value);
+  }
+
+  selectA(item: PokemonListItem): void {
+    this.queryA.set(item.name);
+    this.loadingA.set(true);
+    this.pokemonService.getPokemonDetail(item.name).subscribe({
+      next: (detail) => {
+        this.pokemonA.set(detail);
+        this.loadingA.set(false);
+      },
+      error: () => this.loadingA.set(false),
+    });
+  }
+
+  selectB(item: PokemonListItem): void {
+    this.queryB.set(item.name);
+    this.loadingB.set(true);
+    this.pokemonService.getPokemonDetail(item.name).subscribe({
+      next: (detail) => {
+        this.pokemonB.set(detail);
+        this.loadingB.set(false);
+      },
+      error: () => this.loadingB.set(false),
+    });
+  }
+}

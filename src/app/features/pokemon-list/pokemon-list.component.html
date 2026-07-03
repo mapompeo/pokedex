@@ -1,0 +1,37 @@
+<mat-toolbar color="primary">
+  <span>Pokédex</span>
+  <span class="spacer"></span>
+  <a routerLink="/favoritos" mat-button>Favoritos</a>
+  <a routerLink="/comparar" mat-button>Comparar</a>
+</mat-toolbar>
+
+<div class="pokemon-list__filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Buscar por nome</mat-label>
+    <input matInput [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)" />
+  </mat-form-field>
+
+  <app-type-chip-filter
+    [types]="types()"
+    [selectedTypeNames]="selectedTypeNames()"
+    (selectionChanged)="onTypeSelectionChanged($event)"
+  ></app-type-chip-filter>
+</div>
+
+<div class="pokemon-list__grid">
+  @for (item of filteredItems(); track item.id) {
+    <app-pokemon-card
+      [pokemon]="item"
+      [isFavorite]="favoritesService.isFavorite(item.id)"
+      (favoriteToggled)="onFavoriteToggled($event)"
+    ></app-pokemon-card>
+  } @empty {
+    <p>Nenhum pokémon encontrado.</p>
+  }
+</div>
+
+@if (loading()) {
+  <app-loading-spinner></app-loading-spinner>
+}
+
+<div #sentinel class="pokemon-list__sentinel"></div>

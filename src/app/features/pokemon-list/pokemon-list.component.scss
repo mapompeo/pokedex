@@ -1,0 +1,22 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.pokemon-list__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  align-items: center;
+}
+
+.pokemon-list__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.pokemon-list__sentinel {
+  height: 1px;
+}

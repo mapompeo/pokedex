@@ -1,0 +1,30 @@
+<a routerLink="/" mat-button>← Voltar</a>
+
+@if (loading()) {
+  <app-loading-spinner></app-loading-spinner>
+} @else if (pokemon(); as p) {
+  <div class="pokemon-detail">
+    <img [src]="p.spriteUrl" [alt]="p.name" class="pokemon-detail__sprite" />
+    <h1>#{{ p.id }} {{ p.name }}</h1>
+    <button mat-raised-button color="primary" (click)="toggleFavorite()">
+      {{ isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}
+    </button>
+
+    <mat-chip-set>
+      @for (type of p.types; track type) {
+        <mat-chip>{{ type }}</mat-chip>
+      }
+    </mat-chip-set>
+
+    <p>Altura: {{ p.height }} | Peso: {{ p.weight }}</p>
+
+    <h2>Stats</h2>
+    <ul>
+      @for (stat of p.stats; track stat.name) {
+        <li>{{ stat.name }}: {{ stat.baseStat }}</li>
+      }
+    </ul>
+  </div>
+} @else {
+  <p>Pokémon não encontrado.</p>
+}

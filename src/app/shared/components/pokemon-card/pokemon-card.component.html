@@ -1,0 +1,15 @@
+<mat-card class="pokemon-card">
+  <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link">
+    <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
+    <span class="pokemon-card__name">#{{ pokemon.id }} {{ pokemon.name }}</span>
+  </a>
+  <div class="pokemon-card__actions">
+    <button
+      mat-icon-button
+      (click)="favoriteToggled.emit(pokemon.id)"
+      [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+    >
+      <mat-icon>{{ isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+    </button>
+  </div>
+</mat-card>
