@@ -73,6 +73,13 @@
       @switch (activeTab()) {
         @case ('sobre') {
           <div class="pdetail__panel">
+            @if (category()) {
+              <p class="pdetail__category">{{ category() }}</p>
+            }
+            @if (description()) {
+              <p class="pdetail__description">{{ description() }}</p>
+            }
+
             <div class="pdetail__meta">
               <div class="pdetail__meta-item">
                 <span class="pdetail__meta-value">{{ formatDecimal(p.weight) }} kg</span>

@@ -35,94 +35,66 @@
   }
 
   &__header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     flex: 0 0 auto;
-    margin: 12px 12px 0;
-    padding: 10px 16px;
+    padding: 24px 20px 8px;
     box-sizing: border-box;
-    background: var(--pokedex-red);
-    border-radius: 14px;
-    box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.35);
-    flex-wrap: wrap;
-
-    @media (max-width: 768px) {
-      margin: 8px 8px 0;
-    }
-  }
-
-  &__light {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #fff;
-
-    &--blue {
-      background: var(--pokedex-blue);
-      width: 20px;
-      height: 20px;
-    }
-
-    &--yellow {
-      background: var(--pokedex-yellow);
-    }
-
-    &--green {
-      background: var(--pokedex-green);
-    }
   }
 
   &__title {
-    font-family: 'Press Start 2P', monospace;
-    color: #fff;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    margin-left: 8px;
-
-    @media (max-width: 768px) {
-      font-size: 0.7rem;
-    }
-  }
-
-  &__tabs {
-    display: flex;
-    gap: 8px;
-    margin-left: auto;
-
-    @media (max-width: 768px) {
-      margin-left: 0;
-      width: 100%;
-    }
-  }
-
-  &__tab {
-    padding: 6px 14px;
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: background-color 0.15s ease, color 0.15s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-  }
-
-  &__tab--active {
-    background: var(--dex-gold);
+    font-weight: 800;
     color: var(--dex-ink);
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+  }
 
-    &:hover {
-      background: var(--dex-gold);
-    }
+  &__subtitle {
+    color: #9a97ab;
+    font-size: 0.9rem;
+    margin: 0;
   }
 
   &__screen-scroll {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    padding-bottom: 76px;
+  }
+
+  &__bottom-nav {
+    display: flex;
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 10;
+    gap: 4px;
+    background: var(--dex-ink);
+    border-radius: 999px;
+    padding: 8px 12px;
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
+  }
+
+  &__bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 600;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__bottom-tab--active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
   }
 }

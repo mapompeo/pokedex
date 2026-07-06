@@ -37,3 +37,9 @@ export interface EvolutionNode {
   spriteUrl: string;
   method: string | null;
 }
+
+export interface PokemonExtras {
+  description: string;
+  category: string;
+  evolutions: EvolutionNode[];
+}

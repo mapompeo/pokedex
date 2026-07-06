@@ -34,6 +34,8 @@ export class PokemonDetailComponent {
   activeTab = signal<DetailTab>('sobre');
   evolutions = signal<EvolutionNode[]>([]);
   evolutionsLoading = signal(true);
+  description = signal('');
+  category = signal('');
 
   isFavorite = computed(() => {
     const p = this.pokemon();
@@ -49,9 +51,11 @@ export class PokemonDetailComponent {
       },
       error: () => this.loading.set(false),
     });
-    this.pokemonService.getEvolutionChain(id).subscribe({
-      next: (evolutions) => {
-        this.evolutions.set(evolutions);
+    this.pokemonService.getPokemonExtras(id).subscribe({
+      next: (extras) => {
+        this.evolutions.set(extras.evolutions);
+        this.description.set(extras.description);
+        this.category.set(extras.category);
         this.evolutionsLoading.set(false);
       },
       error: () => this.evolutionsLoading.set(false),

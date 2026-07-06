@@ -59,7 +59,6 @@
   &__id {
     display: block;
     color: rgba(255, 255, 255, 0.8);
-    font-family: 'Courier New', monospace;
     font-weight: 700;
     font-size: 0.85rem;
     letter-spacing: 0.03em;
@@ -93,7 +92,8 @@
   }
 
   &__sheet {
-    flex: 1;
+    flex: 0 1 auto;
+    min-height: 220px;
     background: #fff;
     border-radius: 36px 36px 0 0;
     margin-top: -40px;
@@ -124,6 +124,24 @@
 
   &__tab--active {
     font-weight: 700;
+  }
+
+  &__category {
+    color: #9a97ab;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin: 0 0 8px;
+  }
+
+  &__description {
+    color: var(--dex-ink);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    text-align: center;
+    margin: 0 0 20px;
   }
 
   &__meta {
@@ -247,7 +265,6 @@
 
   &__value {
     color: var(--dex-ink);
-    font-family: 'Courier New', monospace;
     font-size: 0.68rem;
     text-align: right;
   }

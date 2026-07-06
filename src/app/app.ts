@@ -1,10 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatIconModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

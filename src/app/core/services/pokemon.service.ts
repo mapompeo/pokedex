@@ -4,6 +4,7 @@ import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   EvolutionNode,
   PokemonDetail,
+  PokemonExtras,
   PokemonListItem,
   PokemonListPage,
   PokemonStat,
@@ -41,6 +42,8 @@ interface RawPokemonDetail {
 
 interface RawSpeciesResponse {
   evolution_chain: { url: string };
+  flavor_text_entries: { flavor_text: string; language: { name: string } }[];
+  genera: { genus: string; language: { name: string } }[];
 }
 
 interface RawEvolutionDetail {
@@ -172,13 +175,28 @@ export class PokemonService {
     );
   }
 
-  getEvolutionChain(nameOrId: string): Observable<EvolutionNode[]> {
+  getPokemonExtras(nameOrId: string): Observable<PokemonExtras> {
     return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
       switchMap((species) =>
-        this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url)
-      ),
-      map((res) => this.flattenEvolutionChain(res.chain, null))
+        this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url).pipe(
+          map((chainRes) => ({
+            description: this.pickFlavorText(species.flavor_text_entries),
+            category: this.pickGenus(species.genera),
+            evolutions: this.flattenEvolutionChain(chainRes.chain, null),
+          }))
+        )
+      )
     );
+  }
+
+  private pickFlavorText(entries: { flavor_text: string; language: { name: string } }[]): string {
+    const entry = entries.find((e) => e.language.name === 'en') ?? entries[0];
+    return (entry?.flavor_text ?? '').replace(/[\n\f\r]+/g, ' ').trim();
+  }
+
+  private pickGenus(genera: { genus: string; language: { name: string } }[]): string {
+    const entry = genera.find((g) => g.language.name === 'en') ?? genera[0];
+    return entry?.genus ?? '';
   }
 
   private flattenEvolutionChain(node: RawEvolutionChainNode, method: string | null): EvolutionNode[] {

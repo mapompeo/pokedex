@@ -12,7 +12,7 @@ html {
       primary: mat.$red-palette,
       tertiary: mat.$yellow-palette,
     ),
-    typography: Roboto,
+    typography: 'Nunito Sans',
     density: 0,
   ));
 }
@@ -104,7 +104,6 @@ html {
 }
 
 .stat-row__value {
-  font-family: "Courier New", monospace;
   text-align: right;
   color: var(--dex-ink);
 }
@@ -127,5 +126,5 @@ body {
 }
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body { height: 100%; overflow-x: hidden; }
+body { margin: 0; font-family: "Nunito Sans", "Helvetica Neue", sans-serif; }
