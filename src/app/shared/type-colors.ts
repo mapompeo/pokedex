@@ -24,3 +24,8 @@ const DEFAULT_TYPE_COLOR = '#68A090';
 export function getTypeColor(type: string): string {
   return TYPE_COLORS[type] ?? DEFAULT_TYPE_COLOR;
 }
+
+export function getCapBackground(types: string[]): string {
+  const base = types.length ? getTypeColor(types[0]) : '#CBB994';
+  return `linear-gradient(160deg, color-mix(in srgb, ${base} 45%, white), ${base})`;
+}

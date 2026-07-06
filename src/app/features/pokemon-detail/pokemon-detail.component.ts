@@ -6,6 +6,8 @@ import { FavoritesService } from '../../core/services/favorites.service';
 import { PokemonDetail } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
+import { getCapBackground } from '../../shared/type-colors';
+import { getStatPercent } from '../../shared/stat-utils';
 
 @Component({
   selector: 'app-pokemon-detail',
@@ -43,5 +45,13 @@ export class PokemonDetailComponent {
     if (p) {
       this.favoritesService.toggleFavorite(p.id);
     }
+  }
+
+  capBackground(): string {
+    return getCapBackground(this.pokemon()?.types ?? []);
+  }
+
+  statPercent(value: number): number {
+    return getStatPercent(value);
   }
 }

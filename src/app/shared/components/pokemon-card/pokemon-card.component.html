@@ -1,24 +1,28 @@
-<mat-card class="pokemon-card">
+<div class="pokemon-card" [style.background]="capBackground">
+  <span class="pokemon-card__id">#{{ pokemon.id }}</span>
+  <button
+    type="button"
+    class="pokemon-card__fav"
+    (click)="favoriteToggled.emit(pokemon.id)"
+    [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+  >
+    <mat-icon [style.color]="isFavorite ? 'var(--pokedex-red)' : '#ffffff'">{{
+      isFavorite ? 'favorite' : 'favorite_border'
+    }}</mat-icon>
+  </button>
   <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link">
-    <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
-    <span class="pokemon-card__name">#{{ pokemon.id }} {{ pokemon.name }}</span>
-    @if (types.length) {
-      <div class="pokemon-card__types">
-        @for (type of types; track type) {
-          <app-type-badge [type]="type"></app-type-badge>
-        }
-      </div>
-    }
+    <div class="pokemon-card__cap">
+      <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
+    </div>
+    <div class="pokemon-card__body">
+      <span class="pokemon-card__name">{{ pokemon.name }}</span>
+      @if (types.length) {
+        <div class="pokemon-card__types">
+          @for (type of types; track type) {
+            <app-type-badge [type]="type"></app-type-badge>
+          }
+        </div>
+      }
+    </div>
   </a>
-  <div class="pokemon-card__actions">
-    <button
-      mat-icon-button
-      (click)="favoriteToggled.emit(pokemon.id)"
-      [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-    >
-      <mat-icon [style.color]="isFavorite ? 'var(--pokedex-red)' : null">{{
-        isFavorite ? 'favorite' : 'favorite_border'
-      }}</mat-icon>
-    </button>
-  </div>
-</mat-card>
+</div>

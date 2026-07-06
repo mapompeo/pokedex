@@ -1,6 +1,4 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
 import { forkJoin } from 'rxjs';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PokemonService } from '../../core/services/pokemon.service';
@@ -11,7 +9,7 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [RouterLink, MatButtonModule, PokemonCardComponent, LoadingSpinnerComponent],
+  imports: [PokemonCardComponent, LoadingSpinnerComponent],
   templateUrl: './favorites.component.html',
   styleUrl: './favorites.component.scss',
 })

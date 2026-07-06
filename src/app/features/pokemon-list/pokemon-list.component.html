@@ -1,15 +1,14 @@
-<mat-toolbar color="primary">
-  <span>Pokédex</span>
-  <span class="spacer"></span>
-  <a routerLink="/favoritos" mat-button>Favoritos</a>
-  <a routerLink="/comparar" mat-button>Comparar</a>
-</mat-toolbar>
-
 <div class="pokemon-list__filters">
-  <mat-form-field appearance="outline">
-    <mat-label>Buscar por nome</mat-label>
-    <input matInput [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)" />
-  </mat-form-field>
+  <div class="dex-search">
+    <mat-icon>search</mat-icon>
+    <input
+      class="dex-search__input"
+      type="text"
+      placeholder="Buscar por nome"
+      [value]="searchTerm()"
+      (input)="onSearchChange($any($event.target).value)"
+    />
+  </div>
 
   <app-type-chip-filter
     [types]="types()"

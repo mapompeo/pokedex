@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MatChipsModule } from '@angular/material/chips';
 import { PokemonType } from '../../../core/models/pokemon.model';
 import { getTypeNamePt } from '../../type-translations';
 
 @Component({
   selector: 'app-type-chip-filter',
   standalone: true,
-  imports: [MatChipsModule],
+  imports: [],
   templateUrl: './type-chip.component.html',
+  styleUrl: './type-chip.component.scss',
 })
 export class TypeChipComponent {
   @Input({ required: true }) types: PokemonType[] = [];

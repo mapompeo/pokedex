@@ -1,67 +1,96 @@
-<!-- src/app/features/compare/compare.component.html -->
-<a routerLink="/" mat-button>← Voltar</a>
-<h1>Comparar Pokémons</h1>
+<div class="dex-page">
+  <a routerLink="/" class="dex-back">← Voltar</a>
+  <h1 class="dex-title">Comparar Pokémons</h1>
 
-<div class="compare__search-row">
-  <mat-form-field appearance="outline">
-    <mat-label>Pokémon A</mat-label>
-    <input
-      matInput
-      [value]="queryA()"
-      (input)="onQueryAChange($any($event.target).value)"
-      [matAutocomplete]="autoA"
-    />
-    <mat-autocomplete #autoA="matAutocomplete" (optionSelected)="selectA($event.option.value)">
-      @for (item of suggestionsA(); track item.id) {
-        <mat-option [value]="item">{{ item.name }}</mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Pokémon B</mat-label>
-    <input
-      matInput
-      [value]="queryB()"
-      (input)="onQueryBChange($any($event.target).value)"
-      [matAutocomplete]="autoB"
-    />
-    <mat-autocomplete #autoB="matAutocomplete" (optionSelected)="selectB($event.option.value)">
-      @for (item of suggestionsB(); track item.id) {
-        <mat-option [value]="item">{{ item.name }}</mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
-</div>
-
-<div class="compare__grid">
-  <div class="compare__column">
-    @if (loadingA()) {
-      <app-loading-spinner></app-loading-spinner>
-    } @else if (pokemonA(); as a) {
-      <h2>#{{ a.id }} {{ a.name }}</h2>
-      <img [src]="a.spriteUrl" [alt]="a.name" />
-      <p>Altura: {{ a.height }} | Peso: {{ a.weight }}</p>
-      <ul>
-        @for (stat of a.stats; track stat.name) {
-          <li>{{ stat.name }}: {{ stat.baseStat }}</li>
+  <div class="compare__search-row">
+    <div class="dex-search">
+      <mat-icon>search</mat-icon>
+      <input
+        class="dex-search__input"
+        placeholder="Pokémon A"
+        [value]="queryA()"
+        (input)="onQueryAChange($any($event.target).value)"
+        [matAutocomplete]="autoA"
+      />
+      <mat-autocomplete #autoA="matAutocomplete" (optionSelected)="selectA($event.option.value)">
+        @for (item of suggestionsA(); track item.id) {
+          <mat-option [value]="item">{{ item.name }}</mat-option>
         }
-      </ul>
-    }
+      </mat-autocomplete>
+    </div>
+
+    <div class="dex-search">
+      <mat-icon>search</mat-icon>
+      <input
+        class="dex-search__input"
+        placeholder="Pokémon B"
+        [value]="queryB()"
+        (input)="onQueryBChange($any($event.target).value)"
+        [matAutocomplete]="autoB"
+      />
+      <mat-autocomplete #autoB="matAutocomplete" (optionSelected)="selectB($event.option.value)">
+        @for (item of suggestionsB(); track item.id) {
+          <mat-option [value]="item">{{ item.name }}</mat-option>
+        }
+      </mat-autocomplete>
+    </div>
   </div>
 
-  <div class="compare__column">
-    @if (loadingB()) {
-      <app-loading-spinner></app-loading-spinner>
-    } @else if (pokemonB(); as b) {
-      <h2>#{{ b.id }} {{ b.name }}</h2>
-      <img [src]="b.spriteUrl" [alt]="b.name" />
-      <p>Altura: {{ b.height }} | Peso: {{ b.weight }}</p>
-      <ul>
-        @for (stat of b.stats; track stat.name) {
-          <li>{{ stat.name }}: {{ stat.baseStat }}</li>
-        }
-      </ul>
-    }
+  <div class="compare__grid">
+    <div class="compare__column">
+      @if (loadingA()) {
+        <app-loading-spinner></app-loading-spinner>
+      } @else if (pokemonA(); as a) {
+        <div class="compare__portrait" [style.background]="capBackground(a.types)">
+          <img [src]="a.spriteUrl" [alt]="a.name" />
+        </div>
+        <h2 class="compare__name">#{{ a.id }} {{ a.name }}</h2>
+        <div class="compare__types">
+          @for (type of a.types; track type) {
+            <app-type-badge [type]="type"></app-type-badge>
+          }
+        </div>
+        <p class="compare__meta">Altura: {{ a.height }} · Peso: {{ a.weight }}</p>
+        <div class="compare__stats">
+          @for (stat of a.stats; track stat.name) {
+            <div class="stat-row">
+              <span>{{ stat.name }}</span>
+              <span class="stat-row__track">
+                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)"></span>
+              </span>
+              <span class="stat-row__value">{{ stat.baseStat }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="compare__column">
+      @if (loadingB()) {
+        <app-loading-spinner></app-loading-spinner>
+      } @else if (pokemonB(); as b) {
+        <div class="compare__portrait" [style.background]="capBackground(b.types)">
+          <img [src]="b.spriteUrl" [alt]="b.name" />
+        </div>
+        <h2 class="compare__name">#{{ b.id }} {{ b.name }}</h2>
+        <div class="compare__types">
+          @for (type of b.types; track type) {
+            <app-type-badge [type]="type"></app-type-badge>
+          }
+        </div>
+        <p class="compare__meta">Altura: {{ b.height }} · Peso: {{ b.weight }}</p>
+        <div class="compare__stats">
+          @for (stat of b.stats; track stat.name) {
+            <div class="stat-row">
+              <span>{{ stat.name }}</span>
+              <span class="stat-row__track">
+                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)"></span>
+              </span>
+              <span class="stat-row__value">{{ stat.baseStat }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </div>
 </div>

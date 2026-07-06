@@ -1,21 +1,22 @@
-<a routerLink="/" mat-button>← Voltar</a>
-<h1>Favoritos</h1>
+<div class="dex-page">
+  <h1 class="dex-title">Favoritos</h1>
 
-@if (loading()) {
-  <app-loading-spinner></app-loading-spinner>
-}
-
-@if (!loading() && items().length === 0) {
-  <p>Você ainda não tem favoritos.</p>
-}
-
-<div class="favorites__grid">
-  @for (item of items(); track item.id) {
-    <app-pokemon-card
-      [pokemon]="item"
-      [isFavorite]="true"
-      [types]="typesById().get(item.id) ?? []"
-      (favoriteToggled)="onFavoriteToggled($event)"
-    ></app-pokemon-card>
+  @if (loading()) {
+    <app-loading-spinner></app-loading-spinner>
   }
+
+  @if (!loading() && items().length === 0) {
+    <p>Você ainda não tem favoritos.</p>
+  }
+
+  <div class="favorites__grid">
+    @for (item of items(); track item.id) {
+      <app-pokemon-card
+        [pokemon]="item"
+        [isFavorite]="true"
+        [types]="typesById().get(item.id) ?? []"
+        (favoriteToggled)="onFavoriteToggled($event)"
+      ></app-pokemon-card>
+    }
+  </div>
 </div>

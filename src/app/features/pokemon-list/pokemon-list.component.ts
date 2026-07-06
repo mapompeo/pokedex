@@ -9,11 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PokemonListItem, PokemonType } from '../../core/models/pokemon.model';
@@ -26,16 +22,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-pokemon-list',
   standalone: true,
-  imports: [
-    RouterLink,
-    MatToolbarModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    PokemonCardComponent,
-    TypeChipComponent,
-    LoadingSpinnerComponent,
-  ],
+  imports: [MatIconModule, PokemonCardComponent, TypeChipComponent, LoadingSpinnerComponent],
   templateUrl: './pokemon-list.component.html',
   styleUrl: './pokemon-list.component.scss',
 })

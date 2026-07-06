@@ -23,6 +23,90 @@ html {
   --pokedex-blue: #3B4CCA;
   --pokedex-yellow: #FFDE00;
   --pokedex-green: #2ECC71;
+  --dex-ink: #232333;
+  --dex-cream: #FFF6E9;
+  --dex-cream-deep: #F3E6CC;
+  --dex-gold: #E8B923;
+}
+
+.dex-page {
+  padding: 16px 20px 32px;
+}
+
+.dex-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--pokedex-red);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.dex-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--dex-ink);
+  margin: 0 0 16px;
+}
+
+.dex-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 220px;
+  background: var(--dex-cream-deep);
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  padding: 6px 16px;
+  color: var(--dex-ink);
+  transition: border-color 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--dex-gold);
+  }
+}
+
+.dex-search__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.9rem;
+  flex: 1;
+  color: var(--dex-ink);
+  font-family: inherit;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 32px;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #7a7168;
+  text-transform: uppercase;
+}
+
+.stat-row__track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.stat-row__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pokedex-red), var(--dex-gold));
+}
+
+.stat-row__value {
+  font-family: "Courier New", monospace;
+  text-align: right;
+  color: var(--dex-ink);
 }
 
 body {

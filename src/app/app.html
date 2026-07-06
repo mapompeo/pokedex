@@ -1,11 +1,28 @@
 <div class="pokedex-frame">
-  <header class="pokedex-frame__header">
-    <span class="pokedex-frame__light pokedex-frame__light--blue"></span>
-    <span class="pokedex-frame__light pokedex-frame__light--yellow"></span>
-    <span class="pokedex-frame__light pokedex-frame__light--green"></span>
-    <span class="pokedex-frame__title">POKÉDEX</span>
-  </header>
   <div class="pokedex-frame__screen">
-    <router-outlet></router-outlet>
+    <header class="pokedex-frame__header">
+      <span class="pokedex-frame__light pokedex-frame__light--blue"></span>
+      <span class="pokedex-frame__light pokedex-frame__light--yellow"></span>
+      <span class="pokedex-frame__light pokedex-frame__light--green"></span>
+      <span class="pokedex-frame__title">POKÉDEX</span>
+      <nav class="pokedex-frame__tabs">
+        <a
+          routerLink="/"
+          routerLinkActive="pokedex-frame__tab--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="pokedex-frame__tab"
+          >Lista</a
+        >
+        <a routerLink="/favoritos" routerLinkActive="pokedex-frame__tab--active" class="pokedex-frame__tab"
+          >Favoritos</a
+        >
+        <a routerLink="/comparar" routerLinkActive="pokedex-frame__tab--active" class="pokedex-frame__tab"
+          >Comparar</a
+        >
+      </nav>
+    </header>
+    <div class="pokedex-frame__screen-scroll">
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>

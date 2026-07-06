@@ -1,26 +1,20 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { PokemonDetail, PokemonListItem } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
+import { getCapBackground } from '../../shared/type-colors';
+import { getStatPercent } from '../../shared/stat-utils';
 
 const MAX_SUGGESTIONS = 8;
 
 @Component({
   selector: 'app-compare',
   standalone: true,
-  imports: [
-    RouterLink,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatAutocompleteModule,
-    LoadingSpinnerComponent,
-  ],
+  imports: [RouterLink, MatIconModule, MatAutocompleteModule, LoadingSpinnerComponent, TypeBadgeComponent],
   templateUrl: './compare.component.html',
   styleUrl: './compare.component.scss',
 })
@@ -84,5 +78,13 @@ export class CompareComponent {
       },
       error: () => this.loadingB.set(false),
     });
+  }
+
+  capBackground(types: string[]): string {
+    return getCapBackground(types);
+  }
+
+  statPercent(value: number): number {
+    return getStatPercent(value);
   }
 }

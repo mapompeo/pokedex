@@ -1,35 +1,84 @@
 .pokemon-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 8px;
-  border: 2px solid var(--pokedex-red);
-  border-radius: 16px;
+  height: 100%;
+  border: 3px solid var(--dex-gold);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--dex-cream-deep);
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.4);
+  }
+
+  &__id {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    z-index: 1;
+  }
+
+  &__fav {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    z-index: 1;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    line-height: 0;
+    cursor: pointer;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  }
 
   &__link {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    flex: 1;
     text-decoration: none;
     color: inherit;
   }
 
+  &__cap {
+    flex: 0 0 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &__sprite {
-    width: 96px;
-    height: 96px;
+    width: 72px;
+    height: 72px;
     object-fit: contain;
   }
 
-  &__name {
-    text-transform: capitalize;
-    font-weight: 500;
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 0 8px 8px;
+    padding: 10px 8px;
+    text-align: center;
+    background: var(--dex-cream-deep);
+    border-radius: 14px;
   }
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+  &__name {
+    display: block;
+    text-transform: capitalize;
+    font-weight: 700;
+    color: var(--dex-ink);
   }
 
   &__types {
@@ -37,6 +86,5 @@
     gap: 4px;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: 4px;
   }
 }

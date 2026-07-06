@@ -1,30 +1,43 @@
-<a routerLink="/" mat-button>← Voltar</a>
+<div class="dex-page">
+  <a routerLink="/" class="dex-back">← Voltar</a>
 
-@if (loading()) {
-  <app-loading-spinner></app-loading-spinner>
-} @else if (pokemon(); as p) {
-  <div class="pokemon-detail">
-    <img [src]="p.spriteUrl" [alt]="p.name" class="pokemon-detail__sprite" />
-    <h1>#{{ p.id }} {{ p.name }}</h1>
-    <button mat-raised-button color="primary" (click)="toggleFavorite()">
-      {{ isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}
-    </button>
+  @if (loading()) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (pokemon(); as p) {
+    <div class="pokemon-detail">
+      <div class="pokemon-detail__portrait" [style.background]="capBackground()">
+        <img [src]="p.spriteUrl" [alt]="p.name" class="pokemon-detail__sprite" />
+      </div>
+      <div class="pokemon-detail__info">
+        <h1 class="pokemon-detail__name">#{{ p.id }} {{ p.name }}</h1>
 
-    <div class="pokemon-detail__types">
-      @for (type of p.types; track type) {
-        <app-type-badge [type]="type"></app-type-badge>
-      }
+        <div class="pokemon-detail__types">
+          @for (type of p.types; track type) {
+            <app-type-badge [type]="type"></app-type-badge>
+          }
+        </div>
+
+        <p class="pokemon-detail__meta">Altura: {{ p.height }} · Peso: {{ p.weight }}</p>
+
+        <button mat-raised-button color="primary" (click)="toggleFavorite()">
+          {{ isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}
+        </button>
+
+        <h2 class="pokemon-detail__stats-title">Stats</h2>
+        <div class="pokemon-detail__stats">
+          @for (stat of p.stats; track stat.name) {
+            <div class="stat-row">
+              <span>{{ stat.name }}</span>
+              <span class="stat-row__track">
+                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)"></span>
+              </span>
+              <span class="stat-row__value">{{ stat.baseStat }}</span>
+            </div>
+          }
+        </div>
+      </div>
     </div>
-
-    <p>Altura: {{ p.height }} | Peso: {{ p.weight }}</p>
-
-    <h2>Stats</h2>
-    <ul>
-      @for (stat of p.stats; track stat.name) {
-        <li>{{ stat.name }}: {{ stat.baseStat }}</li>
-      }
-    </ul>
-  </div>
-} @else {
-  <p>Pokémon não encontrado.</p>
-}
+  } @else {
+    <p>Pokémon não encontrado.</p>
+  }
+</div>
