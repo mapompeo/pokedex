@@ -5,7 +5,13 @@ import { getTypeNamePt } from '../../type-translations';
 @Component({
   selector: 'app-type-badge',
   standalone: true,
-  template: `<span class="type-badge" [style.background-color]="color">{{ label }}</span>`,
+  template: `<span
+    class="type-badge"
+    [class.type-badge--large]="large"
+    [class.type-badge--ghost]="ghost"
+    [style.background-color]="ghost ? null : color"
+    >{{ label }}</span
+  >`,
   styles: [
     `
       .type-badge {
@@ -18,11 +24,24 @@ import { getTypeNamePt } from '../../type-translations';
         text-transform: capitalize;
         line-height: 1.6;
       }
+
+      .type-badge--large {
+        padding: 6px 18px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+      }
+
+      .type-badge--ghost {
+        background: rgba(255, 255, 255, 0.3) !important;
+        color: #fff;
+      }
     `,
   ],
 })
 export class TypeBadgeComponent {
   @Input({ required: true }) type!: string;
+  @Input() large = false;
+  @Input() ghost = false;
 
   get color(): string {
     return getTypeColor(this.type);

@@ -23,9 +23,17 @@ export interface PokemonDetail {
   spriteUrl: string;
   types: string[];
   stats: PokemonStat[];
+  abilities: string[];
 }
 
 export interface PokemonType {
   id: number;
   name: string;
+}
+
+export interface EvolutionNode {
+  id: number;
+  name: string;
+  spriteUrl: string;
+  method: string | null;
 }

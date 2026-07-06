@@ -50,7 +50,7 @@
             <app-type-badge [type]="type"></app-type-badge>
           }
         </div>
-        <p class="compare__meta">Altura: {{ a.height }} · Peso: {{ a.weight }}</p>
+        <p class="compare__meta">Altura: {{ formatDecimal(a.height) }} m · Peso: {{ formatDecimal(a.weight) }} kg</p>
         <div class="compare__stats">
           @for (stat of a.stats; track stat.name) {
             <div class="stat-row">
@@ -78,7 +78,7 @@
             <app-type-badge [type]="type"></app-type-badge>
           }
         </div>
-        <p class="compare__meta">Altura: {{ b.height }} · Peso: {{ b.weight }}</p>
+        <p class="compare__meta">Altura: {{ formatDecimal(b.height) }} m · Peso: {{ formatDecimal(b.weight) }} kg</p>
         <div class="compare__stats">
           @for (stat of b.stats; track stat.name) {
             <div class="stat-row">

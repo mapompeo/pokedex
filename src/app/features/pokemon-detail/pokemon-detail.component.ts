@@ -1,18 +1,24 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
-import { PokemonDetail } from '../../core/models/pokemon.model';
+import { EvolutionNode, PokemonDetail } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
-import { getCapBackground } from '../../shared/type-colors';
+import { getSolidCardColor } from '../../shared/type-colors';
 import { getStatPercent } from '../../shared/stat-utils';
+import { getStatColor, getStatLabel } from '../../shared/stat-labels';
+import { formatDecimalPtBr, formatSlug } from '../../shared/format-utils';
+
+const DETAIL_STAT_MAX = 300;
+
+type DetailTab = 'sobre' | 'stats' | 'evolucao';
 
 @Component({
   selector: 'app-pokemon-detail',
   standalone: true,
-  imports: [RouterLink, MatButtonModule, LoadingSpinnerComponent, TypeBadgeComponent],
+  imports: [RouterLink, MatIconModule, LoadingSpinnerComponent, TypeBadgeComponent],
   templateUrl: './pokemon-detail.component.html',
   styleUrl: './pokemon-detail.component.scss',
 })
@@ -23,6 +29,11 @@ export class PokemonDetailComponent {
 
   pokemon = signal<PokemonDetail | null>(null);
   loading = signal(true);
+  statMax = DETAIL_STAT_MAX;
+
+  activeTab = signal<DetailTab>('sobre');
+  evolutions = signal<EvolutionNode[]>([]);
+  evolutionsLoading = signal(true);
 
   isFavorite = computed(() => {
     const p = this.pokemon();
@@ -38,6 +49,13 @@ export class PokemonDetailComponent {
       },
       error: () => this.loading.set(false),
     });
+    this.pokemonService.getEvolutionChain(id).subscribe({
+      next: (evolutions) => {
+        this.evolutions.set(evolutions);
+        this.evolutionsLoading.set(false);
+      },
+      error: () => this.evolutionsLoading.set(false),
+    });
   }
 
   toggleFavorite(): void {
@@ -47,11 +65,27 @@ export class PokemonDetailComponent {
     }
   }
 
-  capBackground(): string {
-    return getCapBackground(this.pokemon()?.types ?? []);
+  typeColor(): string {
+    return getSolidCardColor(this.pokemon()?.types ?? []);
   }
 
   statPercent(value: number): number {
-    return getStatPercent(value);
+    return getStatPercent(value, DETAIL_STAT_MAX);
+  }
+
+  statLabel(name: string): string {
+    return getStatLabel(name);
+  }
+
+  statColor(name: string): string {
+    return getStatColor(name);
+  }
+
+  formatDecimal(value: number): string {
+    return formatDecimalPtBr(value);
+  }
+
+  formatAbility(name: string): string {
+    return formatSlug(name);
   }
 }

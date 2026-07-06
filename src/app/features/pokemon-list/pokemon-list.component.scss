@@ -1,4 +1,22 @@
+.pokemon-list {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    pointer-events: none;
+  }
+}
+
 .pokemon-list__filters {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -7,8 +25,9 @@
 }
 
 .pokemon-list__grid {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
   padding: 16px;
 }

@@ -1,20 +1,17 @@
-<div class="pokemon-card" [style.background]="capBackground">
-  <span class="pokemon-card__id">#{{ pokemon.id }}</span>
+<div class="pokemon-card" [style.background]="cardColor">
   <button
     type="button"
     class="pokemon-card__fav"
     (click)="favoriteToggled.emit(pokemon.id)"
     [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
   >
-    <mat-icon [style.color]="isFavorite ? 'var(--pokedex-red)' : '#ffffff'">{{
+    <mat-icon [style.color]="isFavorite ? 'var(--pokedex-red)' : 'var(--dex-ink)'">{{
       isFavorite ? 'favorite' : 'favorite_border'
     }}</mat-icon>
   </button>
   <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link">
-    <div class="pokemon-card__cap">
-      <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
-    </div>
-    <div class="pokemon-card__body">
+    <div class="pokemon-card__info">
+      <span class="pokemon-card__id">#{{ paddedId }}</span>
       <span class="pokemon-card__name">{{ pokemon.name }}</span>
       @if (types.length) {
         <div class="pokemon-card__types">
@@ -24,5 +21,6 @@
         </div>
       }
     </div>
+    <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
   </a>
 </div>

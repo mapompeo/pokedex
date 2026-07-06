@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import {
+  EvolutionNode,
   PokemonDetail,
   PokemonListItem,
   PokemonListPage,
   PokemonStat,
   PokemonType,
 } from '../models/pokemon.model';
+import { getItemNamePt } from '../../shared/evolution-labels';
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 const SPRITE_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
@@ -34,6 +36,28 @@ interface RawPokemonDetail {
   sprites: { front_default: string | null };
   types: { type: { name: string } }[];
   stats: { base_stat: number; stat: { name: string } }[];
+  abilities: { ability: { name: string } }[];
+}
+
+interface RawSpeciesResponse {
+  evolution_chain: { url: string };
+}
+
+interface RawEvolutionDetail {
+  min_level: number | null;
+  item: { name: string } | null;
+  trigger: { name: string } | null;
+  min_happiness: number | null;
+}
+
+interface RawEvolutionChainNode {
+  species: { name: string; url: string };
+  evolution_details: RawEvolutionDetail[];
+  evolves_to: RawEvolutionChainNode[];
+}
+
+interface RawEvolutionChainResponse {
+  chain: RawEvolutionChainNode;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -148,6 +172,48 @@ export class PokemonService {
     );
   }
 
+  getEvolutionChain(nameOrId: string): Observable<EvolutionNode[]> {
+    return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
+      switchMap((species) =>
+        this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url)
+      ),
+      map((res) => this.flattenEvolutionChain(res.chain, null))
+    );
+  }
+
+  private flattenEvolutionChain(node: RawEvolutionChainNode, method: string | null): EvolutionNode[] {
+    const id = this.extractIdFromUrl(node.species.url);
+    const current: EvolutionNode = {
+      id,
+      name: node.species.name,
+      spriteUrl: `${SPRITE_BASE_URL}/${id}.png`,
+      method,
+    };
+    const children = node.evolves_to.flatMap((child) =>
+      this.flattenEvolutionChain(child, this.describeEvolutionDetail(child.evolution_details[0]))
+    );
+    return [current, ...children];
+  }
+
+  private describeEvolutionDetail(detail?: RawEvolutionDetail): string | null {
+    if (!detail) {
+      return null;
+    }
+    if (detail.min_level) {
+      return `Nível ${detail.min_level}`;
+    }
+    if (detail.item) {
+      return getItemNamePt(detail.item.name);
+    }
+    if (detail.trigger?.name === 'trade') {
+      return 'Troca';
+    }
+    if (detail.min_happiness) {
+      return 'Felicidade alta';
+    }
+    return 'Evolução especial';
+  }
+
   private toListItem(name: string, url: string): PokemonListItem {
     const id = this.extractIdFromUrl(url);
     return { id, name, spriteUrl: `${SPRITE_BASE_URL}/${id}.png` };
@@ -158,11 +224,12 @@ export class PokemonService {
     return {
       id: raw.id,
       name: raw.name,
-      height: raw.height,
-      weight: raw.weight,
+      height: raw.height / 10,
+      weight: raw.weight / 10,
       spriteUrl: raw.sprites.front_default ?? `${SPRITE_BASE_URL}/${raw.id}.png`,
       types: raw.types.map((t) => t.type.name),
       stats,
+      abilities: raw.abilities.map((a) => a.ability.name),
     };
   }
 }

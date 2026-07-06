@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { PokemonListItem } from '../../../core/models/pokemon.model';
 import { TypeBadgeComponent } from '../type-badge/type-badge.component';
-import { getCapBackground } from '../../type-colors';
+import { getPastelCardColor } from '../../type-colors';
 
 @Component({
   selector: 'app-pokemon-card',
@@ -19,7 +19,11 @@ export class PokemonCardComponent {
 
   @Output() favoriteToggled = new EventEmitter<number>();
 
-  get capBackground(): string {
-    return getCapBackground(this.types);
+  get cardColor(): string {
+    return getPastelCardColor(this.types);
+  }
+
+  get paddedId(): string {
+    return String(this.pokemon.id).padStart(3, '0');
   }
 }

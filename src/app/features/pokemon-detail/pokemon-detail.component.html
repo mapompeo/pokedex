@@ -1,43 +1,140 @@
-<div class="dex-page">
-  <a routerLink="/" class="dex-back">← Voltar</a>
-
-  @if (loading()) {
+@if (loading()) {
+  <div class="dex-page">
     <app-loading-spinner></app-loading-spinner>
-  } @else if (pokemon(); as p) {
-    <div class="pokemon-detail">
-      <div class="pokemon-detail__portrait" [style.background]="capBackground()">
-        <img [src]="p.spriteUrl" [alt]="p.name" class="pokemon-detail__sprite" />
-      </div>
-      <div class="pokemon-detail__info">
-        <h1 class="pokemon-detail__name">#{{ p.id }} {{ p.name }}</h1>
+  </div>
+} @else if (pokemon(); as p) {
+  <div class="pdetail">
+    <div class="pdetail__hero-wrap">
+      <div class="pdetail__hero" [style.background]="typeColor()">
+        <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" />
 
-        <div class="pokemon-detail__types">
-          @for (type of p.types; track type) {
-            <app-type-badge [type]="type"></app-type-badge>
-          }
-        </div>
-
-        <p class="pokemon-detail__meta">Altura: {{ p.height }} · Peso: {{ p.weight }}</p>
-
-        <button mat-raised-button color="primary" (click)="toggleFavorite()">
-          {{ isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}
+        <a routerLink="/" class="pdetail__back" aria-label="Voltar">
+          <mat-icon>arrow_back</mat-icon>
+        </a>
+        <button
+          type="button"
+          class="pdetail__fav"
+          (click)="toggleFavorite()"
+          [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+        >
+          <mat-icon [style.color]="isFavorite() ? 'var(--pokedex-red)' : '#ffffff'">{{
+            isFavorite() ? 'favorite' : 'favorite_border'
+          }}</mat-icon>
         </button>
 
-        <h2 class="pokemon-detail__stats-title">Stats</h2>
-        <div class="pokemon-detail__stats">
-          @for (stat of p.stats; track stat.name) {
-            <div class="stat-row">
-              <span>{{ stat.name }}</span>
-              <span class="stat-row__track">
-                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)"></span>
-              </span>
-              <span class="stat-row__value">{{ stat.baseStat }}</span>
-            </div>
-          }
+        <div class="pdetail__heading">
+          <span class="pdetail__id">#{{ p.id }}</span>
+          <h1 class="pdetail__name">{{ p.name }}</h1>
+          <div class="pdetail__types">
+            @for (type of p.types; track type) {
+              <app-type-badge [type]="type" [ghost]="true"></app-type-badge>
+            }
+          </div>
         </div>
       </div>
+
+      <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" />
     </div>
-  } @else {
+
+    <div class="pdetail__sheet">
+      <nav class="pdetail__tabs">
+        <button
+          type="button"
+          class="pdetail__tab"
+          [class.pdetail__tab--active]="activeTab() === 'sobre'"
+          [style.color]="activeTab() === 'sobre' ? typeColor() : null"
+          [style.border-color]="activeTab() === 'sobre' ? typeColor() : 'transparent'"
+          (click)="activeTab.set('sobre')"
+        >
+          Sobre
+        </button>
+        <button
+          type="button"
+          class="pdetail__tab"
+          [class.pdetail__tab--active]="activeTab() === 'stats'"
+          [style.color]="activeTab() === 'stats' ? typeColor() : null"
+          [style.border-color]="activeTab() === 'stats' ? typeColor() : 'transparent'"
+          (click)="activeTab.set('stats')"
+        >
+          Stats
+        </button>
+        <button
+          type="button"
+          class="pdetail__tab"
+          [class.pdetail__tab--active]="activeTab() === 'evolucao'"
+          [style.color]="activeTab() === 'evolucao' ? typeColor() : null"
+          [style.border-color]="activeTab() === 'evolucao' ? typeColor() : 'transparent'"
+          (click)="activeTab.set('evolucao')"
+        >
+          Evolução
+        </button>
+      </nav>
+
+      @switch (activeTab()) {
+        @case ('sobre') {
+          <div class="pdetail__panel">
+            <div class="pdetail__meta">
+              <div class="pdetail__meta-item">
+                <span class="pdetail__meta-value">{{ formatDecimal(p.weight) }} kg</span>
+                <span class="pdetail__meta-label">Peso</span>
+              </div>
+              <div class="pdetail__meta-item">
+                <span class="pdetail__meta-value">{{ formatDecimal(p.height) }} m</span>
+                <span class="pdetail__meta-label">Altura</span>
+              </div>
+            </div>
+
+            <h3 class="pdetail__section-title">Habilidades</h3>
+            <div class="pdetail__abilities">
+              @for (ability of p.abilities; track ability) {
+                <span class="pdetail__ability-pill">{{ formatAbility(ability) }}</span>
+              }
+            </div>
+          </div>
+        }
+        @case ('stats') {
+          <div class="pdetail__panel">
+            <div class="pdetail__stats">
+              @for (stat of p.stats; track stat.name) {
+                <div class="pdetail-stat">
+                  <span class="pdetail-stat__label">{{ statLabel(stat.name) }}</span>
+                  <span class="pdetail-stat__track">
+                    <span
+                      class="pdetail-stat__fill"
+                      [style.width.%]="statPercent(stat.baseStat)"
+                      [style.background]="statColor(stat.name)"
+                    ></span>
+                  </span>
+                  <span class="pdetail-stat__value">{{ stat.baseStat }}/{{ statMax }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+        @case ('evolucao') {
+          <div class="pdetail__panel">
+            @if (evolutionsLoading()) {
+              <app-loading-spinner></app-loading-spinner>
+            } @else {
+              <div class="pdetail__evolutions">
+                @for (evo of evolutions(); track evo.id) {
+                  <a [routerLink]="['/pokemon', evo.id]" class="pdetail__evo-card">
+                    <img [src]="evo.spriteUrl" [alt]="evo.name" class="pdetail__evo-sprite" />
+                    <span class="pdetail__evo-name">{{ evo.name }}</span>
+                    @if (evo.method) {
+                      <span class="pdetail__evo-method">{{ evo.method }}</span>
+                    }
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+} @else {
+  <div class="dex-page">
     <p>Pokémon não encontrado.</p>
-  }
-</div>
+  </div>
+}

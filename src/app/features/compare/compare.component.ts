@@ -8,6 +8,7 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 import { getCapBackground } from '../../shared/type-colors';
 import { getStatPercent } from '../../shared/stat-utils';
+import { formatDecimalPtBr } from '../../shared/format-utils';
 
 const MAX_SUGGESTIONS = 8;
 
@@ -86,5 +87,9 @@ export class CompareComponent {
 
   statPercent(value: number): number {
     return getStatPercent(value);
+  }
+
+  formatDecimal(value: number): string {
+    return formatDecimalPtBr(value);
   }
 }
