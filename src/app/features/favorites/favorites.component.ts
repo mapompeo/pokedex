@@ -21,12 +21,14 @@ export class FavoritesComponent {
 
   items = signal<PokemonListItem[]>([]);
   loading = signal(false);
+  typesById = signal<Map<number, string[]>>(new Map());
 
   constructor() {
     effect(() => {
       const ids = [...this.favoritesService.favoriteIds()];
       if (ids.length === 0) {
         this.items.set([]);
+        this.typesById.set(new Map());
         return;
       }
       this.loading.set(true);
@@ -34,6 +36,7 @@ export class FavoritesComponent {
       forkJoin(requests).subscribe({
         next: (details) => {
           this.items.set(details.map((d) => ({ id: d.id, name: d.name, spriteUrl: d.spriteUrl })));
+          this.typesById.set(new Map(details.map((d) => [d.id, d.types])));
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

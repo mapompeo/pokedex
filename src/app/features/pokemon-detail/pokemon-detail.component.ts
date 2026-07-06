@@ -1,16 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PokemonDetail } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 
 @Component({
   selector: 'app-pokemon-detail',
   standalone: true,
-  imports: [RouterLink, MatButtonModule, MatChipsModule, LoadingSpinnerComponent],
+  imports: [RouterLink, MatButtonModule, LoadingSpinnerComponent, TypeBadgeComponent],
   templateUrl: './pokemon-detail.component.html',
   styleUrl: './pokemon-detail.component.scss',
 })

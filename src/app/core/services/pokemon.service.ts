@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, map, of } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   PokemonDetail,
   PokemonListItem,
@@ -41,6 +41,7 @@ export class PokemonService {
   private http = inject(HttpClient);
   private detailCache = new Map<string, PokemonDetail>();
   private allListItemsCache: PokemonListItem[] | null = null;
+  private idTypesCache: Map<number, string[]> | null = null;
 
   extractIdFromUrl(url: string): number {
     const match = url.match(/\/(\d+)\/?$/);
@@ -112,6 +113,38 @@ export class PokemonService {
     );
     return forkJoin(requests).pipe(
       map((sets) => sets.reduce((acc, s) => new Set([...acc].filter((id) => s.has(id)))))
+    );
+  }
+
+  getTypesByPokemonId(): Observable<Map<number, string[]>> {
+    if (this.idTypesCache) {
+      return of(this.idTypesCache);
+    }
+    return this.getTypes().pipe(
+      switchMap((types) =>
+        forkJoin(
+          types.map((type) =>
+            this.http.get<RawTypePokemonResponse>(`${BASE_URL}/type/${type.name}`).pipe(
+              map((res) => ({
+                typeName: type.name,
+                ids: res.pokemon.map((p) => this.extractIdFromUrl(p.pokemon.url)),
+              }))
+            )
+          )
+        )
+      ),
+      map((typeGroups) => {
+        const idToTypes = new Map<number, string[]>();
+        for (const group of typeGroups) {
+          for (const id of group.ids) {
+            const existing = idToTypes.get(id) ?? [];
+            existing.push(group.typeName);
+            idToTypes.set(id, existing);
+          }
+        }
+        this.idTypesCache = idToTypes;
+        return idToTypes;
+      })
     );
   }
 

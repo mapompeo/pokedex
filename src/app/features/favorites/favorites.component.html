@@ -11,7 +11,11 @@
 
 <div class="favorites__grid">
   @for (item of items(); track item.id) {
-    <app-pokemon-card [pokemon]="item" [isFavorite]="true" (favoriteToggled)="onFavoriteToggled($event)">
-    </app-pokemon-card>
+    <app-pokemon-card
+      [pokemon]="item"
+      [isFavorite]="true"
+      [types]="typesById().get(item.id) ?? []"
+      (favoriteToggled)="onFavoriteToggled($event)"
+    ></app-pokemon-card>
   }
 </div>

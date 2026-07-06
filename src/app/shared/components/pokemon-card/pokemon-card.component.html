@@ -2,6 +2,13 @@
   <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link">
     <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
     <span class="pokemon-card__name">#{{ pokemon.id }} {{ pokemon.name }}</span>
+    @if (types.length) {
+      <div class="pokemon-card__types">
+        @for (type of types; track type) {
+          <app-type-badge [type]="type"></app-type-badge>
+        }
+      </div>
+    }
   </a>
   <div class="pokemon-card__actions">
     <button
@@ -9,7 +16,9 @@
       (click)="favoriteToggled.emit(pokemon.id)"
       [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
     >
-      <mat-icon>{{ isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+      <mat-icon [style.color]="isFavorite ? 'var(--pokedex-red)' : null">{{
+        isFavorite ? 'favorite' : 'favorite_border'
+      }}</mat-icon>
     </button>
   </div>
 </mat-card>

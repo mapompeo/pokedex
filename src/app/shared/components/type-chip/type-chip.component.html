@@ -1,7 +1,7 @@
 <mat-chip-listbox multiple aria-label="Filtro por tipo">
   @for (type of types; track type.id) {
     <mat-chip-option [selected]="isSelected(type.name)" (click)="toggle(type.name)">
-      {{ type.name }}
+      {{ label(type.name) }}
     </mat-chip-option>
   }
 </mat-chip-listbox>

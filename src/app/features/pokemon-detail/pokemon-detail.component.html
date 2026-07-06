@@ -10,11 +10,11 @@
       {{ isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos' }}
     </button>
 
-    <mat-chip-set>
+    <div class="pokemon-detail__types">
       @for (type of p.types; track type) {
-        <mat-chip>{{ type }}</mat-chip>
+        <app-type-badge [type]="type"></app-type-badge>
       }
-    </mat-chip-set>
+    </div>
 
     <p>Altura: {{ p.height }} | Peso: {{ p.weight }}</p>
 

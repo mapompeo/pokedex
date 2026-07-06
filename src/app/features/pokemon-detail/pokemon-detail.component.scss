@@ -4,10 +4,20 @@
   align-items: center;
   padding: 16px;
   text-align: center;
+  margin: 16px;
+  border: 2px solid var(--pokedex-red);
+  border-radius: 16px;
 
   &__sprite {
     width: 160px;
     height: 160px;
     object-fit: contain;
+  }
+
+  &__types {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin: 8px 0;
   }
 }

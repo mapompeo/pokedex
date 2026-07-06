@@ -23,6 +23,7 @@
     <app-pokemon-card
       [pokemon]="item"
       [isFavorite]="favoritesService.isFavorite(item.id)"
+      [types]="typesById().get(item.id) ?? []"
       (favoriteToggled)="onFavoriteToggled($event)"
     ></app-pokemon-card>
   } @empty {

@@ -55,6 +55,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   types = signal<PokemonType[]>([]);
   selectedTypeNames = signal<string[]>([]);
   typeFilteredIds = signal<Set<number> | null>(null);
+  typesById = signal<Map<number, string[]>>(new Map());
 
   filteredItems = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -72,6 +73,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.pokemonService.getTypes().subscribe((types) => this.types.set(types));
     this.pokemonService.getAllPokemonListItems().subscribe((items) => this.allNames.set(items));
+    this.pokemonService.getTypesByPokemonId().subscribe((idToTypes) => this.typesById.set(idToTypes));
     this.loadNextPage();
   }
 
