@@ -1,10 +1,10 @@
 export const STAT_LABELS: Record<string, string> = {
   hp: 'HP',
-  attack: 'ATQ',
-  defense: 'DEF',
-  'special-attack': 'ATQ ESP',
-  'special-defense': 'DEF ESP',
-  speed: 'VEL',
+  attack: 'Ataque',
+  defense: 'Defesa',
+  'special-attack': 'Ataque Especial',
+  'special-defense': 'Defesa Especial',
+  speed: 'Velocidade',
 };
 
 export const STAT_COLORS: Record<string, string> = {

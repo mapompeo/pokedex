@@ -5,17 +5,23 @@
       <input
         class="dex-search__input"
         type="text"
-        placeholder="Buscar por nome"
+        placeholder="Buscar por nome, ID ou tipo"
         [value]="searchTerm()"
         (input)="onSearchChange($any($event.target).value)"
       />
     </div>
-
-    <app-type-chip-filter
-      [types]="types()"
-      [selectedTypeNames]="selectedTypeNames()"
-      (selectionChanged)="onTypeSelectionChanged($event)"
-    ></app-type-chip-filter>
+    <div class="pokemon-list__type-filters">
+      @for (type of availableTypes(); track type.name) {
+        <button
+          class="type-chip"
+          [class.type-chip--active]="selectedTypes().has(type.name)"
+          [style.--type-color]="type.color"
+          (click)="toggleTypeFilter(type.name)"
+        >
+          {{ type.label }}
+        </button>
+      }
+    </div>
   </div>
 
   <div class="pokemon-list__grid">

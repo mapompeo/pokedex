@@ -3,17 +3,27 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   EvolutionNode,
+  EvolutionStage,
   PokemonDetail,
   PokemonExtras,
   PokemonListItem,
   PokemonListPage,
+  PokemonMove,
   PokemonStat,
   PokemonType,
 } from '../models/pokemon.model';
 import { getItemNamePt } from '../../shared/evolution-labels';
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
-const SPRITE_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
+const ARTWORK_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork';
+const CRIES_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest';
+
+const TYPE_PRIORITY: Record<string, number> = {
+  normal: 0, fire: 1, water: 2, grass: 3, electric: 4,
+  ice: 5, fighting: 6, poison: 7, ground: 8, psychic: 9,
+  bug: 10, rock: 11, ghost: 12, dragon: 13, dark: 14,
+  steel: 15, fairy: 16, flying: 17,
+};
 
 interface RawListResponse {
   count: number;
@@ -29,21 +39,44 @@ interface RawTypePokemonResponse {
   pokemon: { pokemon: { name: string; url: string } }[];
 }
 
+interface RawMoveDetail {
+  move: { name: string; url: string };
+  version_group_details: {
+    level_learned_at: number;
+    move_learn_method: { name: string };
+    version_group: { name: string };
+  }[];
+}
+
 interface RawPokemonDetail {
   id: number;
   name: string;
   height: number;
   weight: number;
+  base_experience: number;
   sprites: { front_default: string | null };
   types: { type: { name: string } }[];
-  stats: { base_stat: number; stat: { name: string } }[];
+  stats: { base_stat: number; effort: number; stat: { name: string } }[];
   abilities: { ability: { name: string } }[];
+  moves: RawMoveDetail[];
 }
 
 interface RawSpeciesResponse {
   evolution_chain: { url: string };
   flavor_text_entries: { flavor_text: string; language: { name: string } }[];
   genera: { genus: string; language: { name: string } }[];
+  capture_rate: number;
+  base_happiness: number;
+  growth_rate: { name: string };
+  egg_groups: { name: string }[];
+  gender_rate: number;
+  habitat: { name: string } | null;
+  color: { name: string };
+  shape: { name: string } | null;
+  is_legendary: boolean;
+  is_mythical: boolean;
+  is_baby: boolean;
+  generation: { name: string };
 }
 
 interface RawEvolutionDetail {
@@ -169,6 +202,9 @@ export class PokemonService {
             idToTypes.set(id, existing);
           }
         }
+        for (const [, types] of idToTypes) {
+          types.sort((a, b) => (TYPE_PRIORITY[a] ?? 99) - (TYPE_PRIORITY[b] ?? 99));
+        }
         this.idTypesCache = idToTypes;
         return idToTypes;
       })
@@ -179,11 +215,29 @@ export class PokemonService {
     return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
       switchMap((species) =>
         this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url).pipe(
-          map((chainRes) => ({
-            description: this.pickFlavorText(species.flavor_text_entries),
-            category: this.pickGenus(species.genera),
-            evolutions: this.flattenEvolutionChain(chainRes.chain, null),
-          }))
+          map((chainRes) => {
+            const tree = this.buildEvolutionTree(chainRes.chain, null);
+            const stages = this.flattenEvolutionStages(tree);
+            return {
+              description: this.pickFlavorText(species.flavor_text_entries),
+              category: this.pickGenus(species.genera),
+              evolutions: Array.from(stages.entries())
+                .sort(([a], [b]) => a - b)
+                .map(([stage, pokemon]) => ({ stage, pokemon })),
+              captureRate: species.capture_rate,
+              baseHappiness: species.base_happiness,
+              growthRate: species.growth_rate.name,
+              eggGroups: species.egg_groups.map((g) => g.name),
+              genderRate: species.gender_rate,
+              habitat: species.habitat?.name ?? null,
+              color: species.color.name,
+              shape: species.shape?.name ?? null,
+              isLegendary: species.is_legendary,
+              isMythical: species.is_mythical,
+              isBaby: species.is_baby,
+              generation: species.generation.name,
+            };
+          })
         )
       )
     );
@@ -199,18 +253,48 @@ export class PokemonService {
     return entry?.genus ?? '';
   }
 
-  private flattenEvolutionChain(node: RawEvolutionChainNode, method: string | null): EvolutionNode[] {
+  private buildEvolutionTree(node: RawEvolutionChainNode, method: string | null): EvolutionNode {
     const id = this.extractIdFromUrl(node.species.url);
-    const current: EvolutionNode = {
+    return {
       id,
       name: node.species.name,
-      spriteUrl: `${SPRITE_BASE_URL}/${id}.png`,
+      spriteUrl: `${ARTWORK_BASE_URL}/${id}.png`,
       method,
+      children: node.evolves_to.map((child) =>
+        this.buildEvolutionTree(child, this.describeEvolutionDetail(child.evolution_details[0]))
+      ),
     };
-    const children = node.evolves_to.flatMap((child) =>
-      this.flattenEvolutionChain(child, this.describeEvolutionDetail(child.evolution_details[0]))
+  }
+
+  private flattenEvolutionStages(node: EvolutionNode, stage: number = 0): Map<number, EvolutionNode[]> {
+    const map = new Map<number, EvolutionNode[]>();
+    const arr = map.get(stage) ?? [];
+    arr.push(node);
+    map.set(stage, arr);
+    for (const child of node.children) {
+      const childMap = this.flattenEvolutionStages(child, stage + 1);
+      for (const [k, v] of childMap) {
+        const existing = map.get(k) ?? [];
+        map.set(k, [...existing, ...v]);
+      }
+    }
+    return map;
+  }
+
+  getEvolutionStages(nameOrId: string): Observable<EvolutionStage[]> {
+    return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
+      switchMap((species) =>
+        this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url).pipe(
+          map((chainRes) => {
+            const tree = this.buildEvolutionTree(chainRes.chain, null);
+            const stages = this.flattenEvolutionStages(tree);
+            return Array.from(stages.entries())
+              .sort(([a], [b]) => a - b)
+              .map(([stage, pokemon]) => ({ stage, pokemon }));
+          })
+        )
+      )
     );
-    return [current, ...children];
   }
 
   private describeEvolutionDetail(detail?: RawEvolutionDetail): string | null {
@@ -234,20 +318,38 @@ export class PokemonService {
 
   private toListItem(name: string, url: string): PokemonListItem {
     const id = this.extractIdFromUrl(url);
-    return { id, name, spriteUrl: `${SPRITE_BASE_URL}/${id}.png` };
+    return { id, name, spriteUrl: `${ARTWORK_BASE_URL}/${id}.png` };
   }
 
   private toDetail(raw: RawPokemonDetail): PokemonDetail {
-    const stats: PokemonStat[] = raw.stats.map((s) => ({ name: s.stat.name, baseStat: s.base_stat }));
+    const stats: PokemonStat[] = raw.stats.map((s) => ({ name: s.stat.name, baseStat: s.base_stat, effort: s.effort }));
+    const types = raw.types.map((t) => t.type.name).sort((a, b) => (TYPE_PRIORITY[a] ?? 99) - (TYPE_PRIORITY[b] ?? 99));
+    const moves: PokemonMove[] = raw.moves.map((m) => {
+      const detail = m.version_group_details[0];
+      return {
+        name: m.move.name,
+        learnMethod: detail?.move_learn_method.name ?? 'unknown',
+        level: detail?.level_learned_at ?? 0,
+      };
+    });
+    moves.sort((a, b) => {
+      if (a.learnMethod === 'level-up' && b.learnMethod !== 'level-up') return -1;
+      if (a.learnMethod !== 'level-up' && b.learnMethod === 'level-up') return 1;
+      if (a.learnMethod === 'level-up' && b.learnMethod === 'level-up') return a.level - b.level;
+      return a.name.localeCompare(b.name);
+    });
     return {
       id: raw.id,
       name: raw.name,
       height: raw.height / 10,
       weight: raw.weight / 10,
-      spriteUrl: raw.sprites.front_default ?? `${SPRITE_BASE_URL}/${raw.id}.png`,
-      types: raw.types.map((t) => t.type.name),
+      spriteUrl: `${ARTWORK_BASE_URL}/${raw.id}.png`,
+      cryUrl: `${CRIES_BASE_URL}/${raw.id}.ogg`,
+      baseExperience: raw.base_experience,
+      types,
       stats,
       abilities: raw.abilities.map((a) => a.ability.name),
+      moves,
     };
   }
 }

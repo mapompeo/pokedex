@@ -7,23 +7,24 @@
     <div class="pdetail__hero-wrap">
       <div class="pdetail__hero" [style.background]="typeColor()">
         <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" />
-
-        <a routerLink="/" class="pdetail__back" aria-label="Voltar">
-          <mat-icon>arrow_back</mat-icon>
-        </a>
-        <button
-          type="button"
-          class="pdetail__fav"
-          (click)="toggleFavorite()"
-          [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-        >
-          <mat-icon [style.color]="isFavorite() ? 'var(--pokedex-red)' : '#ffffff'">{{
-            isFavorite() ? 'favorite' : 'favorite_border'
-          }}</mat-icon>
-        </button>
+        <div class="pdetail__actions">
+          <a routerLink="/" class="pdetail__back" aria-label="Voltar">
+            <mat-icon>arrow_back</mat-icon>
+          </a>
+          <button
+            type="button"
+            class="pdetail__fav"
+            (click)="toggleFavorite()"
+            [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+          >
+            <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
+              isFavorite() ? 'favorite' : 'favorite_border'
+            }}</mat-icon>
+          </button>
+        </div>
 
         <div class="pdetail__heading">
-          <span class="pdetail__id">#{{ p.id }}</span>
+          <span class="pdetail__id">#{{ paddedId(p.id) }}</span>
           <h1 class="pdetail__name">{{ p.name }}</h1>
           <div class="pdetail__types">
             @for (type of p.types; track type) {
@@ -33,7 +34,7 @@
         </div>
       </div>
 
-      <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" />
+      <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" />
     </div>
 
     <div class="pdetail__sheet">
@@ -51,43 +52,94 @@
         <button
           type="button"
           class="pdetail__tab"
-          [class.pdetail__tab--active]="activeTab() === 'stats'"
-          [style.color]="activeTab() === 'stats' ? typeColor() : null"
-          [style.border-color]="activeTab() === 'stats' ? typeColor() : 'transparent'"
-          (click)="activeTab.set('stats')"
+          [class.pdetail__tab--active]="activeTab() === 'estatisticas'"
+          (click)="activeTab.set('estatisticas')"
         >
-          Stats
+          Estatísticas
         </button>
         <button
           type="button"
           class="pdetail__tab"
-          [class.pdetail__tab--active]="activeTab() === 'evolucao'"
-          [style.color]="activeTab() === 'evolucao' ? typeColor() : null"
-          [style.border-color]="activeTab() === 'evolucao' ? typeColor() : 'transparent'"
-          (click)="activeTab.set('evolucao')"
+          [class.pdetail__tab--active]="activeTab() === 'evolucoes'"
+          [style.color]="activeTab() === 'evolucoes' ? typeColor() : null"
+          [style.border-color]="activeTab() === 'evolucoes' ? typeColor() : 'transparent'"
+          (click)="activeTab.set('evolucoes')"
         >
-          Evolução
+          Evoluções
+        </button>
+        <button
+          type="button"
+          class="pdetail__tab"
+          [class.pdetail__tab--active]="activeTab() === 'movimentos'"
+          [style.color]="activeTab() === 'movimentos' ? typeColor() : null"
+          [style.border-color]="activeTab() === 'movimentos' ? typeColor() : 'transparent'"
+          (click)="activeTab.set('movimentos')"
+        >
+          Movimentos
         </button>
       </nav>
 
       @switch (activeTab()) {
         @case ('sobre') {
           <div class="pdetail__panel">
-            @if (category()) {
-              <p class="pdetail__category">{{ category() }}</p>
-            }
-            @if (description()) {
-              <p class="pdetail__description">{{ description() }}</p>
+            @if (isLegendary() || isMythical() || isBaby()) {
+              <div class="pdetail__badges">
+                @if (isBaby()) { <span class="pdetail__badge pdetail__badge--baby">Bebê</span> }
+                @if (isLegendary()) { <span class="pdetail__badge pdetail__badge--legendary">Lendário</span> }
+                @if (isMythical()) { <span class="pdetail__badge pdetail__badge--mythical">Mítico</span> }
+              </div>
             }
 
-            <div class="pdetail__meta">
-              <div class="pdetail__meta-item">
-                <span class="pdetail__meta-value">{{ formatDecimal(p.weight) }} kg</span>
-                <span class="pdetail__meta-label">Peso</span>
+            <p class="pdetail__category">{{ category() }}</p>
+            <p class="pdetail__description">{{ description() }}</p>
+
+            <h3 class="pdetail__section-title">Sobre</h3>
+            <div class="pdetail__about-rows">
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Peso</span>
+                <span class="pdetail__about-value">{{ formatDecimal(p.weight) }} kg</span>
               </div>
-              <div class="pdetail__meta-item">
-                <span class="pdetail__meta-value">{{ formatDecimal(p.height) }} m</span>
-                <span class="pdetail__meta-label">Altura</span>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Altura</span>
+                <span class="pdetail__about-value">{{ formatDecimal(p.height) }} m</span>
+              </div>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Exp. Base</span>
+                <span class="pdetail__about-value">{{ p.baseExperience }}</span>
+              </div>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Taxa de Captura</span>
+                <span class="pdetail__about-value">{{ captureRate() }} / 255</span>
+              </div>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Gênero</span>
+                <span class="pdetail__about-value">{{ genderLabel(genderRate()) }}</span>
+              </div>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Geração</span>
+                <span class="pdetail__about-value">{{ generationLabel(generation()) }}</span>
+              </div>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Crescimento</span>
+                <span class="pdetail__about-value">{{ growthLabel(growthRate()) }}</span>
+              </div>
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Felicidade Base</span>
+                <span class="pdetail__about-value">{{ baseHappiness() }}</span>
+              </div>
+              @if (habitat()) {
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Habitat</span>
+                  <span class="pdetail__about-value">{{ habitatLabel(habitat()!) }}</span>
+                </div>
+              }
+              <div class="pdetail__about-row">
+                <span class="pdetail__about-label">Grupos de Ovo</span>
+                <span class="pdetail__about-value">
+                  @for (group of eggGroups(); track group; let last = $last) {
+                    {{ eggGroupLabel(group) }}{{ last ? '' : ', ' }}
+                  }
+                </span>
               </div>
             </div>
 
@@ -99,42 +151,98 @@
             </div>
           </div>
         }
-        @case ('stats') {
+        @case ('estatisticas') {
           <div class="pdetail__panel">
+            <h3 class="pdetail__section-title">Estatísticas Base</h3>
             <div class="pdetail__stats">
               @for (stat of p.stats; track stat.name) {
                 <div class="pdetail-stat">
-                  <span class="pdetail-stat__label">{{ statLabel(stat.name) }}</span>
+                  <div class="pdetail-stat__left">
+                    <span class="pdetail-stat__label">{{ statLabel(stat.name) }}</span>
+                    <span class="pdetail-stat__value">{{ stat.baseStat }}</span>
+                    @if (stat.effort > 0) {
+                      <span class="pdetail-stat__ev">+{{ stat.effort }} EV</span>
+                    }
+                  </div>
                   <span class="pdetail-stat__track">
                     <span
                       class="pdetail-stat__fill"
                       [style.width.%]="statPercent(stat.baseStat)"
-                      [style.background]="statColor(stat.name)"
+                      [style.background]="solidColor()"
                     ></span>
                   </span>
-                  <span class="pdetail-stat__value">{{ stat.baseStat }}/{{ statMax }}</span>
                 </div>
               }
+              <div class="pdetail-stat pdetail-stat--total">
+                <div class="pdetail-stat__left">
+                  <span class="pdetail-stat__label">TOTAL</span>
+                  <span class="pdetail-stat__value">{{ totalBaseStats() }}</span>
+                </div>
+                <span class="pdetail-stat__track">
+                  <span
+                    class="pdetail-stat__fill"
+                    [style.width.%]="statPercent(totalBaseStats())"
+                    [style.background]="solidColor()"
+                  ></span>
+                </span>
+              </div>
             </div>
           </div>
         }
-        @case ('evolucao') {
+        @case ('evolucoes') {
           <div class="pdetail__panel">
             @if (evolutionsLoading()) {
               <app-loading-spinner></app-loading-spinner>
             } @else {
               <div class="pdetail__evolutions">
-                @for (evo of evolutions(); track evo.id) {
-                  <a [routerLink]="['/pokemon', evo.id]" class="pdetail__evo-card">
-                    <img [src]="evo.spriteUrl" [alt]="evo.name" class="pdetail__evo-sprite" />
-                    <span class="pdetail__evo-name">{{ evo.name }}</span>
-                    @if (evo.method) {
-                      <span class="pdetail__evo-method">{{ evo.method }}</span>
+                @for (stage of evolutions(); track stage.stage) {
+                  <div class="pdetail__evo-stage">
+                    @if ($index > 0) {
+                      <div class="pdetail__evo-arrow">
+                        <mat-icon>arrow_downward</mat-icon>
+                      </div>
                     }
-                  </a>
+                    <div class="pdetail__evo-row">
+                      @for (evo of stage.pokemon; track evo.id) {
+                        <a
+                          [routerLink]="['/pokemon', evo.id]"
+                          class="pdetail__evo-card"
+                          [class.pdetail__evo-card--current]="evo.id === pokemon()?.id"
+                        >
+                          <span class="pdetail__evo-id">#{{ paddedId(evo.id) }}</span>
+                          <div class="pdetail__evo-imgwrap">
+                            <img src="/pokeball.png" alt="" aria-hidden="true" class="pdetail__evo-ball" />
+                            <img [src]="evo.spriteUrl" [alt]="evo.name" class="pdetail__evo-sprite" />
+                          </div>
+                          <span class="pdetail__evo-name">{{ evo.name }}</span>
+                          @if (evo.method) {
+                            <span class="pdetail__evo-method">{{ evo.method }}</span>
+                          }
+                        </a>
+                      }
+                    </div>
+                  </div>
                 }
               </div>
             }
+          </div>
+        }
+        @case ('movimentos') {
+          <div class="pdetail__panel">
+            <div class="pdetail__moves">
+              @for (move of pokemon()?.moves; track move.name) {
+                <div class="pdetail__move">
+                  <span class="pdetail__move-name">{{ formatMoveName(move.name) }}</span>
+                  <span class="pdetail__move-method">
+                    @if (move.learnMethod === 'level-up') {
+                      {{ learnMethodLabel(move.learnMethod) }} {{ move.level }}
+                    } @else {
+                      {{ learnMethodLabel(move.learnMethod) }}
+                    }
+                  </span>
+                </div>
+              }
+            </div>
           </div>
         }
       }

@@ -9,11 +9,21 @@
   width: 100%;
   height: 100vh;
   box-sizing: border-box;
-  background: var(--pokedex-red);
-  padding: 16px;
+  background: transparent;
+  position: relative;
 
-  @media (max-width: 768px) {
-    padding: 0;
+  &::before {
+    content: '';
+    position: fixed;
+    top: -140px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: calc(100vh + 140px);
+    background: url('/pokeball.png') no-repeat center top / 420px;
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: 0;
   }
 
   &__screen {
@@ -24,20 +34,54 @@
     width: 100%;
     max-width: 960px;
     margin: 0 auto;
-    background: var(--dex-cream);
-    border-radius: 12px;
-    overflow: hidden;
+    position: relative;
+    background: var(--dex-bg);
+  }
 
-    @media (max-width: 768px) {
-      max-width: none;
-      border-radius: 0;
-    }
+  &__screen-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 76px;
   }
 
   &__header {
-    flex: 0 0 auto;
-    padding: 24px 20px 8px;
+    position: relative;
+    padding: 60px 20px 8px;
     box-sizing: border-box;
+    background: transparent;
+    z-index: 1;
+  }
+
+  &__header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  &__theme-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--dex-ink) 6%, transparent);
+    color: var(--dex-ink);
+    cursor: pointer;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--dex-ink) 12%, transparent);
+    }
   }
 
   &__title {
@@ -48,16 +92,9 @@
   }
 
   &__subtitle {
-    color: #9a97ab;
+    color: var(--dex-text-muted);
     font-size: 0.9rem;
     margin: 0;
-  }
-
-  &__screen-scroll {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    padding-bottom: 76px;
   }
 
   &__bottom-nav {
@@ -68,10 +105,11 @@
     transform: translateX(-50%);
     z-index: 10;
     gap: 4px;
-    background: var(--dex-ink);
+    background: var(--dex-bg);
+    border: 1px solid color-mix(in srgb, var(--dex-ink) 10%, transparent);
     border-radius: 999px;
     padding: 8px 12px;
-    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.28);
   }
 
   &__bottom-tab {
@@ -81,10 +119,11 @@
     gap: 2px;
     padding: 6px 16px;
     border-radius: 999px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--dex-text-muted);
     text-decoration: none;
     font-size: 0.68rem;
     font-weight: 600;
+    transition: color 0.15s ease, background 0.15s ease;
 
     mat-icon {
       font-size: 20px;
@@ -95,6 +134,31 @@
 
   &__bottom-tab--active {
     color: #fff;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--pokedex-red);
+    box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--pokedex-red) 60%, transparent);
+  }
+
+  &__bottom-tab-icon {
+    position: relative;
+    display: inline-flex;
+  }
+
+  &__fav-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: var(--pokedex-red);
+    color: #fff;
+    font-size: 0.55rem;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
   }
 }

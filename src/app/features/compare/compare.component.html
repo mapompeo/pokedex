@@ -54,9 +54,9 @@
         <div class="compare__stats">
           @for (stat of a.stats; track stat.name) {
             <div class="stat-row">
-              <span>{{ stat.name }}</span>
+              <span>{{ statLabel(stat.name) }}</span>
               <span class="stat-row__track">
-                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)"></span>
+                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)" [style.background]="statColor(stat.name)"></span>
               </span>
               <span class="stat-row__value">{{ stat.baseStat }}</span>
             </div>
@@ -82,9 +82,9 @@
         <div class="compare__stats">
           @for (stat of b.stats; track stat.name) {
             <div class="stat-row">
-              <span>{{ stat.name }}</span>
+              <span>{{ statLabel(stat.name) }}</span>
               <span class="stat-row__track">
-                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)"></span>
+                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)" [style.background]="statColor(stat.name)"></span>
               </span>
               <span class="stat-row__value">{{ stat.baseStat }}</span>
             </div>

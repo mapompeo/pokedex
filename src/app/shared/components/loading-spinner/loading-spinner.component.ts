@@ -1,11 +1,29 @@
 import { Component } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-loading-spinner',
   standalone: true,
-  imports: [MatProgressSpinnerModule],
-  template: `<div class="loading-spinner"><mat-spinner diameter="40"></mat-spinner></div>`,
-  styles: [`.loading-spinner { display: flex; justify-content: center; padding: 24px; }`],
+  template: `<div class="loading-spinner"><div class="loading-spinner__ball"></div></div>`,
+  styles: [
+    `
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .loading-spinner__ball {
+        width: 40px;
+        height: 40px;
+        background: url('/pokeball.png') no-repeat center / contain;
+        opacity: 0.35;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `,
+  ],
 })
 export class LoadingSpinnerComponent {}

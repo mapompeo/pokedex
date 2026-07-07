@@ -9,7 +9,7 @@ import { getTypeNamePt } from '../../type-translations';
     class="type-badge"
     [class.type-badge--large]="large"
     [class.type-badge--ghost]="ghost"
-    [style.background-color]="ghost ? null : color"
+    [style.background]="ghost ? ghostBg : badgeBg"
     >{{ label }}</span
   >`,
   styles: [
@@ -20,7 +20,7 @@ import { getTypeNamePt } from '../../type-translations';
         border-radius: 12px;
         color: #fff;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: capitalize;
         line-height: 1.6;
       }
@@ -32,8 +32,8 @@ import { getTypeNamePt } from '../../type-translations';
       }
 
       .type-badge--ghost {
-        background: rgba(255, 255, 255, 0.3) !important;
-        color: #fff;
+        border: 1px solid rgba(255,255,255,0.25);
+        color: rgba(255,255,255,0.75);
       }
     `,
   ],
@@ -49,5 +49,13 @@ export class TypeBadgeComponent {
 
   get label(): string {
     return getTypeNamePt(this.type);
+  }
+
+  get badgeBg(): string {
+    return `color-mix(in srgb, ${this.color} 40%, white)`;
+  }
+
+  get ghostBg(): string {
+    return `color-mix(in srgb, ${this.color} 15%, transparent)`;
   }
 }

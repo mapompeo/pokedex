@@ -1,35 +1,53 @@
 .pokemon-list {
   position: relative;
   overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -60px;
-    right: -60px;
-    width: 220px;
-    height: 220px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.04);
-    pointer-events: none;
-  }
 }
 
 .pokemon-list__filters {
   position: relative;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 20px 20px 8px;
   align-items: center;
+}
+
+.pokemon-list__type-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 100%;
+}
+
+.type-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  background: color-mix(in srgb, var(--type-color) 65%, white);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+
+  &--active {
+    filter: brightness(1.2);
+    color: #fff;
+  }
 }
 
 .pokemon-list__grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 16px;
-  padding: 16px;
+  padding: 16px 20px 24px;
 }
 
 .pokemon-list__sentinel {

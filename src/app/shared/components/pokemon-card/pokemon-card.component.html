@@ -1,11 +1,12 @@
 <div class="pokemon-card" [style.background]="cardColor">
+  <img src="/pokeball.png" alt="" class="pokemon-card__watermark" aria-hidden="true" />
   <button
     type="button"
     class="pokemon-card__fav"
     (click)="favoriteToggled.emit(pokemon.id)"
     [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
   >
-    <mat-icon [style.color]="isFavorite ? 'var(--pokedex-red)' : 'var(--dex-ink)'">{{
+    <mat-icon [style.color]="isFavorite ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
       isFavorite ? 'favorite' : 'favorite_border'
     }}</mat-icon>
   </button>

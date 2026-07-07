@@ -1,19 +1,36 @@
 .pdetail {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--dex-bg);
 
   &__hero-wrap {
     position: relative;
+    width: 100%;
     flex: 0 0 auto;
   }
 
   &__hero {
+    position: relative;
     width: 100%;
     height: 240px;
     box-sizing: border-box;
-    padding: 20px 20px 0;
+    padding: 56px 20px 0;
     overflow: hidden;
+
+    // mini dot grid à esquerda (mesma cor/opacidade da pokébola)
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.7px, transparent 1.9px);
+      background-size: 17px 17px;
+      -webkit-mask-image: linear-gradient(to right, #000 0%, #000 34%, transparent 56%);
+      mask-image: linear-gradient(to right, #000 0%, #000 34%, transparent 56%);
+      pointer-events: none;
+      z-index: 0;
+    }
   }
 
   &__watermark {
@@ -27,32 +44,36 @@
     filter: brightness(0) invert(1);
     transform: translateY(-50%);
     pointer-events: none;
+    z-index: 1;
   }
 
-  &__back {
+  &__actions {
     position: absolute;
     top: 14px;
     left: 14px;
+    right: 14px;
     display: flex;
-    color: #fff;
+    align-items: center;
+    justify-content: space-between;
     z-index: 2;
   }
 
+  &__back {
+    display: flex;
+    color: #fff;
+  }
+
   &__fav {
-    position: absolute;
-    top: 6px;
-    right: 6px;
     background: transparent;
     border: none;
     padding: 4px;
     line-height: 0;
     cursor: pointer;
-    z-index: 2;
   }
 
   &__heading {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     max-width: 60%;
   }
 
@@ -83,18 +104,19 @@
   &__sprite {
     position: absolute;
     right: 20px;
-    bottom: -56px;
-    width: 168px;
-    height: 168px;
+    bottom: -3px;
+    width: 170px;
+    height: 170px;
     object-fit: contain;
     filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.25));
     z-index: 2;
+    cursor: pointer;
+
   }
 
   &__sheet {
-    flex: 0 1 auto;
-    min-height: 220px;
-    background: #fff;
+    flex: 1;
+    background: var(--dex-bg);
     border-radius: 36px 36px 0 0;
     margin-top: -40px;
     position: relative;
@@ -109,6 +131,13 @@
     gap: 24px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     margin-bottom: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__tab {
@@ -144,38 +173,61 @@
     margin: 0 0 20px;
   }
 
-  &__meta {
+  &__badges {
     display: flex;
     justify-content: center;
-    gap: 48px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  &__badge {
+    display: inline-flex;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    &--baby { background: #f8d5a0; color: #7a5a20; }
+    &--legendary { background: #e8c840; color: #6b5500; }
+    &--mythical { background: #c8a0f8; color: #502a7a; }
+  }
+
+  &__about-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     margin-bottom: 20px;
   }
 
-  &__meta-item {
+  &__about-row {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--dex-ink) 6%, transparent);
   }
 
-  &__meta-value {
-    color: var(--dex-ink);
+  &__about-label {
+    color: var(--dex-text-muted);
+    font-size: 0.78rem;
     font-weight: 700;
-    font-size: 1.05rem;
+    min-width: 110px;
   }
 
-  &__meta-label {
-    color: #9a97ab;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
+  &__about-value {
+    color: var(--dex-ink);
+    font-size: 0.85rem;
+    font-weight: 700;
   }
 
   &__section-title {
-    color: var(--dex-ink);
     text-align: left;
-    margin: 0 0 10px;
+    margin: 0 0 12px;
     font-size: 0.95rem;
+    font-weight: 700;
+    padding-bottom: 4px;
   }
 
   &__abilities {
@@ -200,60 +252,143 @@
   }
 
   &__evolutions {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px;
-  }
-
-  &__evo-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 0;
+  }
+
+  &__evo-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  &__evo-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #c0b8b0;
+    padding: 4px 0;
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__evo-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  &__evo-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
     text-decoration: none;
-    padding: 12px 8px;
-    border-radius: 14px;
-    background: var(--dex-cream-deep);
+    padding: 8px;
+    min-width: 120px;
+    transition: transform 0.15s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
+
+  // O pokémon atual é sinalizado apenas pela pokébola mais visível atrás dele
+  &__evo-card--current &__evo-ball {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+
+  &__evo-id {
+    color: var(--dex-text-muted);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+
+  &__evo-imgwrap {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__evo-ball {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 106px;
+    height: 106px;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    opacity: 0.12;
+    pointer-events: none;
   }
 
   &__evo-sprite {
-    width: 72px;
-    height: 72px;
+    position: relative;
+    z-index: 1;
+    width: 108px;
+    height: 108px;
     object-fit: contain;
+    filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.2));
   }
 
   &__evo-name {
-    color: var(--dex-ink);
-    font-weight: 700;
+    color: var(--dex-text);
+    font-weight: 800;
     text-transform: capitalize;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 
   &__evo-method {
-    color: #7a7168;
-    font-size: 0.68rem;
+    color: var(--dex-text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
     text-align: center;
+    background: color-mix(in srgb, var(--dex-ink) 6%, transparent);
+    padding: 3px 10px;
+    border-radius: 999px;
   }
 }
 
 .pdetail-stat {
-  display: grid;
-  grid-template-columns: 64px 1fr 64px;
+  display: flex;
   align-items: center;
   gap: 10px;
 
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 180px;
+    flex-shrink: 0;
+  }
+
   &__label {
-    color: #9a97ab;
-    font-size: 0.7rem;
+    color: var(--dex-text-muted);
+    font-size: 0.78rem;
     font-weight: 700;
     text-align: left;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
+    min-width: 110px;
   }
 
   &__track {
+    flex: 1;
     height: 8px;
     border-radius: 999px;
-    background: var(--dex-cream-deep);
+    background: #d0d0d0;
     overflow: hidden;
   }
 
@@ -265,7 +400,51 @@
 
   &__value {
     color: var(--dex-ink);
-    font-size: 0.68rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 28px;
     text-align: right;
+  }
+
+  &__ev {
+    font-size: 0.6rem;
+    color: var(--dex-gold);
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  &--total {
+    border-top: 1px solid var(--dex-cream-deep);
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+}
+
+.pdetail__moves {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pdetail__move {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--dex-bg-card);
+
+  &__name {
+    color: var(--dex-ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  &__method {
+    color: var(--dex-text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
 }

@@ -12,17 +12,18 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
-import { PokemonListItem, PokemonType } from '../../core/models/pokemon.model';
+import { PokemonListItem } from '../../core/models/pokemon.model';
 import { PokemonCardComponent } from '../../shared/components/pokemon-card/pokemon-card.component';
-import { TypeChipComponent } from '../../shared/components/type-chip/type-chip.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { getTypeColor } from '../../shared/type-colors';
+import { getTypeNamePt } from '../../shared/type-translations';
 
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-pokemon-list',
   standalone: true,
-  imports: [MatIconModule, PokemonCardComponent, TypeChipComponent, LoadingSpinnerComponent],
+  imports: [MatIconModule, PokemonCardComponent, LoadingSpinnerComponent],
   templateUrl: './pokemon-list.component.html',
   styleUrl: './pokemon-list.component.scss',
 })
@@ -39,34 +40,51 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   offset = signal(0);
   total = signal<number | null>(null);
   searchTerm = signal('');
-  types = signal<PokemonType[]>([]);
-  selectedTypeNames = signal<string[]>([]);
-  typeFilteredIds = signal<Set<number> | null>(null);
   typesById = signal<Map<number, string[]>>(new Map());
+  availableTypes = signal<{ name: string; label: string; color: string }[]>([]);
+  selectedTypes = signal<Set<string>>(new Set());
 
   filteredItems = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
-    const typeIds = this.typeFilteredIds();
-    const source = term ? this.allNames() : this.allItems();
+    const types = this.selectedTypes();
+    const hasFilter = !!term || types.size > 0;
+    const source = hasFilter ? this.allNames() : this.allItems();
     return source.filter((item) => {
-      const matchesSearch = !term || item.name.toLowerCase().includes(term);
-      const matchesType = !typeIds || typeIds.has(item.id);
-      return matchesSearch && matchesType;
+      if (term) {
+        const itemTypes = this.typesById().get(item.id) ?? [];
+        const matchesName = item.name.toLowerCase().includes(term);
+        const matchesId = String(item.id).includes(term);
+        const matchesType = itemTypes.some((t) => t.toLowerCase().includes(term) || getTypeNamePt(t).toLowerCase().includes(term));
+        if (!matchesName && !matchesId && !matchesType) {
+          return false;
+        }
+      }
+      if (types.size > 0) {
+        const itemTypes = this.typesById().get(item.id) ?? [];
+        if (!itemTypes.some((t) => types.has(t))) {
+          return false;
+        }
+      }
+      return true;
     });
   });
 
   hasMore = computed(() => this.total() === null || this.allItems().length < (this.total() ?? 0));
 
   ngOnInit(): void {
-    this.pokemonService.getTypes().subscribe((types) => this.types.set(types));
     this.pokemonService.getAllPokemonListItems().subscribe((items) => this.allNames.set(items));
     this.pokemonService.getTypesByPokemonId().subscribe((idToTypes) => this.typesById.set(idToTypes));
+    this.pokemonService.getTypes().subscribe((types) =>
+      this.availableTypes.set(
+        types.map((t) => ({ name: t.name, label: getTypeNamePt(t.name), color: getTypeColor(t.name) }))
+      )
+    );
     this.loadNextPage();
   }
 
   ngAfterViewInit(): void {
     this.observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !this.loading() && !this.searchTerm().trim() && this.hasMore()) {
+      if (entries[0].isIntersecting && !this.loading() && !this.searchTerm().trim() && this.selectedTypes().size === 0 && this.hasMore()) {
         this.loadNextPage();
       }
     });
@@ -96,13 +114,16 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.searchTerm.set(value);
   }
 
-  onTypeSelectionChanged(typeNames: string[]): void {
-    this.selectedTypeNames.set(typeNames);
-    if (typeNames.length === 0) {
-      this.typeFilteredIds.set(null);
-      return;
-    }
-    this.pokemonService.getPokemonIdsByTypes(typeNames).subscribe((ids) => this.typeFilteredIds.set(ids));
+  toggleTypeFilter(typeName: string): void {
+    this.selectedTypes.update((set) => {
+      const next = new Set(set);
+      if (next.has(typeName)) {
+        next.delete(typeName);
+      } else {
+        next.add(typeName);
+      }
+      return next;
+    });
   }
 
   onFavoriteToggled(id: number): void {

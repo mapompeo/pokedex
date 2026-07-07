@@ -1,12 +1,19 @@
 <div class="pokedex-frame">
   <div class="pokedex-frame__screen">
-    @if (!isDetailRoute()) {
-      <header class="pokedex-frame__header">
-        <h1 class="pokedex-frame__title">Pokédex</h1>
-        <p class="pokedex-frame__subtitle">Busque um pokémon pelo nome ou explore a lista completa</p>
-      </header>
-    }
     <div class="pokedex-frame__screen-scroll">
+      @if (!isDetailRoute()) {
+        <header class="pokedex-frame__header">
+          <div class="pokedex-frame__header-row">
+            <div>
+              <h1 class="pokedex-frame__title">{{ title }}</h1>
+              <p class="pokedex-frame__subtitle">{{ subtitle }}</p>
+            </div>
+            <button class="pokedex-frame__theme-btn" (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'">
+              <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+          </div>
+        </header>
+      }
       <router-outlet></router-outlet>
     </div>
 
@@ -18,7 +25,7 @@
           [routerLinkActiveOptions]="{ exact: true }"
           class="pokedex-frame__bottom-tab"
         >
-          <mat-icon>view_list</mat-icon>
+          <mat-icon>grid_view</mat-icon>
           <span>Lista</span>
         </a>
         <a
@@ -26,7 +33,12 @@
           routerLinkActive="pokedex-frame__bottom-tab--active"
           class="pokedex-frame__bottom-tab"
         >
-          <mat-icon>favorite</mat-icon>
+          <span class="pokedex-frame__bottom-tab-icon">
+            <mat-icon>favorite</mat-icon>
+            @if (favoriteCount() > 0) {
+              <span class="pokedex-frame__fav-badge">{{ favoriteCount() }}</span>
+            }
+          </span>
           <span>Favoritos</span>
         </a>
         <a
