@@ -1,8 +1,9 @@
-<div class="pokedex-frame">
+<div class="pokedex-frame" [style.background]="frameBackground()">
   <div class="pokedex-frame__screen">
     <div class="pokedex-frame__screen-scroll">
       @if (!isDetailRoute()) {
         <header class="pokedex-frame__header">
+          <img src="/pokeball.png" alt="" class="pokedex-frame__header-watermark" aria-hidden="true" />
           <div class="pokedex-frame__header-row">
             <div>
               <h1 class="pokedex-frame__title">{{ title }}</h1>
@@ -14,7 +15,9 @@
           </div>
         </header>
       }
-      <router-outlet></router-outlet>
+      <div class="pokedex-frame__content" [class.pokedex-frame__content--sheet]="!isDetailRoute()">
+        <router-outlet></router-outlet>
+      </div>
     </div>
 
     @if (!isDetailRoute()) {

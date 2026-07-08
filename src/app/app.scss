@@ -9,22 +9,8 @@
   width: 100%;
   height: 100vh;
   box-sizing: border-box;
-  background: transparent;
+  // cor definida via [style.background]="frameBackground()" (app.ts / PageBackgroundService)
   position: relative;
-
-  &::before {
-    content: '';
-    position: fixed;
-    top: -140px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100vw;
-    height: calc(100vh + 140px);
-    background: url('/pokeball.png') no-repeat center top / 420px;
-    opacity: 0.02;
-    pointer-events: none;
-    z-index: 0;
-  }
 
   &__screen {
     display: flex;
@@ -35,26 +21,62 @@
     max-width: 960px;
     margin: 0 auto;
     position: relative;
-    background: var(--dex-bg);
   }
 
   &__screen-scroll {
+    display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 76px;
+  }
+
+  // flex-shrink:0 (em vez de min-height:0) garante que o sheet nunca fique
+  // menor que o próprio conteúdo — se encolhesse, o fundo branco parava de
+  // acompanhar o scroll/lazy-loading e sobrava a cor do frame atrás dos cards.
+  &__content {
+    flex: 1 0 auto;
+  }
+
+  // mesma folha branca arredondada da tela de detalhe (ver .pdetail__sheet):
+  // o respiro para a navbar flutuante fica dentro do sheet (padding), não fora
+  // dele, para o branco se estender até o fim mesmo com pouco conteúdo.
+  &__content--sheet {
+    background: var(--dex-bg);
+    border-radius: 32px 32px 0 0;
+    padding-bottom: 92px;
   }
 
   &__header {
     position: relative;
-    padding: 60px 20px 8px;
+    padding: 60px 20px 28px;
     box-sizing: border-box;
     background: transparent;
     z-index: 1;
+    // sem overflow:hidden aqui: com altura automática (título+subtítulo
+    // variam de tamanho) e um filho flex, isso colapsa a altura do header
+    // no Chromium.
+  }
+
+  // centralizada e um pouco acima do topo, como a pokébola original de fundo
+  &__header-watermark {
+    position: absolute;
+    top: -110px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 280px;
+    object-fit: contain;
+    opacity: 0.16;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+    z-index: 0;
   }
 
   &__header-row {
+    position: relative;
+    z-index: 1;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -68,8 +90,8 @@
     height: 36px;
     border: none;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--dex-ink) 6%, transparent);
-    color: var(--dex-ink);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
     cursor: pointer;
     flex-shrink: 0;
 
@@ -80,19 +102,19 @@
     }
 
     &:hover {
-      background: color-mix(in srgb, var(--dex-ink) 12%, transparent);
+      background: rgba(255, 255, 255, 0.28);
     }
   }
 
   &__title {
     font-weight: 800;
-    color: var(--dex-ink);
+    color: #fff;
     font-size: 1.6rem;
     margin: 0 0 4px;
   }
 
   &__subtitle {
-    color: var(--dex-text-muted);
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;
     margin: 0;
   }

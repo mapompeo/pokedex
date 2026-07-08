@@ -30,10 +30,6 @@ export function getCapBackground(types: string[]): string {
   return `linear-gradient(160deg, color-mix(in srgb, ${base} 45%, white), ${base})`;
 }
 
-export function getSolidCardColor(types: string[]): string {
-  return types.length ? getTypeColor(types[0]) : '#CBB994';
-}
-
 export function getPastelCardColor(types: string[]): string {
   const base = types.length ? getTypeColor(types[0]) : '#CBB994';
   return `color-mix(in srgb, ${base} 65%, white)`;

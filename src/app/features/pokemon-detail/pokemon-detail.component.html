@@ -82,73 +82,77 @@
       @switch (activeTab()) {
         @case ('sobre') {
           <div class="pdetail__panel">
-            @if (isLegendary() || isMythical() || isBaby()) {
-              <div class="pdetail__badges">
-                @if (isBaby()) { <span class="pdetail__badge pdetail__badge--baby">Bebê</span> }
-                @if (isLegendary()) { <span class="pdetail__badge pdetail__badge--legendary">Lendário</span> }
-                @if (isMythical()) { <span class="pdetail__badge pdetail__badge--mythical">Mítico</span> }
-              </div>
-            }
-
-            <p class="pdetail__category">{{ category() }}</p>
-            <p class="pdetail__description">{{ description() }}</p>
-
-            <h3 class="pdetail__section-title">Sobre</h3>
-            <div class="pdetail__about-rows">
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Peso</span>
-                <span class="pdetail__about-value">{{ formatDecimal(p.weight) }} kg</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Altura</span>
-                <span class="pdetail__about-value">{{ formatDecimal(p.height) }} m</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Exp. Base</span>
-                <span class="pdetail__about-value">{{ p.baseExperience }}</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Taxa de Captura</span>
-                <span class="pdetail__about-value">{{ captureRate() }} / 255</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Gênero</span>
-                <span class="pdetail__about-value">{{ genderLabel(genderRate()) }}</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Geração</span>
-                <span class="pdetail__about-value">{{ generationLabel(generation()) }}</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Crescimento</span>
-                <span class="pdetail__about-value">{{ growthLabel(growthRate()) }}</span>
-              </div>
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Felicidade Base</span>
-                <span class="pdetail__about-value">{{ baseHappiness() }}</span>
-              </div>
-              @if (habitat()) {
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Habitat</span>
-                  <span class="pdetail__about-value">{{ habitatLabel(habitat()!) }}</span>
+            @if (extras(); as ex) {
+              @if (ex.isLegendary || ex.isMythical || ex.isBaby) {
+                <div class="pdetail__badges">
+                  @if (ex.isBaby) { <span class="pdetail__badge pdetail__badge--baby">Bebê</span> }
+                  @if (ex.isLegendary) { <span class="pdetail__badge pdetail__badge--legendary">Lendário</span> }
+                  @if (ex.isMythical) { <span class="pdetail__badge pdetail__badge--mythical">Mítico</span> }
                 </div>
               }
-              <div class="pdetail__about-row">
-                <span class="pdetail__about-label">Grupos de Ovo</span>
-                <span class="pdetail__about-value">
-                  @for (group of eggGroups(); track group; let last = $last) {
-                    {{ eggGroupLabel(group) }}{{ last ? '' : ', ' }}
-                  }
-                </span>
-              </div>
-            </div>
 
-            <h3 class="pdetail__section-title">Habilidades</h3>
-            <div class="pdetail__abilities">
-              @for (ability of p.abilities; track ability) {
-                <span class="pdetail__ability-pill">{{ formatAbility(ability) }}</span>
-              }
-            </div>
+              <p class="pdetail__category">{{ ex.category }}</p>
+              <p class="pdetail__description">{{ ex.description }}</p>
+
+              <h3 class="pdetail__section-title">Sobre</h3>
+              <div class="pdetail__about-rows">
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Peso</span>
+                  <span class="pdetail__about-value">{{ formatDecimal(p.weight) }} kg</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Altura</span>
+                  <span class="pdetail__about-value">{{ formatDecimal(p.height) }} m</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Exp. Base</span>
+                  <span class="pdetail__about-value">{{ p.baseExperience }}</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Taxa de Captura</span>
+                  <span class="pdetail__about-value">{{ ex.captureRate }} / 255</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Gênero</span>
+                  <span class="pdetail__about-value">{{ genderLabel(ex.genderRate) }}</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Geração</span>
+                  <span class="pdetail__about-value">{{ generationLabel(ex.generation) }}</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Crescimento</span>
+                  <span class="pdetail__about-value">{{ growthLabel(ex.growthRate) }}</span>
+                </div>
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Felicidade Base</span>
+                  <span class="pdetail__about-value">{{ ex.baseHappiness }}</span>
+                </div>
+                @if (ex.habitat; as habitat) {
+                  <div class="pdetail__about-row">
+                    <span class="pdetail__about-label">Habitat</span>
+                    <span class="pdetail__about-value">{{ habitatLabel(habitat) }}</span>
+                  </div>
+                }
+                <div class="pdetail__about-row">
+                  <span class="pdetail__about-label">Grupos de Ovo</span>
+                  <span class="pdetail__about-value">
+                    @for (group of ex.eggGroups; track group; let last = $last) {
+                      {{ eggGroupLabel(group) }}{{ last ? '' : ', ' }}
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <h3 class="pdetail__section-title">Habilidades</h3>
+              <div class="pdetail__abilities">
+                @for (ability of p.abilities; track ability) {
+                  <span class="pdetail__ability-pill">{{ formatAbility(ability) }}</span>
+                }
+              </div>
+            } @else {
+              <app-loading-spinner></app-loading-spinner>
+            }
           </div>
         }
         @case ('estatisticas') {

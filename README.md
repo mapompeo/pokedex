@@ -1,69 +1,160 @@
-# Pokédex
+# 🔴 Pokédex
 
-Projeto de estudo em **Angular + TypeScript**, construído para praticar arquitetura de componentes standalone, gerenciamento de estado com Signals e consumo de uma API REST pública ([PokéAPI](https://pokeapi.co/)).
+<div align="center">
 
-## Funcionalidades
+![Angular](https://img.shields.io/badge/Angular-20-DD0031?style=for-the-badge&logo=angular)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript)
+![Angular Material](https://img.shields.io/badge/Angular_Material-20-757575?style=for-the-badge&logo=angular)
+![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=for-the-badge&logo=reactivex)
 
-- **Listagem de pokémons** com scroll infinito
-- **Busca por nome** sobre a lista completa (~1300 pokémons), não só os já carregados na tela
+**Pokédex completa em Angular, consumindo a PokéAPI em tempo real — sem backend próprio**
+
+<!-- ![Pokédex — tela inicial](docs/screenshot.png) -->
+
+[Sobre](#sobre) • [Stack](#stack) • [Como Usar](#-como-usar) • [Arquitetura](#-arquitetura) • [Decisões](#-decisões-de-arquitetura)
+
+</div>
+
+---
+
+## Sobre
+
+Pokédex é um projeto de estudo em **Angular 20 + TypeScript**, construído para praticar arquitetura de componentes standalone, gerenciamento de estado com **Signals** (sem NgRx) e consumo de uma API REST pública, a [PokéAPI](https://pokeapi.co/).
+
+### O que a aplicação entrega
+
+- **Listagem de pokémons** com scroll infinito sobre os ~1300 pokémons da PokéAPI
+- **Busca por nome** sobre a lista completa, não só os já carregados na tela
 - **Filtro por tipo** com múltipla seleção (ex: fogo + voador)
-- **Detalhes do pokémon**: sprite, tipos, altura, peso e stats
+- **Detalhes do pokémon**: sprite, tipos, altura, peso, stats, habilidades, movimentos e cadeia de evolução
 - **Favoritos** persistidos em `localStorage`, com tela dedicada
 - **Comparação** lado a lado entre 2 pokémons, escolhidos por busca com autocomplete
+- **Tema claro/escuro** com persistência local
+
+---
 
 ## Stack
 
-- [Angular](https://angular.dev/) (standalone components, sem NgModules)
-- TypeScript
-- [Angular Material](https://material.angular.io/)
-- Signals para estado da aplicação (sem NgRx, sem RxJS `Subject`/`BehaviorSubject`)
-- [PokéAPI](https://pokeapi.co/) — API pública, sem necessidade de chave
+- [Angular 20](https://angular.dev/) — standalone components, sem NgModules
+- TypeScript 5.8 (modo `strict`)
+- [Angular Material](https://material.angular.io/) — ícones e componentes de UI
+- **Signals** para todo o estado da aplicação (sem NgRx, sem `Subject`/`BehaviorSubject`)
+- **RxJS** apenas para orquestrar chamadas HTTP (`switchMap`, `forkJoin`, `takeUntilDestroyed`)
+- [PokéAPI](https://pokeapi.co/) — API pública, sem necessidade de chave/autenticação
 
-## Como rodar localmente
+---
 
-Pré-requisitos: [Node.js](https://nodejs.org/) e [Angular CLI](https://angular.dev/tools/cli) instalados.
+## 🏗️ Arquitetura
 
-```bash
-npm install
-ng serve
+```
+HTTP (PokéAPI)
+    ↓
+PokemonService (cache em memória + mapeamento DTO → modelo de domínio)
+    ↓
+Componentes standalone (Signals: pokemon, extras, loading, activeTab, ...)
+    ↓
+Template (Angular control flow: @if / @for / @switch)
 ```
 
-Acesse `http://localhost:4200`.
+### Camadas
 
-## Estrutura do projeto
+- **`core/services`** — `PokemonService` (toda a integração com a PokéAPI, incluindo cache e montagem da cadeia de evolução) e `FavoritesService` (favoritos em `localStorage`)
+- **`core/models`** — interfaces de domínio (`PokemonDetail`, `PokemonExtras`, `PokemonListItem`, ...), desacopladas do formato bruto da API
+- **`core/interceptors`** — interceptor HTTP global de erros
+- **`shared/components`** — componentes reutilizáveis (card, badge de tipo, spinner)
+- **`features`** — uma pasta por tela (`pokemon-list`, `pokemon-detail`, `favorites`, `compare`), cada uma isolada e lazy-loaded via rotas
+
+### Por que Signals em vez de NgRx?
+
+Para o tamanho deste projeto, um gerenciador de estado externo seria over-engineering: o estado inteiro cabe em dois services (`PokemonService`, `FavoritesService`) usando Signals nativos do Angular, sem o boilerplate de actions/reducers/selectors. Se a aplicação crescesse (múltiplas fontes de estado compartilhado, undo/redo, dev tools de time-travel), aí valeria reavaliar.
+
+---
+
+## 🚀 Como Usar
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) 18+
+- [Angular CLI](https://angular.dev/tools/cli) (`npm install -g @angular/cli`, opcional — o `npx ng` também funciona)
+
+### Instalação local
+
+```bash
+# Clone o repositório
+git clone https://github.com/mapompeo/pokedex.git
+cd pokedex
+
+# Instale as dependências
+npm install
+
+# Rode a aplicação
+npm start
+```
+
+Acesse **http://localhost:4200**.
+
+### Build de produção
+
+```bash
+npm run build
+```
+
+Os artefatos ficam em `dist/pokedex`. As URLs da PokéAPI usadas em cada ambiente vêm de `src/environments/environment.ts` (dev) e `environment.prod.ts` (produção), trocados automaticamente pelo Angular CLI via `fileReplacements`.
+
+---
+
+## Estrutura do Projeto
 
 ```
 src/app/
 ├── core/
-│   ├── models/          # Interfaces de domínio (Pokemon, PokemonType, ...)
-│   ├── services/        # PokemonService (PokéAPI) e FavoritesService (localStorage)
+│   ├── models/           # Interfaces de domínio (PokemonDetail, PokemonExtras, ...)
+│   ├── services/         # PokemonService (PokéAPI) e FavoritesService (localStorage)
 │   └── interceptors/     # Interceptor global de erros HTTP
 ├── shared/
-│   └── components/       # Componentes reutilizáveis (card, filtro de tipo, spinner)
+│   ├── components/       # Componentes reutilizáveis (card, type-badge, spinner)
+│   └── *.ts              # Helpers de formatação e tradução (pt-BR)
 ├── features/
-│   ├── pokemon-list/      # Tela principal: listagem, busca e filtro
-│   ├── pokemon-detail/    # Tela de detalhes de um pokémon
-│   ├── favorites/         # Tela de favoritos
-│   └── compare/           # Tela de comparação entre 2 pokémons
-└── app.routes.ts
+│   ├── pokemon-list/     # Tela principal: listagem, busca e filtro por tipo
+│   ├── pokemon-detail/   # Detalhes, stats, evolução e movimentos
+│   ├── favorites/        # Tela de favoritos
+│   └── compare/          # Comparação entre 2 pokémons
+└── app.routes.ts         # Rotas lazy-loaded por feature
 ```
 
 Cada feature é isolada e se comunica com as demais apenas através dos services e do roteamento — sem acoplamento direto entre telas.
 
-## Decisões de arquitetura
+---
 
-- **Sem gerenciador de estado externo (NgRx):** o estado da aplicação vive em dois services (`PokemonService`, `FavoritesService`) usando Signals. Para o tamanho deste projeto, é suficiente e evita boilerplate desnecessário.
-- **Sprites sem chamadas extras:** a URL do sprite de cada pokémon na listagem é construída diretamente a partir do ID (`raw.githubusercontent.com/PokeAPI/sprites`), sem precisar buscar o detalhe completo de cada item só para exibir uma imagem.
-- **Busca com dataset completo:** como a PokéAPI não oferece busca textual parcial, a busca por nome carrega uma única vez a lista completa de nomes (uma chamada leve, sem sprites/detalhes) e filtra localmente — assim encontra qualquer pokémon, mesmo sem ele já ter sido carregado pelo scroll infinito.
-- **Sem testes automatizados nesta versão:** decisão consciente para focar no aprendizado de Angular em si; validação é feita manualmente via `ng build` e testes no navegador.
+## 💡 Decisões de Arquitetura
 
-## Possíveis melhorias futuras
+- **Sem gerenciador de estado externo (NgRx):** estado vive em Signals dentro de `PokemonService`/`FavoritesService`. Suficiente para o tamanho do projeto, evita boilerplate.
+- **Sprites sem chamadas extras:** a URL do sprite de cada pokémon na listagem é construída direto a partir do ID (`raw.githubusercontent.com/PokeAPI/sprites`), sem buscar o detalhe completo só para exibir uma imagem.
+- **Busca com dataset completo:** como a PokéAPI não oferece busca textual parcial, a busca por nome carrega uma vez a lista completa (uma chamada leve, sem sprites/detalhes) e filtra localmente — encontra qualquer pokémon, mesmo sem ele já ter sido carregado pelo scroll infinito.
+- **Cancelamento de requisições em cascata:** navegação entre pokémons e alternância de favoritos usam `switchMap`, cancelando automaticamente uma requisição em andamento se uma nova começar antes dela responder — evita que uma resposta lenta e antiga sobrescreva dados mais recentes na tela.
+- **Sem testes automatizados nesta versão:** decisão consciente para focar no aprendizado de Angular em si; validação é feita via `ng build` e testes manuais no navegador.
+
+## 🔭 Possíveis Melhorias Futuras
 
 - Testes automatizados (unitários e e2e)
-- Refinar UI/UX (layout, responsividade, identidade visual)
-- Cadeia de evolução na tela de detalhes
+- Cache com invalidação/expiração no `PokemonService`
 - Paginação/scroll infinito também no filtro por tipo combinado com busca
 
-## Autor
+---
 
-Matheus Pompeo
+## 👨‍💻 Autor
+
+**Matheus Pompeo**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/matheuspompeo/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/mapompeo)
+
+---
+
+<div align="center">
+
+**⭐ Se este projeto te ajudou, considere dar uma estrela!**
+
+Made with ❤️ and Angular
+
+</div>

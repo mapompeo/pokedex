@@ -1,10 +1,13 @@
 import { Component, computed, effect, inject, signal, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
+import { EMPTY, catchError, filter, map, switchMap } from 'rxjs';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
-import { EvolutionStage, PokemonDetail } from '../../core/models/pokemon.model';
+import { PageBackgroundService } from '../../core/services/page-background.service';
+import { PokemonDetail, PokemonExtras } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 import { getPastelCardColor, getTypeColor } from '../../shared/type-colors';
@@ -23,6 +26,14 @@ const TAB_LABELS: Record<DetailTab, string> = {
   movimentos: 'Movimentos',
 };
 
+const LEARN_METHOD_LABELS: Record<string, string> = {
+  'level-up': 'Nível',
+  egg: 'Ovo',
+  machine: 'TM',
+  tutor: 'Tutor',
+  'form-change': 'Mud. Forma',
+};
+
 @Component({
   selector: 'app-pokemon-detail',
   standalone: true,
@@ -34,29 +45,17 @@ export class PokemonDetailComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private pokemonService = inject(PokemonService);
   private titleService = inject(Title);
+  private pageBackground = inject(PageBackgroundService);
   favoritesService = inject(FavoritesService);
 
   pokemon = signal<PokemonDetail | null>(null);
   loading = signal(true);
-  statMax = DETAIL_STAT_MAX;
 
   activeTab = signal<DetailTab>('sobre');
-  evolutions = signal<EvolutionStage[]>([]);
   evolutionsLoading = signal(true);
-  description = signal('');
-  category = signal('');
-  captureRate = signal(0);
-  baseHappiness = signal(0);
-  growthRate = signal('');
-  eggGroups = signal<string[]>([]);
-  genderRate = signal(0);
-  habitat = signal<string | null>(null);
-  color = signal('');
-  shape = signal<string | null>(null);
-  isLegendary = signal(false);
-  isMythical = signal(false);
-  isBaby = signal(false);
-  generation = signal('');
+  extras = signal<PokemonExtras | null>(null);
+
+  evolutions = computed(() => this.extras()?.evolutions ?? []);
 
   totalBaseStats = computed(() => {
     const p = this.pokemon();
@@ -71,12 +70,50 @@ export class PokemonDetailComponent implements OnDestroy {
   constructor() {
     // Reage a cada mudança de :id (o Angular reaproveita este componente ao
     // navegar entre /pokemon/:id, então snapshot no construtor não bastaria).
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) {
-        this.load(id);
-      }
-    });
+    // switchMap cancela a requisição anterior quando o :id muda antes dela
+    // responder, evitando que uma resposta antiga sobrescreva a mais nova.
+    const id$ = this.route.paramMap.pipe(
+      map((params) => params.get('id')),
+      filter((id): id is string => !!id)
+    );
+
+    id$
+      .pipe(
+        switchMap((id) => {
+          this.loading.set(true);
+          return this.pokemonService.getPokemonDetail(id).pipe(
+            catchError(() => {
+              this.loading.set(false);
+              return EMPTY;
+            })
+          );
+        }),
+        takeUntilDestroyed()
+      )
+      .subscribe((detail) => {
+        this.pokemon.set(detail);
+        this.loading.set(false);
+        this.setAppBg(detail.types);
+      });
+
+    id$
+      .pipe(
+        switchMap((id) => {
+          this.evolutionsLoading.set(true);
+          this.extras.set(null);
+          return this.pokemonService.getPokemonExtras(id).pipe(
+            catchError(() => {
+              this.evolutionsLoading.set(false);
+              return EMPTY;
+            })
+          );
+        }),
+        takeUntilDestroyed()
+      )
+      .subscribe((extras) => {
+        this.extras.set(extras);
+        this.evolutionsLoading.set(false);
+      });
 
     // Título da guia: "Pokédex | Nome · Aba"
     effect(() => {
@@ -87,53 +124,16 @@ export class PokemonDetailComponent implements OnDestroy {
     });
   }
 
-  private load(id: string): void {
-    this.loading.set(true);
-    this.evolutionsLoading.set(true);
-    this.pokemonService.getPokemonDetail(id).subscribe({
-      next: (detail) => {
-        this.pokemon.set(detail);
-        this.loading.set(false);
-        this.setAppBg(detail.types);
-      },
-      error: () => this.loading.set(false),
-    });
-    this.pokemonService.getPokemonExtras(id).subscribe({
-      next: (extras) => {
-        this.evolutions.set(extras.evolutions);
-        this.description.set(extras.description);
-        this.category.set(extras.category);
-        this.captureRate.set(extras.captureRate);
-        this.baseHappiness.set(extras.baseHappiness);
-        this.growthRate.set(extras.growthRate);
-        this.eggGroups.set(extras.eggGroups);
-        this.genderRate.set(extras.genderRate);
-        this.habitat.set(extras.habitat);
-        this.color.set(extras.color);
-        this.shape.set(extras.shape);
-        this.isLegendary.set(extras.isLegendary);
-        this.isMythical.set(extras.isMythical);
-        this.isBaby.set(extras.isBaby);
-        this.generation.set(extras.generation);
-        this.evolutionsLoading.set(false);
-      },
-      error: () => this.evolutionsLoading.set(false),
-    });
-  }
-
   private capitalize(name: string): string {
     return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
-  private appBgColor = '';
-
   private setAppBg(types: string[]): void {
-    this.appBgColor = getPastelCardColor(types);
-    document.body.style.background = this.appBgColor;
+    this.pageBackground.color.set(getPastelCardColor(types));
   }
 
   ngOnDestroy(): void {
-    document.body.style.background = '';
+    this.pageBackground.color.set(null);
     this.titleService.setTitle('Pokédex');
   }
 
@@ -202,14 +202,7 @@ export class PokemonDetailComponent implements OnDestroy {
   }
 
   learnMethodLabel(method: string): string {
-    switch (method) {
-      case 'level-up': return 'Nível';
-      case 'egg': return 'Ovo';
-      case 'machine': return 'TM';
-      case 'tutor': return 'Tutor';
-      case 'form-change': return 'Mud. Forma';
-      default: return method;
-    }
+    return LEARN_METHOD_LABELS[method] ?? method;
   }
 
   playCry(): void {

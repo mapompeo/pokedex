@@ -64,8 +64,6 @@ export interface PokemonExtras {
   eggGroups: string[];
   genderRate: number;
   habitat: string | null;
-  color: string;
-  shape: string | null;
   isLegendary: boolean;
   isMythical: boolean;
   isBaby: boolean;

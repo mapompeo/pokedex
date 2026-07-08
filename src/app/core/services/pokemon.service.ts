@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   EvolutionNode,
-  EvolutionStage,
   PokemonDetail,
   PokemonExtras,
   PokemonListItem,
@@ -13,10 +12,11 @@ import {
   PokemonType,
 } from '../models/pokemon.model';
 import { getItemNamePt } from '../../shared/evolution-labels';
+import { environment } from '../../../environments/environment';
 
-const BASE_URL = 'https://pokeapi.co/api/v2';
-const ARTWORK_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork';
-const CRIES_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest';
+const BASE_URL = environment.apiBaseUrl;
+const ARTWORK_BASE_URL = environment.artworkBaseUrl;
+const CRIES_BASE_URL = environment.criesBaseUrl;
 
 const TYPE_PRIORITY: Record<string, number> = {
   normal: 0, fire: 1, water: 2, grass: 3, electric: 4,
@@ -71,8 +71,6 @@ interface RawSpeciesResponse {
   egg_groups: { name: string }[];
   gender_rate: number;
   habitat: { name: string } | null;
-  color: { name: string };
-  shape: { name: string } | null;
   is_legendary: boolean;
   is_mythical: boolean;
   is_baby: boolean;
@@ -162,20 +160,6 @@ export class PokemonService {
     );
   }
 
-  getPokemonIdsByTypes(typeNames: string[]): Observable<Set<number>> {
-    if (typeNames.length === 0) {
-      return of(new Set<number>());
-    }
-    const requests = typeNames.map((name) =>
-      this.http.get<RawTypePokemonResponse>(`${BASE_URL}/type/${name}`).pipe(
-        map((res) => new Set(res.pokemon.map((p) => this.extractIdFromUrl(p.pokemon.url))))
-      )
-    );
-    return forkJoin(requests).pipe(
-      map((sets) => sets.reduce((acc, s) => new Set([...acc].filter((id) => s.has(id)))))
-    );
-  }
-
   getTypesByPokemonId(): Observable<Map<number, string[]>> {
     if (this.idTypesCache) {
       return of(this.idTypesCache);
@@ -230,8 +214,6 @@ export class PokemonService {
               eggGroups: species.egg_groups.map((g) => g.name),
               genderRate: species.gender_rate,
               habitat: species.habitat?.name ?? null,
-              color: species.color.name,
-              shape: species.shape?.name ?? null,
               isLegendary: species.is_legendary,
               isMythical: species.is_mythical,
               isBaby: species.is_baby,
@@ -279,22 +261,6 @@ export class PokemonService {
       }
     }
     return map;
-  }
-
-  getEvolutionStages(nameOrId: string): Observable<EvolutionStage[]> {
-    return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
-      switchMap((species) =>
-        this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url).pipe(
-          map((chainRes) => {
-            const tree = this.buildEvolutionTree(chainRes.chain, null);
-            const stages = this.flattenEvolutionStages(tree);
-            return Array.from(stages.entries())
-              .sort(([a], [b]) => a - b)
-              .map(([stage, pokemon]) => ({ stage, pokemon }));
-          })
-        )
-      )
-    );
   }
 
   private describeEvolutionDetail(detail?: RawEvolutionDetail): string | null {
