@@ -48,7 +48,11 @@
         (favoriteToggled)="onFavoriteToggled($event)"
       ></app-pokemon-card>
     } @empty {
-      <p>Nenhum pokémon encontrado.</p>
+      <div class="pokemon-list__empty">
+        <mat-icon class="pokemon-list__empty-icon">search_off</mat-icon>
+        <p class="pokemon-list__empty-text">Nenhum Pokémon encontrado</p>
+        <p class="pokemon-list__empty-hint">Tente buscar por nome, ID ou tipo diferente</p>
+      </div>
     }
   </div>
 

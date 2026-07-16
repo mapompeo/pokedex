@@ -4,8 +4,8 @@
   "description": "Sua Pokédex completa com todos os Pokémon",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#CC0000",
-  "theme_color": "#CC0000",
+  "background_color": "#f1f1f1",
+  "theme_color": "#FF0000",
   "scope": "/",
   "icons": [
     {

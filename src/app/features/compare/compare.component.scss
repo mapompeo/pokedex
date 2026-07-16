@@ -1,17 +1,12 @@
 .compare__search-row {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 16px;
 
   .dex-search {
     flex: 1 1 0;
     min-width: 0;
-    padding: 4px 12px;
-
-    .dex-search__input {
-      font-size: 0.85rem;
-    }
   }
 }
 
@@ -37,14 +32,19 @@
 .compare__card {
   display: flex;
   flex-direction: column;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   background: var(--dex-bg);
-  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--dex-shadow-md);
   scroll-snap-align: center;
   flex: 0 0 82%;
   min-width: 0;
   position: relative;
+
+  &:focus-within {
+    outline: 2px solid var(--dex-gold);
+    outline-offset: 2px;
+  }
 
   &--empty {
     background: var(--dex-bg-card);
@@ -62,14 +62,14 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #d0d0d0;
+  background: color-mix(in srgb, var(--dex-ink) 15%, transparent);
   border: none;
   padding: 0;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
 
   &--active {
-    background: var(--pokedex-red, #FF0000);
+    background: var(--pokedex-red);
     transform: scale(1.25);
   }
 }
@@ -85,7 +85,7 @@
   justify-content: center;
   padding: 32px;
   color: var(--dex-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   text-align: center;
 }
@@ -121,17 +121,17 @@
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
-  width: 130px;
-  height: 130px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
-  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 8px 8px color-mix(in srgb, var(--dex-ink) 16%, transparent));
   z-index: 3;
 }
 
 .compare__body {
   padding: 16px;
   background: var(--dex-bg);
-  border-radius: 24px 24px 0 0;
+  border-radius: 20px 20px 0 0;
   margin-top: -16px;
   position: relative;
   z-index: 2;
@@ -147,7 +147,7 @@
 
 .compare__id {
   color: var(--dex-text-muted);
-  font-size: 0.72rem;
+  font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.03em;
 }
@@ -156,7 +156,7 @@
   text-transform: capitalize;
   color: var(--dex-ink);
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
 }
 
@@ -173,7 +173,7 @@
   justify-content: center;
   gap: 8px;
   margin: 0 0 14px;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--dex-text-muted);
 
@@ -195,7 +195,7 @@
 }
 
 .compare__section-title {
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--dex-ink);
   margin: 0 0 10px;
@@ -216,7 +216,7 @@
 
   &__label {
     color: var(--dex-text-muted);
-    font-size: 0.65rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     white-space: nowrap;
@@ -227,7 +227,7 @@
 
   &__value {
     color: var(--dex-ink);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-align: right;
   }
@@ -235,7 +235,7 @@
   &__track {
     height: 6px;
     border-radius: 999px;
-  background: color-mix(in srgb, var(--dex-ink) 15%, transparent);
+    background: color-mix(in srgb, var(--dex-ink) 15%, transparent);
     overflow: hidden;
     position: relative;
   }
@@ -260,10 +260,10 @@
 
   &--higher {
     .compare-stat__value {
-      color: var(--pokedex-green, #2ECC71);
+      color: var(--pokedex-green);
     }
     .compare-stat__fill {
-      box-shadow: 0 0 6px color-mix(in srgb, var(--pokedex-green, #2ECC71) 50%, transparent);
+      box-shadow: 0 0 6px color-mix(in srgb, var(--pokedex-green) 50%, transparent);
     }
   }
 }
@@ -273,11 +273,11 @@
     grid-template-columns: 90px 28px 1fr;
 
     &__label {
-      font-size: 0.68rem;
+      font-size: 0.6875rem;
     }
 
     &__value {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
     }
   }
 }

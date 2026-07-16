@@ -38,3 +38,14 @@ export function getMultiplierLabel(mult: number): { label: string; className: st
   }
   return { label: `${mult}×`, className: 'unknown' };
 }
+
+export function getEffectivenessSummary(defendingTypes: string[]): { type: string; multiplier: number }[] {
+  const allTypes = Object.keys(TYPE_CHART);
+  return allTypes.map((type) => {
+    let mult = 1;
+    for (const def of defendingTypes) {
+      mult *= TYPE_CHART[type]?.[def] ?? 1;
+    }
+    return { type, multiplier: mult };
+  });
+}

@@ -18,7 +18,7 @@ const MAX_STAT = 255;
         <polygon
           [attr.points]="polygonPoints(level)"
           fill="none"
-          stroke="rgba(0,0,0,0.08)"
+          class="radar__grid"
           stroke-width="1"
         />
       }
@@ -29,7 +29,7 @@ const MAX_STAT = 255;
           [attr.y1]="CY"
           [attr.x2]="vertX(i, R)"
           [attr.y2]="vertY(i, R)"
-          stroke="rgba(0,0,0,0.08)"
+          class="radar__grid"
           stroke-width="1"
         />
       }
@@ -90,16 +90,20 @@ const MAX_STAT = 255;
         height: auto;
       }
 
+      .radar__grid {
+        stroke: color-mix(in srgb, var(--dex-ink) 12%, transparent);
+      }
+
       .radar__label {
         font-size: 8px;
         font-weight: 700;
-        fill: #444;
+        fill: var(--dex-text);
       }
 
       .radar__value {
         font-size: 7px;
         font-weight: 600;
-        fill: #555;
+        fill: var(--dex-text-muted);
       }
     `,
   ],

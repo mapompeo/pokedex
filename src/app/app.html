@@ -6,7 +6,7 @@
           <img src="/pokeball.png" alt="" class="pokedex-frame__header-watermark" aria-hidden="true" loading="lazy" />
           <div class="pokedex-frame__header-row">
             <div>
-              <img src="/pokedex-logo.png" alt="Pokédex" class="pokedex-frame__logo" loading="lazy" />
+              <img src="/pokedex-logo.png" alt="Pokédex" class="pokedex-frame__logo" fetchpriority="high" />
               <p class="pokedex-frame__subtitle">{{ subtitle() }}</p>
             </div>
             <button class="pokedex-frame__theme-btn" (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'">

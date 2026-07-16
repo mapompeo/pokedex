@@ -22,7 +22,7 @@ import { Component } from '@angular/core';
       .skeleton-card {
         position: relative;
         overflow: hidden;
-        border-radius: 18px;
+        border-radius: 20px;
         background: color-mix(in srgb, var(--dex-bg-card) 60%, transparent);
         min-height: 140px;
         padding: 16px 110px 16px 16px;

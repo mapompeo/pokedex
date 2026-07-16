@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, OnDestroy, ElementRef, AfterViewInit, NgZone } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnDestroy, ElementRef, AfterViewInit, NgZone, DestroyRef } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
@@ -52,6 +52,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   private pageBackground = inject(PageBackgroundService);
   private el = inject(ElementRef);
   private ngZone = inject(NgZone);
+  private destroyRef = inject(DestroyRef);
   favoritesService = inject(FavoritesService);
 
   pokemon = signal<PokemonDetail | null>(null);
@@ -168,7 +169,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
         return;
       }
       forkJoin(moveNames.map((name) => this.pokemonService.getMoveDetail(name)))
-        .pipe(takeUntilDestroyed())
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((details) => {
           const map = new Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>();
           moveNames.forEach((name, i) => map.set(name, details[i]));

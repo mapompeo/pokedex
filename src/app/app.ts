@@ -23,7 +23,7 @@ export class App implements AfterViewInit {
 
   title = 'Pokédex';
   subtitle = signal('Seu guia completo do mundo pokémon');
-  isDetailRoute = signal(window.location.pathname.startsWith('/pokemon/'));
+  isDetailRoute = signal(this.router.url.startsWith('/pokemon/'));
   favoriteCount = computed(() => this.favoritesService.favoriteIds().size);
   isDarkMode = signal(document.body.classList.contains('dark-mode'));
 

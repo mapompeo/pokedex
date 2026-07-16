@@ -1,12 +1,17 @@
 .pokemon-card {
   position: relative;
-  border-radius: 18px;
-  box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  box-shadow: var(--dex-shadow-md);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    outline: 2px solid var(--dex-gold);
+    outline-offset: 2px;
+  }
 
   &:hover {
     transform: translateY(-4px) scale(1.03);
-    box-shadow: 0 14px 24px -10px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--dex-shadow-xl);
   }
 
   &__fav {
@@ -16,9 +21,19 @@
     z-index: 2;
     background: transparent;
     border: none;
-    padding: 4px;
+    padding: 10px;
     line-height: 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+
+    &:focus-visible {
+      outline: 2px solid var(--dex-gold);
+      outline-offset: 2px;
+    }
   }
 
   &__watermark {
@@ -41,6 +56,11 @@
     padding: 16px 110px 16px 16px;
     text-decoration: none;
     color: inherit;
+
+    &:focus-visible {
+      outline: 2px solid var(--dex-gold);
+      outline-offset: -2px;
+    }
   }
 
   &__info {
@@ -52,16 +72,20 @@
   }
 
   &__id {
-    font-size: 0.7rem;
+    font-size: 0.6875rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.45);
+    color: color-mix(in srgb, #fff 45%, transparent);
   }
 
   &__name {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 900;
     color: #fff;
     text-transform: capitalize;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   &__types {
@@ -77,7 +101,7 @@
     width: 120px;
     height: 120px;
     object-fit: contain;
-    filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 6px 6px color-mix(in srgb, var(--dex-ink) 18%, transparent));
     transition: transform 0.25s ease;
   }
 
