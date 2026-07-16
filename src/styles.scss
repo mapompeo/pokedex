@@ -18,7 +18,7 @@ html {
 }
 
 :root {
-  --pokedex-red: #CC0000;
+  --pokedex-red: #FF0000;
   --pokedex-red-dark: #A00000;
   --pokedex-blue: #3B4CCA;
   --pokedex-yellow: #FFDE00;
@@ -45,7 +45,13 @@ html {
 }
 
 .dex-page {
-  padding: 16px 20px 32px;
+  padding: 16px 16px 28px;
+}
+
+@media (min-width: 600px) {
+  .dex-page {
+    padding: 16px 20px 32px;
+  }
 }
 
 .dex-back {

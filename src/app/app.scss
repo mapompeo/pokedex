@@ -1,15 +1,14 @@
 :host {
   display: block;
-  height: 100vh;
+  height: 100dvh;
 }
 
 .pokedex-frame {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   box-sizing: border-box;
-  // cor definida via [style.background]="frameBackground()" (app.ts / PageBackgroundService)
   position: relative;
 
   &__screen {
@@ -18,9 +17,11 @@
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
-    max-width: 960px;
+    max-width: 480px;
     margin: 0 auto;
     position: relative;
+    border-left: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
   }
 
   &__screen-scroll {
@@ -32,44 +33,33 @@
     overflow-x: hidden;
   }
 
-  // flex-shrink:0 (em vez de min-height:0) garante que o sheet nunca fique
-  // menor que o próprio conteúdo — se encolhesse, o fundo branco parava de
-  // acompanhar o scroll/lazy-loading e sobrava a cor do frame atrás dos cards.
   &__content {
     flex: 1 0 auto;
   }
 
-  // mesma folha branca arredondada da tela de detalhe (ver .pdetail__sheet):
-  // o respiro para a navbar flutuante fica dentro do sheet (padding), não fora
-  // dele, para o branco se estender até o fim mesmo com pouco conteúdo.
   &__content--sheet {
     background: var(--dex-bg);
     border-radius: 32px 32px 0 0;
-    padding-bottom: 92px;
+    padding-bottom: 88px;
   }
 
   &__header {
     position: relative;
-    padding: 60px 20px 28px;
+    padding: 28px 16px 20px;
     box-sizing: border-box;
     background: transparent;
     z-index: 1;
-    // sem overflow:hidden aqui: com altura automática (título+subtítulo
-    // variam de tamanho) e um filho flex, isso colapsa a altura do header
-    // no Chromium.
   }
 
-  // centralizada e um pouco acima do topo, como a pokébola original de fundo
   &__header-watermark {
     position: absolute;
-    top: -110px;
+    top: -60px;
     left: 50%;
     transform: translateX(-50%);
-    width: 280px;
-    height: 280px;
+    width: 200px;
+    height: 200px;
     object-fit: contain;
-    opacity: 0.16;
-    filter: brightness(0) invert(1);
+    opacity: 0.08;
     pointer-events: none;
     z-index: 0;
   }
@@ -82,6 +72,13 @@
     align-items: flex-start;
   }
 
+  &__header-row > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+  }
+
   &__theme-btn {
     display: inline-flex;
     align-items: center;
@@ -90,8 +87,8 @@
     height: 36px;
     border: none;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
-    color: #fff;
+    background: color-mix(in srgb, var(--dex-ink) 10%, transparent);
+    color: var(--dex-ink);
     cursor: pointer;
     flex-shrink: 0;
 
@@ -102,20 +99,20 @@
     }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.28);
+      background: color-mix(in srgb, var(--dex-ink) 18%, transparent);
     }
   }
 
-  &__title {
-    font-weight: 800;
-    color: #fff;
-    font-size: 1.6rem;
-    margin: 0 0 4px;
+  &__logo {
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 8px;
   }
 
   &__subtitle {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.9rem;
+    color: var(--dex-text-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
     margin: 0;
   }
 
@@ -126,38 +123,97 @@
     bottom: 16px;
     transform: translateX(-50%);
     z-index: 10;
-    gap: 4px;
-    background: var(--dex-bg);
-    border: 1px solid color-mix(in srgb, var(--dex-ink) 10%, transparent);
+    gap: 12px;
+    background: color-mix(in srgb, var(--dex-bg) 92%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
     border-radius: 999px;
-    padding: 8px 12px;
-    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.28);
+    padding: 10px 16px;
+    box-shadow:
+      0 8px 32px -8px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  &__bottom-pill {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: #FFCE31;
+    box-shadow: 0 4px 14px -4px color-mix(in srgb, #FFCE31 50%, transparent);
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
   }
 
   &__bottom-tab {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 6px 16px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
     border-radius: 999px;
     color: var(--dex-text-muted);
     text-decoration: none;
-    font-size: 0.68rem;
-    font-weight: 600;
-    transition: color 0.15s ease, background 0.15s ease;
+    font-size: 0.55rem;
+    font-weight: 800;
+    width: 64px;
+    height: 64px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
 
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      font-size: 21px;
+      width: 21px;
+      height: 21px;
+      flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    span:last-child {
+      max-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      white-space: nowrap;
+      transition: max-width 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
+      margin-left: 0;
+    }
+
+    &:hover {
+      color: var(--dex-ink);
+
+      mat-icon {
+        transform: scale(1.1);
+      }
     }
   }
 
   &__bottom-tab--active {
-    color: #fff;
-    background: var(--pokedex-red);
-    box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--pokedex-red) 60%, transparent);
+    color: #332F99;
+    font-weight: 900;
+    width: auto;
+    padding: 0 16px 0 12px;
+
+    span:last-child {
+      max-width: 80px;
+      opacity: 1;
+      margin-left: 6px;
+    }
+
+    &:hover {
+      color: #332F99;
+
+      mat-icon {
+        transform: scale(1.05);
+      }
+    }
   }
 
   &__bottom-tab-icon {
@@ -167,20 +223,26 @@
 
   &__fav-badge {
     position: absolute;
-    top: -6px;
-    right: -8px;
-    background: var(--pokedex-red);
-    color: #fff;
-    font-size: 0.55rem;
+    top: -5px;
+    right: -9px;
+    background: var(--pokedex-yellow);
+    color: var(--dex-ink);
+    font-size: 0.5rem;
     font-weight: 800;
-    min-width: 16px;
-    height: 16px;
+    min-width: 15px;
+    height: 15px;
     border-radius: 999px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 4px;
+    padding: 0 3px;
     line-height: 1;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    animation: badge-pulse 2s ease-in-out infinite;
   }
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }

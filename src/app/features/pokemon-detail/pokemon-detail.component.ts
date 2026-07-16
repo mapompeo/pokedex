@@ -1,18 +1,21 @@
-import { Component, computed, effect, inject, signal, OnDestroy } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnDestroy, ElementRef, AfterViewInit, NgZone } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
-import { EMPTY, catchError, filter, map, switchMap } from 'rxjs';
+import { EMPTY, catchError, filter, forkJoin, map, switchMap } from 'rxjs';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PageBackgroundService } from '../../core/services/page-background.service';
 import { PokemonDetail, PokemonExtras } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
+import { RadarChartComponent } from '../../shared/components/radar-chart/radar-chart.component';
 import { getPastelCardColor, getTypeColor } from '../../shared/type-colors';
 import { getStatPercent } from '../../shared/stat-utils';
 import { getStatColor, getStatLabel } from '../../shared/stat-labels';
+import { getEffectivenessSummary } from '../../shared/type-chart';
+import { tabFade } from '../../shared/animations';
 import * as fmt from '../../shared/format-utils';
 
 const DETAIL_STAT_MAX = 300;
@@ -37,19 +40,24 @@ const LEARN_METHOD_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-pokemon-detail',
   standalone: true,
-  imports: [RouterLink, MatIconModule, LoadingSpinnerComponent, TypeBadgeComponent],
+  imports: [RouterLink, MatIconModule, LoadingSpinnerComponent, TypeBadgeComponent, RadarChartComponent],
+  animations: [tabFade],
   templateUrl: './pokemon-detail.component.html',
   styleUrl: './pokemon-detail.component.scss',
 })
-export class PokemonDetailComponent implements OnDestroy {
+export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   private route = inject(ActivatedRoute);
   private pokemonService = inject(PokemonService);
   private titleService = inject(Title);
   private pageBackground = inject(PageBackgroundService);
+  private el = inject(ElementRef);
+  private ngZone = inject(NgZone);
   favoritesService = inject(FavoritesService);
 
   pokemon = signal<PokemonDetail | null>(null);
   loading = signal(true);
+  error = signal(false);
+  scrollProgress = signal(0);
 
   activeTab = signal<DetailTab>('sobre');
   evolutionsLoading = signal(true);
@@ -67,6 +75,37 @@ export class PokemonDetailComponent implements OnDestroy {
     return p ? this.favoritesService.isFavorite(p.id) : false;
   });
 
+  prevId = computed(() => {
+    const p = this.pokemon();
+    return p && p.id > 1 ? p.id - 1 : null;
+  });
+
+  nextId = computed(() => {
+    const p = this.pokemon();
+    return p && p.id < 1025 ? p.id + 1 : null;
+  });
+
+  effectivenessSummary = computed(() => {
+    const p = this.pokemon();
+    return p ? getEffectivenessSummary(p.types) : [];
+  });
+
+  effectivenessGroups = computed(() => {
+    const summary = this.effectivenessSummary();
+    const multipliers = [0, 0.25, 0.5, 2, 4];
+    const groups: { multiplier: number; types: string[] }[] = [];
+    for (const m of multipliers) {
+      const types = summary.filter((e) => e.multiplier === m).map((e) => e.type);
+      if (types.length) {
+        groups.push({ multiplier: m, types });
+      }
+    }
+    return groups;
+  });
+
+  movesWithDetails = signal<Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>>(new Map());
+  movesLoading = signal(false);
+
   constructor() {
     // Reage a cada mudança de :id (o Angular reaproveita este componente ao
     // navegar entre /pokemon/:id, então snapshot no construtor não bastaria).
@@ -81,9 +120,11 @@ export class PokemonDetailComponent implements OnDestroy {
       .pipe(
         switchMap((id) => {
           this.loading.set(true);
+          this.error.set(false);
           return this.pokemonService.getPokemonDetail(id).pipe(
             catchError(() => {
               this.loading.set(false);
+              this.error.set(true);
               return EMPTY;
             })
           );
@@ -93,6 +134,7 @@ export class PokemonDetailComponent implements OnDestroy {
       .subscribe((detail) => {
         this.pokemon.set(detail);
         this.loading.set(false);
+        this.error.set(false);
         this.setAppBg(detail.types);
       });
 
@@ -114,6 +156,26 @@ export class PokemonDetailComponent implements OnDestroy {
         this.extras.set(extras);
         this.evolutionsLoading.set(false);
       });
+
+    // Carrega detalhes dos movimentos
+    effect(() => {
+      const p = this.pokemon();
+      if (!p) return;
+      this.movesLoading.set(true);
+      const moveNames = p.moves.map((m) => m.name);
+      if (moveNames.length === 0) {
+        this.movesLoading.set(false);
+        return;
+      }
+      forkJoin(moveNames.map((name) => this.pokemonService.getMoveDetail(name)))
+        .pipe(takeUntilDestroyed())
+        .subscribe((details) => {
+          const map = new Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>();
+          moveNames.forEach((name, i) => map.set(name, details[i]));
+          this.movesWithDetails.set(map);
+          this.movesLoading.set(false);
+        });
+    });
 
     // Título da guia: "Pokédex | Nome · Aba"
     effect(() => {
@@ -142,6 +204,17 @@ export class PokemonDetailComponent implements OnDestroy {
     if (p) {
       this.favoritesService.toggleFavorite(p.id);
     }
+  }
+
+  ngAfterViewInit(): void {
+    const scrollEl = this.el.nativeElement.closest('.pokedex-frame__screen-scroll') as HTMLElement | null;
+    if (!scrollEl) return;
+    this.ngZone.runOutsideAngular(() => {
+      scrollEl.addEventListener('scroll', () => {
+        const progress = Math.min(scrollEl.scrollTop / 160, 1);
+        this.ngZone.run(() => this.scrollProgress.set(progress));
+      }, { passive: true });
+    });
   }
 
   paddedId(id: number): string {
@@ -203,6 +276,26 @@ export class PokemonDetailComponent implements OnDestroy {
 
   learnMethodLabel(method: string): string {
     return LEARN_METHOD_LABELS[method] ?? method;
+  }
+
+  damageClassIcon(move: { name: string }): string {
+    const detail = this.movesWithDetails().get(move.name);
+    switch (detail?.damageClass) {
+      case 'physical': return 'handyman';
+      case 'special': return 'auto_fix_high';
+      case 'status': return 'psychology';
+      default: return 'help_outline';
+    }
+  }
+
+  damageClassLabel(move: { name: string }): string {
+    const detail = this.movesWithDetails().get(move.name);
+    switch (detail?.damageClass) {
+      case 'physical': return 'Físico';
+      case 'special': return 'Especial';
+      case 'status': return 'Status';
+      default: return '—';
+    }
   }
 
   playCry(): void {

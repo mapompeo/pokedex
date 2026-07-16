@@ -20,6 +20,10 @@ export interface PokemonMove {
   name: string;
   learnMethod: string;
   level: number;
+  power: number | null;
+  accuracy: number | null;
+  pp: number | null;
+  damageClass: string | null;
 }
 
 export interface PokemonDetail {

@@ -3,11 +3,11 @@
     <div class="pokedex-frame__screen-scroll">
       @if (!isDetailRoute()) {
         <header class="pokedex-frame__header">
-          <img src="/pokeball.png" alt="" class="pokedex-frame__header-watermark" aria-hidden="true" />
+          <img src="/pokeball.png" alt="" class="pokedex-frame__header-watermark" aria-hidden="true" loading="lazy" />
           <div class="pokedex-frame__header-row">
             <div>
-              <h1 class="pokedex-frame__title">{{ title }}</h1>
-              <p class="pokedex-frame__subtitle">{{ subtitle }}</p>
+              <img src="/pokedex-logo.png" alt="Pokédex" class="pokedex-frame__logo" loading="lazy" />
+              <p class="pokedex-frame__subtitle">{{ subtitle() }}</p>
             </div>
             <button class="pokedex-frame__theme-btn" (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'">
               <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
@@ -16,25 +16,34 @@
         </header>
       }
       <div class="pokedex-frame__content" [class.pokedex-frame__content--sheet]="!isDetailRoute()">
-        <router-outlet></router-outlet>
+        <div [@routeFade]="router.url">
+          <router-outlet></router-outlet>
+        </div>
       </div>
     </div>
 
     @if (!isDetailRoute()) {
       <nav class="pokedex-frame__bottom-nav">
+        <span class="pokedex-frame__bottom-pill" [style.left]="pillLeft()"></span>
         <a
+          #tab0
           routerLink="/"
           routerLinkActive="pokedex-frame__bottom-tab--active"
           [routerLinkActiveOptions]="{ exact: true }"
           class="pokedex-frame__bottom-tab"
+          aria-label="Lista de Pokémon"
+          [attr.aria-current]="activeTabIndex() === 0 ? 'page' : null"
         >
           <mat-icon>grid_view</mat-icon>
           <span>Lista</span>
         </a>
         <a
+          #tab1
           routerLink="/favoritos"
           routerLinkActive="pokedex-frame__bottom-tab--active"
           class="pokedex-frame__bottom-tab"
+          aria-label="Favoritos"
+          [attr.aria-current]="activeTabIndex() === 1 ? 'page' : null"
         >
           <span class="pokedex-frame__bottom-tab-icon">
             <mat-icon>favorite</mat-icon>
@@ -45,9 +54,12 @@
           <span>Favoritos</span>
         </a>
         <a
+          #tab2
           routerLink="/comparar"
           routerLinkActive="pokedex-frame__bottom-tab--active"
           class="pokedex-frame__bottom-tab"
+          aria-label="Comparar Pokémon"
+          [attr.aria-current]="activeTabIndex() === 2 ? 'page' : null"
         >
           <mat-icon>compare_arrows</mat-icon>
           <span>Comparar</span>

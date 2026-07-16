@@ -1,4 +1,7 @@
-<div class="pokemon-list">
+<div class="pokemon-list" (touchstart)="onTouchStart($event)" (touchmove)="onTouchMove($event)" (touchend)="onTouchEnd($event)">
+  <div class="pull-indicator" [class.pull-indicator--visible]="isPulling()" [style.height.px]="pullDistance()">
+    <mat-icon [class.pull-indicator--spinning]="pullDistance() >= 60">refresh</mat-icon>
+  </div>
   <div class="pokemon-list__filters">
     <div class="dex-search">
       <mat-icon>search</mat-icon>
@@ -6,6 +9,7 @@
         class="dex-search__input"
         type="text"
         placeholder="Buscar por nome, ID ou tipo"
+        aria-label="Buscar Pokémon"
         [value]="searchTerm()"
         (input)="onSearchChange($any($event.target).value)"
       />
@@ -16,15 +20,26 @@
           class="type-chip"
           [class.type-chip--active]="selectedTypes().has(type.name)"
           [style.--type-color]="type.color"
+          [attr.aria-pressed]="selectedTypes().has(type.name)"
           (click)="toggleTypeFilter(type.name)"
         >
           {{ type.label }}
         </button>
       }
+      @if (selectedTypes().size > 0) {
+        <button class="type-chip type-chip--clear" (click)="clearAllFilters()" aria-label="Limpar filtros de tipo">
+          <mat-icon>close</mat-icon>
+          Limpar
+        </button>
+      }
+      <button class="type-chip type-chip--surprise" (click)="randomPokemon()" aria-label="Pokémon aleatório">
+        <mat-icon>casino</mat-icon>
+        Surpresa!
+      </button>
     </div>
   </div>
 
-  <div class="pokemon-list__grid">
+  <div class="pokemon-list__grid" [@listStagger]="filteredItems().length" role="list">
     @for (item of filteredItems(); track item.id) {
       <app-pokemon-card
         [pokemon]="item"
@@ -37,9 +52,29 @@
     }
   </div>
 
+  @if (error() && allItems().length === 0) {
+    <div class="pokemon-list__error">
+      <mat-icon class="pokemon-list__error-icon">cloud_off</mat-icon>
+      <p>Não foi possível carregar os Pokémon.</p>
+      <button class="type-chip type-chip--clear" (click)="loadNextPage()">
+        <mat-icon>refresh</mat-icon>
+        Tentar novamente
+      </button>
+    </div>
+  }
+
   @if (loading()) {
-    <app-loading-spinner></app-loading-spinner>
+    <div class="pokemon-list__grid">
+      @for (_ of [1,2,3,4,5,6]; track _) {
+        <app-skeleton-card></app-skeleton-card>
+      }
+    </div>
   }
 
   <div #sentinel class="pokemon-list__sentinel"></div>
+  @if (showScrollTop()) {
+    <button class="scroll-top-fab" (click)="scrollToTop()" aria-label="Voltar ao topo">
+      <mat-icon>keyboard_arrow_up</mat-icon>
+    </button>
+  }
 </div>

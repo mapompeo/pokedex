@@ -1,16 +1,14 @@
 <div class="dex-page">
-  <a routerLink="/" class="dex-back">← Voltar</a>
-  <h1 class="dex-title">Comparar Pokémons</h1>
-
   <div class="compare__search-row">
     <div class="dex-search">
       <mat-icon>search</mat-icon>
       <input
         class="dex-search__input"
-        placeholder="Pokémon A"
+        [placeholder]="placeholderA()"
         [value]="queryA()"
         (input)="onQueryAChange($any($event.target).value)"
         [matAutocomplete]="autoA"
+        aria-label="Buscar primeiro Pokémon para comparar"
       />
       <mat-autocomplete #autoA="matAutocomplete" (optionSelected)="selectA($event.option.value)">
         @for (item of suggestionsA(); track item.id) {
@@ -23,10 +21,11 @@
       <mat-icon>search</mat-icon>
       <input
         class="dex-search__input"
-        placeholder="Pokémon B"
+        [placeholder]="placeholderB()"
         [value]="queryB()"
         (input)="onQueryBChange($any($event.target).value)"
         [matAutocomplete]="autoB"
+        aria-label="Buscar segundo Pokémon para comparar"
       />
       <mat-autocomplete #autoB="matAutocomplete" (optionSelected)="selectB($event.option.value)">
         @for (item of suggestionsB(); track item.id) {
@@ -36,61 +35,166 @@
     </div>
   </div>
 
-  <div class="compare__grid">
-    <div class="compare__column">
-      @if (loadingA()) {
-        <app-loading-spinner></app-loading-spinner>
-      } @else if (pokemonA(); as a) {
-        <div class="compare__portrait" [style.background]="capBackground(a.types)">
-          <img [src]="a.spriteUrl" [alt]="a.name" />
+  <div class="compare__grid" role="list">
+    @if (pokemonA(); as a) {
+      <div class="compare__card">
+        <div class="compare__hero" [style.background]="capBackground(a.types)">
+          <img src="/pokeball.png" alt="" class="compare__watermark" aria-hidden="true" loading="lazy" />
+          <img [src]="a.spriteUrl" [alt]="a.name" class="compare__sprite" loading="lazy" />
         </div>
-        <h2 class="compare__name">#{{ a.id }} {{ a.name }}</h2>
-        <div class="compare__types">
-          @for (type of a.types; track type) {
-            <app-type-badge [type]="type"></app-type-badge>
-          }
-        </div>
-        <p class="compare__meta">Altura: {{ formatDecimal(a.height) }} m · Peso: {{ formatDecimal(a.weight) }} kg</p>
-        <div class="compare__stats">
-          @for (stat of a.stats; track stat.name) {
-            <div class="stat-row">
-              <span>{{ statLabel(stat.name) }}</span>
-              <span class="stat-row__track">
-                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)" [style.background]="statColor(stat.name)"></span>
-              </span>
-              <span class="stat-row__value">{{ stat.baseStat }}</span>
+        <div class="compare__body">
+          <div class="compare__header">
+            <span class="compare__id">#{{ paddedId(a.id) }}</span>
+            <h2 class="compare__name">{{ a.name }}</h2>
+            <div class="compare__types">
+              @for (type of a.types; track type) {
+                <app-type-badge [type]="type"></app-type-badge>
+              }
             </div>
-          }
-        </div>
-      }
-    </div>
+          </div>
 
-    <div class="compare__column">
-      @if (loadingB()) {
-        <app-loading-spinner></app-loading-spinner>
-      } @else if (pokemonB(); as b) {
-        <div class="compare__portrait" [style.background]="capBackground(b.types)">
-          <img [src]="b.spriteUrl" [alt]="b.name" />
+          <div class="compare__meta">
+            <span class="compare__meta-item">
+              <mat-icon>straighten</mat-icon>
+              {{ formatDecimal(a.height) }} m
+            </span>
+            <span class="compare__meta-divider">·</span>
+            <span class="compare__meta-item">
+              <mat-icon>fitness_center</mat-icon>
+              {{ formatDecimal(a.weight) }} kg
+            </span>
+          </div>
+
+          <h3 class="compare__section-title">Estatísticas Base</h3>
+          <div class="compare__stats">
+            @for (stat of a.stats; track stat.name; let idx = $index) {
+              <div class="compare-stat" [class.compare-stat--higher]="isStatHigher(pokemonA(), stat.name)">
+                <span class="compare-stat__label">{{ statLabel(stat.name) }}</span>
+                <span class="compare-stat__value">{{ stat.baseStat }}</span>
+                <span class="compare-stat__track">
+                  @if (pokemonB(); as b) {
+                    <span
+                      class="compare-stat__ghost"
+                      [style.width.%]="statPercent(b.stats[idx].baseStat)"
+                      [style.background]="solidColor(b.types)"
+                    ></span>
+                  }
+                  <span
+                    class="compare-stat__fill"
+                    [style.width.%]="statPercent(stat.baseStat)"
+                    [style.background]="solidColor(a.types)"
+                  ></span>
+                </span>
+              </div>
+            }
+          </div>
         </div>
-        <h2 class="compare__name">#{{ b.id }} {{ b.name }}</h2>
-        <div class="compare__types">
-          @for (type of b.types; track type) {
-            <app-type-badge [type]="type"></app-type-badge>
-          }
+      </div>
+    } @else if (errorA()) {
+      <div class="compare__card compare__card--empty">
+        <div class="compare__hero compare__hero--placeholder"></div>
+        <div class="compare__empty-body">
+          <mat-icon>error_outline</mat-icon>
+          <p>Erro ao carregar</p>
         </div>
-        <p class="compare__meta">Altura: {{ formatDecimal(b.height) }} m · Peso: {{ formatDecimal(b.weight) }} kg</p>
-        <div class="compare__stats">
-          @for (stat of b.stats; track stat.name) {
-            <div class="stat-row">
-              <span>{{ statLabel(stat.name) }}</span>
-              <span class="stat-row__track">
-                <span class="stat-row__fill" [style.width.%]="statPercent(stat.baseStat)" [style.background]="statColor(stat.name)"></span>
-              </span>
-              <span class="stat-row__value">{{ stat.baseStat }}</span>
+      </div>
+    } @else if (loadingA()) {
+      <div class="compare__card compare__card--empty">
+        <div class="compare__hero compare__hero--placeholder"></div>
+        <div class="compare__empty-body">
+          <app-loading-spinner></app-loading-spinner>
+        </div>
+      </div>
+    } @else {
+      <div class="compare__card compare__card--empty">
+        <div class="compare__hero compare__hero--placeholder"></div>
+        <div class="compare__empty-body">
+          <p>Selecione um Pokémon</p>
+        </div>
+      </div>
+    }
+
+    @if (pokemonB(); as b) {
+      <div class="compare__card">
+        <div class="compare__hero" [style.background]="capBackground(b.types)">
+          <img src="/pokeball.png" alt="" class="compare__watermark" aria-hidden="true" loading="lazy" />
+          <img [src]="b.spriteUrl" [alt]="b.name" class="compare__sprite" loading="lazy" />
+        </div>
+        <div class="compare__body">
+          <div class="compare__header">
+            <span class="compare__id">#{{ paddedId(b.id) }}</span>
+            <h2 class="compare__name">{{ b.name }}</h2>
+            <div class="compare__types">
+              @for (type of b.types; track type) {
+                <app-type-badge [type]="type"></app-type-badge>
+              }
             </div>
-          }
+          </div>
+
+          <div class="compare__meta">
+            <span class="compare__meta-item">
+              <mat-icon>straighten</mat-icon>
+              {{ formatDecimal(b.height) }} m
+            </span>
+            <span class="compare__meta-divider">·</span>
+            <span class="compare__meta-item">
+              <mat-icon>fitness_center</mat-icon>
+              {{ formatDecimal(b.weight) }} kg
+            </span>
+          </div>
+
+          <h3 class="compare__section-title">Estatísticas Base</h3>
+          <div class="compare__stats">
+            @for (stat of b.stats; track stat.name; let idx = $index) {
+              <div class="compare-stat" [class.compare-stat--higher]="isStatHigher(pokemonB(), stat.name)">
+                <span class="compare-stat__label">{{ statLabel(stat.name) }}</span>
+                <span class="compare-stat__value">{{ stat.baseStat }}</span>
+                <span class="compare-stat__track">
+                  @if (pokemonA(); as a) {
+                    <span
+                      class="compare-stat__ghost"
+                      [style.width.%]="statPercent(a.stats[idx].baseStat)"
+                      [style.background]="solidColor(a.types)"
+                    ></span>
+                  }
+                  <span
+                    class="compare-stat__fill"
+                    [style.width.%]="statPercent(stat.baseStat)"
+                    [style.background]="solidColor(b.types)"
+                  ></span>
+                </span>
+              </div>
+            }
+          </div>
         </div>
-      }
-    </div>
+      </div>
+    } @else if (errorB()) {
+      <div class="compare__card compare__card--empty">
+        <div class="compare__hero compare__hero--placeholder"></div>
+        <div class="compare__empty-body">
+          <mat-icon>error_outline</mat-icon>
+          <p>Erro ao carregar</p>
+        </div>
+      </div>
+    } @else if (loadingB()) {
+      <div class="compare__card compare__card--empty">
+        <div class="compare__hero compare__hero--placeholder"></div>
+        <div class="compare__empty-body">
+          <app-loading-spinner></app-loading-spinner>
+        </div>
+      </div>
+    } @else {
+      <div class="compare__card compare__card--empty">
+        <div class="compare__hero compare__hero--placeholder"></div>
+        <div class="compare__empty-body">
+          <p>Selecione um Pokémon</p>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="compare__dots" #dotsRef>
+    <button class="compare__dot" [class.compare__dot--active]="activeDot() === 0" (click)="scrollToCard(0)" aria-label="Pokémon A"></button>
+    <button class="compare__dot" [class.compare__dot--active]="activeDot() === 1" (click)="scrollToCard(1)" aria-label="Pokémon B"></button>
   </div>
 </div>

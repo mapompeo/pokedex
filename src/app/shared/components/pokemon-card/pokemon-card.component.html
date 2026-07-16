@@ -1,5 +1,5 @@
 <div class="pokemon-card" [style.background]="cardColor">
-  <img src="/pokeball.png" alt="" class="pokemon-card__watermark" aria-hidden="true" />
+  <img src="/pokeball.png" alt="" class="pokemon-card__watermark" aria-hidden="true" loading="lazy" />
   <button
     type="button"
     class="pokemon-card__fav"
@@ -10,7 +10,7 @@
       isFavorite ? 'favorite' : 'favorite_border'
     }}</mat-icon>
   </button>
-  <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link">
+  <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link" [attr.aria-label]="'Ver detalhes de ' + pokemon.name">
     <div class="pokemon-card__info">
       <span class="pokemon-card__id">#{{ paddedId }}</span>
       <span class="pokemon-card__name">{{ pokemon.name }}</span>
@@ -22,6 +22,6 @@
         </div>
       }
     </div>
-    <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" />
+    <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" loading="lazy" />
   </a>
 </div>

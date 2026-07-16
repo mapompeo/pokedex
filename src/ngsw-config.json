@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/*.(png|svg|ico|webp)"
+        ]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "pokeapi",
+      "urls": [
+        "https://pokeapi.co/api/v2/**",
+        "https://raw.githubusercontent.com/**"
+      ],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 200,
+        "maxAge": "7d",
+        "timeout": "10s"
+      }
+    }
+  ]
+}

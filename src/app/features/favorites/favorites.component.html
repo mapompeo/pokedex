@@ -1,15 +1,17 @@
 <div class="dex-page">
-  <h1 class="dex-title">Favoritos</h1>
-
   @if (loading()) {
     <app-loading-spinner></app-loading-spinner>
   }
 
   @if (!loading() && items().length === 0) {
-    <p>Você ainda não tem favoritos.</p>
+    <div class="favorites__empty">
+      <img src="/pokeball.png" alt="" class="favorites__empty-img" loading="lazy" />
+      <h2 class="favorites__empty-title">Nenhum favorito ainda</h2>
+      <p class="favorites__empty-text">Toque no coração de um Pokémon pra salvar aqui!</p>
+    </div>
   }
 
-  <div class="favorites__grid">
+  <div class="favorites__grid" role="list">
     @for (item of items(); track item.id) {
       <app-pokemon-card
         [pokemon]="item"

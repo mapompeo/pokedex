@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import {
   EvolutionNode,
   PokemonDetail,
@@ -100,6 +100,7 @@ export class PokemonService {
   private detailCache = new Map<string, PokemonDetail>();
   private allListItemsCache: PokemonListItem[] | null = null;
   private idTypesCache: Map<number, string[]> | null = null;
+  private moveCache = new Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>();
 
   extractIdFromUrl(url: string): number {
     const match = url.match(/\/(\d+)\/?$/);
@@ -282,6 +283,24 @@ export class PokemonService {
     return 'Evolução especial';
   }
 
+  getMoveDetail(moveName: string): Observable<{ power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }> {
+    const cached = this.moveCache.get(moveName);
+    if (cached) return of(cached);
+    return this.http.get<any>(`${BASE_URL}/move/${moveName}`).pipe(
+      map((raw) => {
+        const detail = {
+          power: raw.power,
+          accuracy: raw.accuracy,
+          pp: raw.pp,
+          damageClass: raw.damage_class?.name ?? null,
+        };
+        this.moveCache.set(moveName, detail);
+        return detail;
+      }),
+      catchError(() => of({ power: null, accuracy: null, pp: null, damageClass: null }))
+    );
+  }
+
   private toListItem(name: string, url: string): PokemonListItem {
     const id = this.extractIdFromUrl(url);
     return { id, name, spriteUrl: `${ARTWORK_BASE_URL}/${id}.png` };
@@ -296,6 +315,10 @@ export class PokemonService {
         name: m.move.name,
         learnMethod: detail?.move_learn_method.name ?? 'unknown',
         level: detail?.level_learned_at ?? 0,
+        power: null,
+        accuracy: null,
+        pp: null,
+        damageClass: null,
       };
     });
     moves.sort((a, b) => {

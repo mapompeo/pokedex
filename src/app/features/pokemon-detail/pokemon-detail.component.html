@@ -1,16 +1,50 @@
 @if (loading()) {
-  <div class="dex-page">
-    <app-loading-spinner></app-loading-spinner>
+  <div class="pdetail-skeleton">
+    <div class="pdetail-skeleton__shimmer"></div>
+    <div class="pdetail-skeleton__hero">
+      <div class="pdetail-skeleton__actions">
+        <span class="pdetail-skeleton__back"></span>
+      </div>
+      <div class="pdetail-skeleton__heading">
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--id"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--name"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--types"></span>
+      </div>
+    </div>
+    <div class="pdetail-skeleton__sheet">
+      <div class="pdetail-skeleton__tabs">
+        <span class="pdetail-skeleton__tab"></span>
+        <span class="pdetail-skeleton__tab"></span>
+        <span class="pdetail-skeleton__tab"></span>
+        <span class="pdetail-skeleton__tab"></span>
+      </div>
+      <div class="pdetail-skeleton__content">
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--section"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--long"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--long"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--medium"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--long"></span>
+        <span class="pdetail-skeleton__line pdetail-skeleton__line--medium"></span>
+      </div>
+    </div>
   </div>
 } @else if (pokemon(); as p) {
-  <div class="pdetail">
-    <div class="pdetail__hero-wrap">
+  <div class="pdetail" [class.pdetail--collapsed]="scrollProgress() > 0.5">
+    <div class="pdetail__hero-wrap" [style.--scroll]="scrollProgress()">
       <div class="pdetail__hero" [style.background]="typeColor()">
-        <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" />
+        <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" loading="lazy" />
         <div class="pdetail__actions">
           <a routerLink="/" class="pdetail__back" aria-label="Voltar">
             <mat-icon>arrow_back</mat-icon>
           </a>
+          <div class="pdetail__nav-arrows">
+            <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior">
+              <mat-icon>chevron_left</mat-icon>
+            </a>
+            <a [routerLink]="['/pokemon', nextId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" aria-label="Próximo Pokémon">
+              <mat-icon>chevron_right</mat-icon>
+            </a>
+          </div>
           <button
             type="button"
             class="pdetail__fav"
@@ -34,15 +68,17 @@
         </div>
       </div>
 
-      <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" />
+      <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" loading="lazy" />
     </div>
 
     <div class="pdetail__sheet">
-      <nav class="pdetail__tabs">
+      <nav class="pdetail__tabs" role="tablist" aria-label="Aba de informações">
         <button
           type="button"
+          role="tab"
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'sobre'"
+          [attr.aria-selected]="activeTab() === 'sobre'"
           [style.color]="activeTab() === 'sobre' ? typeColor() : null"
           [style.border-color]="activeTab() === 'sobre' ? typeColor() : 'transparent'"
           (click)="activeTab.set('sobre')"
@@ -51,16 +87,20 @@
         </button>
         <button
           type="button"
+          role="tab"
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'estatisticas'"
+          [attr.aria-selected]="activeTab() === 'estatisticas'"
           (click)="activeTab.set('estatisticas')"
         >
           Estatísticas
         </button>
         <button
           type="button"
+          role="tab"
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'evolucoes'"
+          [attr.aria-selected]="activeTab() === 'evolucoes'"
           [style.color]="activeTab() === 'evolucoes' ? typeColor() : null"
           [style.border-color]="activeTab() === 'evolucoes' ? typeColor() : 'transparent'"
           (click)="activeTab.set('evolucoes')"
@@ -69,8 +109,10 @@
         </button>
         <button
           type="button"
+          role="tab"
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'movimentos'"
+          [attr.aria-selected]="activeTab() === 'movimentos'"
           [style.color]="activeTab() === 'movimentos' ? typeColor() : null"
           [style.border-color]="activeTab() === 'movimentos' ? typeColor() : 'transparent'"
           (click)="activeTab.set('movimentos')"
@@ -81,7 +123,7 @@
 
       @switch (activeTab()) {
         @case ('sobre') {
-          <div class="pdetail__panel">
+          <div @tabFade class="pdetail__panel" role="tabpanel" aria-label="Sobre">
             @if (extras(); as ex) {
               @if (ex.isLegendary || ex.isMythical || ex.isBaby) {
                 <div class="pdetail__badges">
@@ -150,14 +192,36 @@
                   <span class="pdetail__ability-pill">{{ formatAbility(ability) }}</span>
                 }
               </div>
+
+              <h3 class="pdetail__section-title">Efetividade contra tipos</h3>
+              @let groups = effectivenessGroups();
+              @if (groups.length) {
+                <div class="pdetail__type-chart">
+                  @for (group of groups; track group.multiplier) {
+                    <div class="pdetail__type-chart-group">
+                      <span class="pdetail__type-chart-group-label">
+                        @if (group.multiplier === 0) { Imune (0×) }
+                        @else if (group.multiplier < 1) { Resiste (×{{ group.multiplier }}) }
+                        @else { Fraqueza (×{{ group.multiplier }}) }
+                      </span>
+                      <div class="pdetail__type-chart-badges">
+                        @for (type of group.types; track type) {
+                          <app-type-badge [type]="type"></app-type-badge>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             } @else {
               <app-loading-spinner></app-loading-spinner>
             }
           </div>
         }
         @case ('estatisticas') {
-          <div class="pdetail__panel">
+          <div @tabFade class="pdetail__panel" role="tabpanel" aria-label="Estatísticas">
             <h3 class="pdetail__section-title">Estatísticas Base</h3>
+            <app-radar-chart [stats]="p.stats" [typeColor]="solidColor()"></app-radar-chart>
             <div class="pdetail__stats">
               @for (stat of p.stats; track stat.name) {
                 <div class="pdetail-stat">
@@ -194,7 +258,7 @@
           </div>
         }
         @case ('evolucoes') {
-          <div class="pdetail__panel">
+          <div class="pdetail__panel" role="tabpanel" aria-label="Evoluções">
             @if (evolutionsLoading()) {
               <app-loading-spinner></app-loading-spinner>
             } @else {
@@ -215,8 +279,8 @@
                         >
                           <span class="pdetail__evo-id">#{{ paddedId(evo.id) }}</span>
                           <div class="pdetail__evo-imgwrap">
-                            <img src="/pokeball.png" alt="" aria-hidden="true" class="pdetail__evo-ball" />
-                            <img [src]="evo.spriteUrl" [alt]="evo.name" class="pdetail__evo-sprite" />
+                            <img src="/pokeball.png" alt="" aria-hidden="true" class="pdetail__evo-ball" loading="lazy" />
+                            <img [src]="evo.spriteUrl" [alt]="evo.name" class="pdetail__evo-sprite" loading="lazy" />
                           </div>
                           <span class="pdetail__evo-name">{{ evo.name }}</span>
                           @if (evo.method) {
@@ -232,28 +296,67 @@
           </div>
         }
         @case ('movimentos') {
-          <div class="pdetail__panel">
-            <div class="pdetail__moves">
-              @for (move of pokemon()?.moves; track move.name) {
-                <div class="pdetail__move">
-                  <span class="pdetail__move-name">{{ formatMoveName(move.name) }}</span>
-                  <span class="pdetail__move-method">
-                    @if (move.learnMethod === 'level-up') {
-                      {{ learnMethodLabel(move.learnMethod) }} {{ move.level }}
-                    } @else {
-                      {{ learnMethodLabel(move.learnMethod) }}
-                    }
-                  </span>
+          <div class="pdetail__panel" role="tabpanel" aria-label="Movimentos">
+            @let moves = pokemon()?.moves ?? [];
+            @if (moves.length === 0) {
+              <app-loading-spinner></app-loading-spinner>
+            } @else {
+              <div class="pdetail__moves">
+                <div class="pdetail__moves-header">
+                  <span class="pdetail__moves-header-cell">Nome</span>
+                  <span class="pdetail__moves-header-cell">Cat.</span>
+                  <span class="pdetail__moves-header-cell">Poder</span>
+                  <span class="pdetail__moves-header-cell">Prec.</span>
+                  <span class="pdetail__moves-header-cell">PP</span>
+                  <span class="pdetail__moves-header-cell">Método</span>
                 </div>
-              }
-            </div>
+                @for (move of moves; track move.name) {
+                  @let detail = movesWithDetails().get(move.name);
+                  <div class="pdetail__move">
+                    <span class="pdetail__move-name">{{ formatMoveName(move.name) }}</span>
+                    <span class="pdetail__move-cat">
+                      @if (detail?.damageClass) {
+                        <mat-icon class="pdetail__move-cat-icon">{{ damageClassIcon(move) }}</mat-icon>
+                        {{ damageClassLabel(move) }}
+                      }
+                    </span>
+                    <span class="pdetail__move-power">{{ detail?.power ?? '—' }}</span>
+                    <span class="pdetail__move-acc">{{ detail?.accuracy ?? '—' }}</span>
+                    <span class="pdetail__move-pp">{{ detail?.pp ?? '—' }}</span>
+                    <span class="pdetail__move-method">
+                      @if (move.learnMethod === 'level-up') {
+                        {{ learnMethodLabel(move.learnMethod) }} {{ move.level }}
+                      } @else {
+                        {{ learnMethodLabel(move.learnMethod) }}
+                      }
+                    </span>
+                  </div>
+                }
+              </div>
+            }
           </div>
         }
       }
     </div>
   </div>
+} @else if (error()) {
+  <div class="dex-page pdetail__error">
+    <mat-icon class="pdetail__error-icon">error_outline</mat-icon>
+    <h2>Não foi possível carregar este Pokémon</h2>
+    <p>Verifique o nome ou ID e tente novamente.</p>
+    <a routerLink="/" class="dex-back">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar para lista
+    </a>
+  </div>
 } @else {
-  <div class="dex-page">
-    <p>Pokémon não encontrado.</p>
+  <div class="dex-page pdetail__error">
+    <mat-icon class="pdetail__error-icon">search_off</mat-icon>
+    <h2>Pokémon não encontrado</h2>
+    <p>O Pokémon que você procura não existe ou foi removido.</p>
+    <a routerLink="/" class="dex-back">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar para lista
+    </a>
   </div>
 }
