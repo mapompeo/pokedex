@@ -1,11 +1,11 @@
-import { Component, computed, effect, inject, signal, OnDestroy, AfterViewInit, ElementRef, NgZone, DestroyRef } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, computed, effect, inject, signal, OnDestroy, AfterViewInit, NgZone, DestroyRef } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EMPTY, catchError, filter, forkJoin, map, switchMap } from 'rxjs';
-import { PokemonService } from '../../core/services/pokemon.service';
+import { MoveDetail, PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PageBackgroundService } from '../../core/services/page-background.service';
 import { PokemonDetail, PokemonExtras } from '../../core/models/pokemon.model';
@@ -48,10 +48,10 @@ const LEARN_METHOD_LABELS: Record<string, string> = {
 })
 export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private pokemonService = inject(PokemonService);
   private titleService = inject(Title);
   private pageBackground = inject(PageBackgroundService);
-  private el = inject(ElementRef);
   private ngZone = inject(NgZone);
   private destroyRef = inject(DestroyRef);
   favoritesService = inject(FavoritesService);
@@ -68,7 +68,10 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   });
   evolutionsLoading = signal(true);
   extras = signal<PokemonExtras | null>(null);
-  isShiny = signal(false);
+  isShiny = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('shiny') === '1')),
+    { initialValue: false }
+  );
 
   evolutions = computed(() => this.extras()?.evolutions ?? []);
 
@@ -110,8 +113,9 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     return groups;
   });
 
-  movesWithDetails = signal<Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>>(new Map());
+  movesWithDetails = signal<Map<string, MoveDetail>>(new Map());
   movesLoading = signal(false);
+  abilityNames = signal<Map<string, string>>(new Map());
 
   constructor() {
     // Reage a cada mudança de :id (o Angular reaproveita este componente ao
@@ -177,18 +181,36 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       forkJoin(moveNames.map((name) => this.pokemonService.getMoveDetail(name)))
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((details) => {
-          const map = new Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>();
+          const map = new Map<string, MoveDetail>();
           moveNames.forEach((name, i) => map.set(name, details[i]));
           this.movesWithDetails.set(map);
           this.movesLoading.set(false);
         });
     });
 
-    // Título da guia: "Pokédex | Nome · Aba"
+    // Carrega nomes traduzidos das habilidades
     effect(() => {
       const p = this.pokemon();
+      if (!p || p.abilities.length === 0) return;
+      forkJoin(p.abilities.map((name) => this.pokemonService.getAbilityDisplayName(name)))
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((names) => {
+          const map = new Map<string, string>();
+          p.abilities.forEach((name, i) => map.set(name, names[i]));
+          this.abilityNames.set(map);
+        });
+    });
+
+    // Título da guia: "Pokédex | Nome (Shiny) · Aba"
+    effect(() => {
+      const p = this.pokemon();
+      if (!p) {
+        this.titleService.setTitle('Pokédex');
+        return;
+      }
+      const shinyLabel = this.isShiny() ? ' (Shiny)' : '';
       this.titleService.setTitle(
-        p ? `Pokédex | ${this.capitalize(p.name)} · ${TAB_LABELS[this.activeTab()]}` : 'Pokédex'
+        `Pokédex | ${this.capitalize(p.name)}${shinyLabel} · ${TAB_LABELS[this.activeTab()]}`
       );
     });
   }
@@ -214,7 +236,11 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   }
 
   toggleShiny(): void {
-    this.isShiny.update((v) => !v);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { shiny: this.isShiny() ? null : '1' },
+      queryParamsHandling: 'merge',
+    });
   }
 
   paddedId(id: number): string {
@@ -247,7 +273,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   }
 
   formatAbility(name: string): string {
-    return fmt.formatSlug(name);
+    return this.abilityNames().get(name) ?? fmt.formatSlug(name);
   }
 
   generationLabel(gen: string): string {
@@ -271,7 +297,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   }
 
   formatMoveName(name: string): string {
-    return fmt.formatSlug(name);
+    return this.movesWithDetails().get(name)?.displayName ?? fmt.formatSlug(name);
   }
 
   learnMethodLabel(method: string): string {
@@ -300,12 +326,12 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.ngZone.runOutsideAngular(() => {
-      const el = this.el.nativeElement as HTMLElement;
-      const scrollEl = el.closest('[data-scroll-root]') ?? el;
-      scrollEl.addEventListener('scroll', () => {
-        const progress = Math.min(scrollEl.scrollTop / 160, 1);
+      const onScroll = () => {
+        const progress = Math.min(window.scrollY / 160, 1);
         this.scrollProgress.set(progress);
-      }, { passive: true });
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      this.destroyRef.onDestroy(() => window.removeEventListener('scroll', onScroll));
     });
   }
 

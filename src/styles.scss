@@ -119,14 +119,13 @@ body {
   font: var(--mat-sys-body-medium);
   margin: 0;
   min-height: 100%;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 app-root {
   display: block;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 ::-webkit-scrollbar { display: none; }
@@ -134,6 +133,22 @@ app-root {
 
 ::backdrop {
   transition: background-color 0.3s ease;
+}
+
+.app-snackbar {
+  .mdc-snackbar__surface {
+    background: var(--dex-bg) !important;
+    border-radius: 999px !important;
+    box-shadow: var(--dex-shadow-lg);
+  }
+
+  .mdc-snackbar__label {
+    color: var(--dex-ink) !important;
+  }
+
+  .mat-mdc-snack-bar-action {
+    color: var(--pokedex-red) !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

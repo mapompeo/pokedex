@@ -12,7 +12,14 @@ import {
   PokemonType,
 } from '../models/pokemon.model';
 import { getItemNamePt } from '../../shared/evolution-labels';
+import { formatSlug } from '../../shared/format-utils';
+import { getCategoryOverride } from '../../shared/category-overrides';
+import { TranslationService } from './translation.service';
 import { environment } from '../../../environments/environment';
+
+const PORTUGUESE_LANGUAGES = ['pt-br', 'pt'];
+
+const LANGUAGE_PRIORITY = ['pt-br', 'pt', 'en'];
 
 const BASE_URL = environment.apiBaseUrl;
 const ARTWORK_BASE_URL = environment.artworkBaseUrl;
@@ -54,11 +61,23 @@ interface RawPokemonDetail {
   height: number;
   weight: number;
   base_experience: number;
-  sprites: { front_default: string | null; front_shiny: string | null; other: { home: { front_default: string | null; front_shiny: string | null } } };
+  sprites: {
+    front_default: string | null;
+    front_shiny: string | null;
+    other: {
+      home: { front_default: string | null; front_shiny: string | null };
+      'official-artwork': { front_default: string | null; front_shiny: string | null };
+    };
+  };
   types: { type: { name: string } }[];
   stats: { base_stat: number; effort: number; stat: { name: string } }[];
   abilities: { ability: { name: string } }[];
   moves: RawMoveDetail[];
+}
+
+interface RawLocalizedName {
+  name: string;
+  language: { name: string };
 }
 
 interface RawSpeciesResponse {
@@ -94,13 +113,35 @@ interface RawEvolutionChainResponse {
   chain: RawEvolutionChainNode;
 }
 
+interface RawMoveDetailResponse {
+  power: number | null;
+  accuracy: number | null;
+  pp: number | null;
+  damage_class: { name: string } | null;
+  names: RawLocalizedName[];
+}
+
+interface RawAbilityResponse {
+  names: RawLocalizedName[];
+}
+
+export interface MoveDetail {
+  displayName: string;
+  power: number | null;
+  accuracy: number | null;
+  pp: number | null;
+  damageClass: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PokemonService {
   private http = inject(HttpClient);
+  private translation = inject(TranslationService);
   private detailCache = new Map<string, PokemonDetail>();
   private allListItemsCache: PokemonListItem[] | null = null;
   private idTypesCache: Map<number, string[]> | null = null;
-  private moveCache = new Map<string, { power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }>();
+  private moveCache = new Map<string, MoveDetail>();
+  private abilityCache = new Map<string, string>();
 
   extractIdFromUrl(url: string): number {
     const match = url.match(/\/(\d+)\/?$/);
@@ -200,39 +241,55 @@ export class PokemonService {
     return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
       switchMap((species) =>
         this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url).pipe(
-          map((chainRes) => {
+          switchMap((chainRes) => {
             const tree = this.buildEvolutionTree(chainRes.chain, null);
             const stages = this.flattenEvolutionStages(tree);
-            return {
-              description: this.pickFlavorText(species.flavor_text_entries),
-              category: this.pickGenus(species.genera),
-              evolutions: Array.from(stages.entries())
-                .sort(([a], [b]) => a - b)
-                .map(([stage, pokemon]) => ({ stage, pokemon })),
-              captureRate: species.capture_rate,
-              baseHappiness: species.base_happiness,
-              growthRate: species.growth_rate.name,
-              eggGroups: species.egg_groups.map((g) => g.name),
-              genderRate: species.gender_rate,
-              habitat: species.habitat?.name ?? null,
-              isLegendary: species.is_legendary,
-              isMythical: species.is_mythical,
-              isBaby: species.is_baby,
-              generation: species.generation.name,
-            };
+            const rawDescription = this.pickFlavorText(species.flavor_text_entries);
+            const rawCategory = this.pickGenus(species.genera);
+            const categoryOverride = getCategoryOverride(rawCategory);
+            return forkJoin({
+              description: this.translation.translate(rawDescription),
+              category: categoryOverride ? of(categoryOverride) : this.translation.translate(rawCategory),
+            }).pipe(
+              map(({ description, category }) => ({
+                description,
+                category,
+                evolutions: Array.from(stages.entries())
+                  .sort(([a], [b]) => a - b)
+                  .map(([stage, pokemon]) => ({ stage, pokemon })),
+                captureRate: species.capture_rate,
+                baseHappiness: species.base_happiness,
+                growthRate: species.growth_rate.name,
+                eggGroups: species.egg_groups.map((g) => g.name),
+                genderRate: species.gender_rate,
+                habitat: species.habitat?.name ?? null,
+                isLegendary: species.is_legendary,
+                isMythical: species.is_mythical,
+                isBaby: species.is_baby,
+                generation: species.generation.name,
+              }))
+            );
           })
         )
       )
     );
   }
 
+  private pickLocalized<T extends { language: { name: string } }>(entries: T[]): T | undefined {
+    for (const lang of LANGUAGE_PRIORITY) {
+      const found = entries.find((e) => e.language.name === lang);
+      if (found) return found;
+    }
+    return entries[0];
+  }
+
   private pickFlavorText(entries: { flavor_text: string; language: { name: string } }[]): string {
-    const entry = entries.find((e) => e.language.name === 'pt') ?? entries.find((e) => e.language.name === 'en') ?? entries[0];
+    const entry = this.pickLocalized(entries);
     return (entry?.flavor_text ?? '').replace(/[\n\f\r]+/g, ' ').trim();
   }
 
   private pickGenus(genera: { genus: string; language: { name: string } }[]): string {
-    const entry = genera.find((g) => g.language.name === 'pt') ?? genera.find((g) => g.language.name === 'en') ?? genera[0];
+    const entry = this.pickLocalized(genera);
     return entry?.genus ?? '';
   }
 
@@ -283,21 +340,52 @@ export class PokemonService {
     return 'Evolução especial';
   }
 
-  getMoveDetail(moveName: string): Observable<{ power: number | null; accuracy: number | null; pp: number | null; damageClass: string | null }> {
+  getMoveDetail(moveName: string): Observable<MoveDetail> {
     const cached = this.moveCache.get(moveName);
     if (cached) return of(cached);
-    return this.http.get<any>(`${BASE_URL}/move/${moveName}`).pipe(
-      map((raw) => {
-        const detail = {
-          power: raw.power,
-          accuracy: raw.accuracy,
-          pp: raw.pp,
-          damageClass: raw.damage_class?.name ?? null,
-        };
-        this.moveCache.set(moveName, detail);
-        return detail;
+    return this.http.get<RawMoveDetailResponse>(`${BASE_URL}/move/${moveName}`).pipe(
+      switchMap((raw) => {
+        const localized = this.pickLocalized(raw.names ?? []);
+        const resolvedName = localized?.name ?? formatSlug(moveName);
+        const needsTranslation = !localized || !PORTUGUESE_LANGUAGES.includes(localized.language.name);
+        const displayName$ = needsTranslation ? this.translation.translate(resolvedName) : of(resolvedName);
+        return displayName$.pipe(
+          map((displayName) => {
+            const detail: MoveDetail = {
+              displayName,
+              power: raw.power,
+              accuracy: raw.accuracy,
+              pp: raw.pp,
+              damageClass: raw.damage_class?.name ?? null,
+            };
+            this.moveCache.set(moveName, detail);
+            return detail;
+          })
+        );
       }),
-      catchError(() => of({ power: null, accuracy: null, pp: null, damageClass: null }))
+      catchError(() =>
+        of({ displayName: formatSlug(moveName), power: null, accuracy: null, pp: null, damageClass: null })
+      )
+    );
+  }
+
+  getAbilityDisplayName(abilityName: string): Observable<string> {
+    const cached = this.abilityCache.get(abilityName);
+    if (cached) return of(cached);
+    return this.http.get<RawAbilityResponse>(`${BASE_URL}/ability/${abilityName}`).pipe(
+      switchMap((raw) => {
+        const localized = this.pickLocalized(raw.names ?? []);
+        const resolvedName = localized?.name ?? formatSlug(abilityName);
+        const needsTranslation = !localized || !PORTUGUESE_LANGUAGES.includes(localized.language.name);
+        const label$ = needsTranslation ? this.translation.translate(resolvedName) : of(resolvedName);
+        return label$.pipe(
+          map((label) => {
+            this.abilityCache.set(abilityName, label);
+            return label;
+          })
+        );
+      }),
+      catchError(() => of(formatSlug(abilityName)))
     );
   }
 
@@ -333,7 +421,7 @@ export class PokemonService {
       height: raw.height / 10,
       weight: raw.weight / 10,
       spriteUrl: `${ARTWORK_BASE_URL}/${raw.id}.png`,
-      shinyUrl: raw.sprites.other.home.front_shiny ?? raw.sprites.front_shiny ?? `${ARTWORK_BASE_URL}/${raw.id}.png`,
+      shinyUrl: `${ARTWORK_BASE_URL}/shiny/${raw.id}.png`,
       cryUrl: `${CRIES_BASE_URL}/${raw.id}.ogg`,
       baseExperience: raw.base_experience,
       types,

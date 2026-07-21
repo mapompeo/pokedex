@@ -31,6 +31,41 @@
       pointer-events: none;
       z-index: 0;
     }
+
+    &--shiny {
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          120deg,
+          transparent 15%,
+          rgba(255, 255, 255, 0.15) 25%,
+          rgba(255, 215, 0, 0.12) 35%,
+          rgba(255, 255, 255, 0.22) 50%,
+          rgba(255, 215, 0, 0.12) 65%,
+          rgba(255, 255, 255, 0.15) 75%,
+          transparent 85%
+        );
+        background-size: 200% 100%;
+        animation: hero-shimmer 2.5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
+
+  &__hero-shimmer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+
+    &--active {
+      opacity: 1;
+    }
   }
 
   &__watermark {
@@ -53,20 +88,11 @@
     left: 0;
     right: 0;
     display: flex;
-    flex-direction: column;
-    z-index: 100;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.35) 70%, transparent);
-  }
-
-  &__actions-row {
-    display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 10px 0;
-
-    &--bottom {
-      padding: 4px 14px 12px;
-    }
+    z-index: 100;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 14px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
   }
 
   &__back {
@@ -113,6 +139,11 @@
       opacity: 0.3;
       pointer-events: none;
     }
+  }
+
+  &__action-group {
+    display: flex;
+    gap: 4px;
   }
 
   &__action-btn {
@@ -211,12 +242,48 @@
   &__sheet {
     background: var(--dex-bg);
     border-radius: 32px 32px 0 0;
-    margin-top: -48px;
+    margin-top: -12px;
     position: sticky;
     top: 62px;
     z-index: 5;
-    padding: 100px 12px 24px;
+    padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
+  }
+
+  &__tabs-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  &__tab-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: color-mix(in srgb, var(--dex-ink) 10%, transparent);
+    color: var(--dex-ink);
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:focus-visible {
+      outline: 2px solid var(--dex-gold);
+      outline-offset: 2px;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--dex-ink) 18%, transparent);
+    }
+
+    &--active {
+      background: var(--dex-gold);
+      color: #000;
+    }
   }
 
   &__panel {
@@ -228,7 +295,7 @@
     display: flex;
     position: relative;
     gap: 6px;
-    margin: 0 auto 20px;
+    margin: 0 auto;
     width: fit-content;
     background: color-mix(in srgb, var(--dex-bg) 92%, transparent);
     backdrop-filter: blur(20px);
@@ -432,10 +499,13 @@
   }
 
   &__about-columns {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     gap: 24px;
     text-align: left;
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   &__abilities {
@@ -456,7 +526,7 @@
   }
 
   &__stats {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     gap: 6px;
     text-align: left;
@@ -465,8 +535,11 @@
   &__stats-layout {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 16px;
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   &__evolutions {
@@ -475,6 +548,9 @@
     align-items: center;
     gap: 0;
     padding: 8px 0;
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   &__evo-stage {
@@ -753,6 +829,16 @@
   100% { transform: translateX(100%); }
 }
 
+@keyframes hero-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes sparkle-float {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+  50% { transform: translateY(-8px) scale(1.15); opacity: 1; }
+}
+
 .pdetail__error {
   display: flex;
   flex-direction: column;
@@ -789,7 +875,7 @@
 }
 
 .pdetail__type-chart {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   gap: 12px;
   text-align: left;
@@ -819,11 +905,14 @@
 }
 
 .pdetail__moves {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-x: auto;
   text-align: left;
+  max-width: 768px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .pdetail__moves-header {
@@ -836,7 +925,6 @@
   color: var(--dex-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
   min-width: 300px;
 }
 
@@ -847,8 +935,11 @@
   align-items: center;
   padding: 10px 12px;
   border-radius: 8px;
-  background: var(--dex-bg-card);
   min-width: 300px;
+
+  &:nth-child(odd) {
+    background: color-mix(in srgb, var(--dex-ink) 3%, transparent);
+  }
 
   &__name {
     color: var(--dex-ink);
@@ -898,7 +989,7 @@
 
 @media (min-width: 768px) {
   .pdetail__sheet {
-    padding: 48px 40px 40px;
+    padding: 12px 40px 40px;
   }
 
   .pdetail__category,
@@ -908,61 +999,11 @@
     margin-right: auto;
   }
 
-  .pdetail__about-columns {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 56px;
-  }
-
-  .pdetail__about-rows {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 24px;
-  }
-
-  .pdetail__stats-layout {
-    display: flex;
-    align-items: center;
-    gap: 40px;
-  }
-
-  .pdetail__stats-layout app-radar-chart {
-    flex: 0 0 300px;
-  }
-
-  .pdetail__stats {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .pdetail__evolutions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .pdetail__evo-stage {
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-  }
-
   .pdetail__evo-arrow {
     padding: 0 12px;
 
     mat-icon {
       transform: rotate(-90deg);
     }
-  }
-
-  .pdetail__moves {
-    align-items: center;
-  }
-
-  .pdetail__moves-header,
-  .pdetail__move {
-    grid-template-columns: minmax(160px, 420px) 100px 70px 70px 60px 130px;
-    min-width: 0;
-    width: min(100%, 900px);
   }
 }

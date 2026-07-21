@@ -1,7 +1,8 @@
-import { Component, NgZone, computed, inject, signal } from '@angular/core';
+import { Component, NgZone, computed, effect, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter } from 'rxjs';
 import { FavoritesService } from './core/services/favorites.service';
 import { PageBackgroundService } from './core/services/page-background.service';
@@ -19,6 +20,7 @@ export class App {
   private ngZone = inject(NgZone);
   private favoritesService = inject(FavoritesService);
   private pageBackground = inject(PageBackgroundService);
+  private swUpdate = inject(SwUpdate);
 
   title = 'Pokédex';
   subtitle = signal('Seu guia completo do mundo pokémon');
@@ -39,6 +41,18 @@ export class App {
       document.body.classList.add('dark-mode');
     }
     this.isDarkMode.set(document.body.classList.contains('dark-mode'));
+
+    // Sincroniza a cor de fundo com o <body> real (nao so uma div aninhada),
+    // pra o Safari conseguir tingir a status bar / toolbar por tras do notch.
+    effect(() => {
+      document.body.style.backgroundColor = this.frameBackground();
+    });
+
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates
+        .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
+        .subscribe(() => document.location.reload());
+    }
 
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))

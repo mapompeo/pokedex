@@ -336,12 +336,6 @@
   to { transform: rotate(360deg); }
 }
 
-.dark-mode {
-  .type-chip--surprise {
-    background: color-mix(in srgb, var(--dex-gold) 30%, var(--dex-bg-card));
-  }
-}
-
 @media (min-width: 480px) {
   .pokemon-list__grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

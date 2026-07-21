@@ -7,9 +7,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const snackBar = inject(MatSnackBar);
   return next(req).pipe(
     catchError((error) => {
-      snackBar.open('Não foi possível carregar os dados. Tente novamente.', 'Fechar', {
-        duration: 4000,
-      });
+      const isTranslationRequest = req.url.includes('mymemory.translated.net');
+      if (!isTranslationRequest) {
+        snackBar.open('Não foi possível carregar os dados. Tente novamente.', 'Fechar', {
+          duration: 4000,
+          panelClass: 'app-snackbar',
+        });
+      }
       return throwError(() => error);
     })
   );

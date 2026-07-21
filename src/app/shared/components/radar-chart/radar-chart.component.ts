@@ -112,7 +112,7 @@ export class RadarChartComponent {
   stats = input.required<PokemonStat[]>();
   typeColor = input('');
 
-  readonly S = 220;
+  readonly S = 260;
   readonly CX = this.S / 2;
   readonly CY = this.S / 2;
   readonly R = 88;

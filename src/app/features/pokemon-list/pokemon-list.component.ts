@@ -41,7 +41,6 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('sentinel') sentinel?: ElementRef<HTMLDivElement>;
   private observer?: IntersectionObserver;
   private searchSubject = new Subject<string>();
-  private scrollEl?: HTMLElement;
   private onScrollHandler?: () => void;
 
   showScrollTop = signal(false);
@@ -116,27 +115,24 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.sentinel) {
       this.observer.observe(this.sentinel.nativeElement);
     }
-    this.scrollEl = this.sentinel?.nativeElement.closest('.pokedex-frame__screen-scroll') as HTMLElement | undefined;
-    if (this.scrollEl) {
-      this.onScrollHandler = () => {
-        this.showScrollTop.set(this.scrollEl!.scrollTop > 400);
-      };
-      this.scrollEl.addEventListener('scroll', this.onScrollHandler, { passive: true });
-    }
+    this.onScrollHandler = () => {
+      this.showScrollTop.set(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', this.onScrollHandler, { passive: true });
     setTimeout(() => this.fillViewportIfNeeded(), 0);
   }
 
   private fillViewportIfNeeded(): void {
     if (this.loading() || !this.hasMore() || this.searchTerm().trim() || this.selectedTypes().size > 0) return;
-    if (this.scrollEl && this.scrollEl.scrollHeight <= this.scrollEl.clientHeight + 50) {
+    if (document.documentElement.scrollHeight <= window.innerHeight + 50) {
       this.loadNextPage();
     }
   }
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
-    if (this.scrollEl && this.onScrollHandler) {
-      this.scrollEl.removeEventListener('scroll', this.onScrollHandler);
+    if (this.onScrollHandler) {
+      window.removeEventListener('scroll', this.onScrollHandler);
     }
   }
 
@@ -179,16 +175,13 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   randomPokemon(): void {
-    const maxId = this.total() ?? 1025;
+    const maxId = Math.min(this.total() ?? 1025, 1025);
     const randomId = Math.floor(Math.random() * maxId) + 1;
     this.router.navigate(['/pokemon', randomId]);
   }
 
   scrollToTop(): void {
-    const scrollEl = this.sentinel?.nativeElement.closest('.pokedex-frame__screen-scroll');
-    if (scrollEl) {
-      scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   onTouchStart(event: TouchEvent): void {
@@ -198,8 +191,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onTouchMove(event: TouchEvent): void {
-    const scrollEl = this.sentinel?.nativeElement.closest('.pokedex-frame__screen-scroll');
-    if (!scrollEl || scrollEl.scrollTop > 0) return;
+    if (window.scrollY > 0) return;
     this.touchMoveY = event.touches[0].clientY;
     const diff = this.touchMoveY - this.touchStartY;
     if (diff > 0) {
