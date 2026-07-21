@@ -78,6 +78,21 @@
   background: color-mix(in srgb, var(--dex-ink) 5%, transparent);
 }
 
+@media (min-width: 768px) {
+  .compare__grid {
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+
+  .compare__card {
+    flex: 1 1 0;
+  }
+
+  .compare__dots {
+    display: none;
+  }
+}
+
 .compare__empty-body {
   flex: 1;
   display: flex;

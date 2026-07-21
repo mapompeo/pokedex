@@ -123,7 +123,8 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-html { height: 100%; overflow-x: hidden; }
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; -ms-overflow-style: none; }
 
 ::backdrop {
   transition: background-color 0.3s ease;
@@ -138,7 +139,4 @@ html { height: 100%; overflow-x: hidden; }
   }
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--dex-ink) 15%, transparent); border-radius: 999px; }
-* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--dex-ink) 15%, transparent) transparent; -ms-overflow-style: auto; }
+

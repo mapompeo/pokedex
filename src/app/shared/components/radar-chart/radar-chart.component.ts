@@ -38,14 +38,14 @@ const MAX_STAT = 255;
         <polygon
           [attr.points]="dataPoints()"
           [attr.fill]="typeColor()"
-          fill-opacity="0.25"
+          fill-opacity="0.15"
           stroke="none"
         />
         <polygon
           [attr.points]="dataPoints()"
           fill="none"
           [attr.stroke]="typeColor()"
-          stroke-width="2"
+          stroke-width="2.5"
           stroke-linejoin="round"
         />
       }
@@ -54,7 +54,7 @@ const MAX_STAT = 255;
         <circle
           [attr.cx]="dataX(i, stat.baseStat)"
           [attr.cy]="dataY(i, stat.baseStat)"
-          r="2.5"
+          r="3.5"
           [attr.fill]="typeColor()"
         />
       }
@@ -85,24 +85,24 @@ const MAX_STAT = 255;
       .radar {
         display: block;
         margin: 0 auto;
-        max-width: 260px;
+        max-width: 280px;
         width: 100%;
         height: auto;
       }
 
       .radar__grid {
-        stroke: color-mix(in srgb, var(--dex-ink) 12%, transparent);
+        stroke: color-mix(in srgb, var(--dex-ink) 14%, transparent);
       }
 
       .radar__label {
-        font-size: 8px;
-        font-weight: 700;
+        font-size: 9px;
+        font-weight: 800;
         fill: var(--dex-text);
       }
 
       .radar__value {
-        font-size: 7px;
-        font-weight: 600;
+        font-size: 8px;
+        font-weight: 700;
         fill: var(--dex-text-muted);
       }
     `,
@@ -112,12 +112,12 @@ export class RadarChartComponent {
   stats = input.required<PokemonStat[]>();
   typeColor = input('');
 
-  readonly S = 180;
+  readonly S = 220;
   readonly CX = this.S / 2;
   readonly CY = this.S / 2;
-  readonly R = 72;
-  readonly LABEL_R = 86;
-  readonly VALUE_R = 58;
+  readonly R = 88;
+  readonly LABEL_R = 106;
+  readonly VALUE_R = 70;
 
   orderedStats = computed(() => {
     const map = new Map(this.stats().map((s) => [s.name, s]));

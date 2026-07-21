@@ -1,8 +1,9 @@
-import { Component, computed, effect, inject, signal, OnDestroy, ElementRef, AfterViewInit, NgZone, DestroyRef } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnDestroy, AfterViewInit, ElementRef, NgZone, DestroyRef } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EMPTY, catchError, filter, forkJoin, map, switchMap } from 'rxjs';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
@@ -40,7 +41,7 @@ const LEARN_METHOD_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-pokemon-detail',
   standalone: true,
-  imports: [RouterLink, MatIconModule, LoadingSpinnerComponent, TypeBadgeComponent, RadarChartComponent],
+  imports: [RouterLink, MatIconModule, MatTooltipModule, LoadingSpinnerComponent, TypeBadgeComponent, RadarChartComponent],
   animations: [tabFade],
   templateUrl: './pokemon-detail.component.html',
   styleUrl: './pokemon-detail.component.scss',
@@ -61,6 +62,10 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   scrollProgress = signal(0);
 
   activeTab = signal<DetailTab>('sobre');
+  activeTabIndex = computed(() => {
+    const map: Record<DetailTab, number> = { sobre: 0, estatisticas: 1, evolucoes: 2, movimentos: 3 };
+    return map[this.activeTab()] ?? 0;
+  });
   evolutionsLoading = signal(true);
   extras = signal<PokemonExtras | null>(null);
 
@@ -207,17 +212,6 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  ngAfterViewInit(): void {
-    const scrollEl = this.el.nativeElement.closest('.pokedex-frame__screen-scroll') as HTMLElement | null;
-    if (!scrollEl) return;
-    this.ngZone.runOutsideAngular(() => {
-      scrollEl.addEventListener('scroll', () => {
-        const progress = Math.min(scrollEl.scrollTop / 160, 1);
-        this.ngZone.run(() => this.scrollProgress.set(progress));
-      }, { passive: true });
-    });
-  }
-
   paddedId(id: number): string {
     return String(id).padStart(3, '0');
   }
@@ -297,6 +291,17 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       case 'status': return 'Status';
       default: return '—';
     }
+  }
+
+  ngAfterViewInit(): void {
+    this.ngZone.runOutsideAngular(() => {
+      const el = this.el.nativeElement as HTMLElement;
+      const scrollEl = el.closest('[data-scroll-root]') ?? el;
+      scrollEl.addEventListener('scroll', () => {
+        const progress = Math.min(scrollEl.scrollTop / 160, 1);
+        this.scrollProgress.set(progress);
+      }, { passive: true });
+    });
   }
 
   playCry(): void {

@@ -17,11 +17,7 @@
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
     position: relative;
-    border-left: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
   }
 
   &__screen-scroll {
@@ -128,31 +124,40 @@
     bottom: 16px;
     transform: translateX(-50%);
     z-index: 10;
-    gap: 12px;
+    gap: 8px;
     background: color-mix(in srgb, var(--dex-bg) 92%, transparent);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
     border-radius: 999px;
-    padding: 10px 16px;
+    padding: 6px 12px;
     box-shadow:
       var(--dex-shadow-lg),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
   }
 
   &__bottom-pill {
     position: absolute;
     top: 50%;
-    left: 0;
+    left: 12px;
     transform: translateY(-50%);
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+    width: 104px;
+    height: 48px;
+    border-radius: 999px;
     box-sizing: border-box;
     background: var(--pokedex-yellow);
     box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--pokedex-yellow) 50%, transparent);
     transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 0;
+  }
+
+  &__bottom-nav--tab1 &__bottom-pill {
+    left: 72px;
+  }
+
+  &__bottom-nav--tab2 &__bottom-pill {
+    left: 132px;
   }
 
   &__bottom-tab {
@@ -164,15 +169,14 @@
     border-radius: 999px;
     color: var(--dex-text-muted);
     text-decoration: none;
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     font-weight: 800;
-    width: 64px;
-    height: 64px;
+    width: 52px;
+    height: 48px;
     box-sizing: border-box;
     position: relative;
     z-index: 1;
     transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
 
     mat-icon {
       font-size: 21px;
@@ -182,7 +186,7 @@
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    span:last-child {
+    > span:last-child {
       max-width: 0;
       overflow: hidden;
       opacity: 0;
@@ -203,11 +207,11 @@
   &__bottom-tab--active {
     color: var(--dex-nav-active);
     font-weight: 900;
-    width: auto;
-    padding: 0 16px 0 12px;
+    width: 104px;
+    padding: 0 8px;
 
-    span:last-child {
-      max-width: 80px;
+    > span:last-child {
+      max-width: 100px;
       opacity: 1;
       margin-left: 6px;
     }
@@ -221,33 +225,51 @@
     }
   }
 
-  &__bottom-tab-icon {
-    position: relative;
-    display: inline-flex;
-  }
-
-  &__fav-badge {
-    position: absolute;
-    top: -5px;
-    right: -9px;
-    background: var(--pokedex-yellow);
-    color: var(--dex-ink);
-    font-size: 0.5rem;
-    font-weight: 800;
-    min-width: 15px;
-    height: 15px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 3px;
-    line-height: 1;
-    box-shadow: var(--dex-shadow-sm);
-    animation: badge-pulse 2s ease-in-out infinite;
-  }
 }
 
-@keyframes badge-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
+@media (min-width: 768px) {
+  .pokedex-frame {
+    &__content--sheet {
+      padding-bottom: 32px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    &__header {
+      padding: 24px 32px;
+    }
+
+    &__header-watermark {
+      display: none;
+    }
+
+    &__header-row {
+      align-items: center;
+      justify-content: flex-start;
+      gap: 24px;
+    }
+
+    &__header-row > div:first-child {
+      flex: 0 0 auto;
+      align-items: flex-start;
+    }
+
+    &__logo {
+      height: 64px;
+      margin-bottom: 0;
+    }
+
+    &__subtitle {
+      text-align: left;
+    }
+
+    &__bottom-nav {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      transform: none;
+      margin: 0 0 0 auto;
+      flex-shrink: 0;
+    }
+  }
 }

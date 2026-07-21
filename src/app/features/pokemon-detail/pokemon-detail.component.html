@@ -29,19 +29,19 @@
     </div>
   </div>
 } @else if (pokemon(); as p) {
-  <div class="pdetail" [class.pdetail--collapsed]="scrollProgress() > 0.5">
-    <div class="pdetail__hero-wrap" [style.--scroll]="scrollProgress()">
+  <div class="pdetail" [style.--scroll]="scrollProgress()">
+    <div class="pdetail__hero-wrap">
       <div class="pdetail__hero" [style.background]="typeColor()">
         <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" loading="lazy" />
         <div class="pdetail__actions">
-          <a routerLink="/" class="pdetail__back" aria-label="Voltar">
+          <a routerLink="/" class="pdetail__back" aria-label="Voltar" matTooltip="Voltar" matTooltipPosition="right">
             <mat-icon>arrow_back</mat-icon>
           </a>
           <div class="pdetail__nav-arrows">
-            <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior">
+            <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
               <mat-icon>chevron_left</mat-icon>
             </a>
-            <a [routerLink]="['/pokemon', nextId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" aria-label="Próximo Pokémon">
+            <a [routerLink]="['/pokemon', nextId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" aria-label="Próximo Pokémon" matTooltip="Próximo Pokémon" matTooltipPosition="above">
               <mat-icon>chevron_right</mat-icon>
             </a>
           </div>
@@ -50,6 +50,8 @@
             class="pdetail__fav"
             (click)="toggleFavorite()"
             [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+            [matTooltip]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+            matTooltipPosition="left"
           >
             <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
               isFavorite() ? 'favorite' : 'favorite_border'
@@ -67,23 +69,25 @@
           </div>
         </div>
       </div>
-
-      <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" loading="lazy" />
     </div>
 
+    <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" loading="lazy" />
+
     <div class="pdetail__sheet">
-      <nav class="pdetail__tabs" role="tablist" aria-label="Aba de informações">
+      <nav class="pdetail__tabs" role="tablist" aria-label="Aba de informações" [class.pdetail__tabs--tab1]="activeTabIndex() === 1" [class.pdetail__tabs--tab2]="activeTabIndex() === 2" [class.pdetail__tabs--tab3]="activeTabIndex() === 3">
+        <span class="pdetail__tabs-pill"></span>
         <button
           type="button"
           role="tab"
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'sobre'"
           [attr.aria-selected]="activeTab() === 'sobre'"
-          [style.color]="activeTab() === 'sobre' ? typeColor() : null"
-          [style.border-color]="activeTab() === 'sobre' ? typeColor() : 'transparent'"
           (click)="activeTab.set('sobre')"
+          matTooltip="Sobre"
+          matTooltipPosition="above"
         >
-          Sobre
+          <mat-icon>info</mat-icon>
+          <span>Sobre</span>
         </button>
         <button
           type="button"
@@ -92,8 +96,11 @@
           [class.pdetail__tab--active]="activeTab() === 'estatisticas'"
           [attr.aria-selected]="activeTab() === 'estatisticas'"
           (click)="activeTab.set('estatisticas')"
+          matTooltip="Estatísticas"
+          matTooltipPosition="above"
         >
-          Estatísticas
+          <mat-icon>bar_chart</mat-icon>
+          <span>Stats</span>
         </button>
         <button
           type="button"
@@ -101,11 +108,12 @@
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'evolucoes'"
           [attr.aria-selected]="activeTab() === 'evolucoes'"
-          [style.color]="activeTab() === 'evolucoes' ? typeColor() : null"
-          [style.border-color]="activeTab() === 'evolucoes' ? typeColor() : 'transparent'"
           (click)="activeTab.set('evolucoes')"
+          matTooltip="Evoluções"
+          matTooltipPosition="above"
         >
-          Evoluções
+          <mat-icon>trending_up</mat-icon>
+          <span>Evoluções</span>
         </button>
         <button
           type="button"
@@ -113,11 +121,12 @@
           class="pdetail__tab"
           [class.pdetail__tab--active]="activeTab() === 'movimentos'"
           [attr.aria-selected]="activeTab() === 'movimentos'"
-          [style.color]="activeTab() === 'movimentos' ? typeColor() : null"
-          [style.border-color]="activeTab() === 'movimentos' ? typeColor() : 'transparent'"
           (click)="activeTab.set('movimentos')"
+          matTooltip="Movimentos"
+          matTooltipPosition="above"
         >
-          Movimentos
+          <mat-icon>bolt</mat-icon>
+          <span>Movimentos</span>
         </button>
       </nav>
 
@@ -136,83 +145,89 @@
               <p class="pdetail__category">{{ ex.category }}</p>
               <p class="pdetail__description">{{ ex.description }}</p>
 
-              <h3 class="pdetail__section-title">Sobre</h3>
-              <div class="pdetail__about-rows">
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Peso</span>
-                  <span class="pdetail__about-value">{{ formatDecimal(p.weight) }} kg</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Altura</span>
-                  <span class="pdetail__about-value">{{ formatDecimal(p.height) }} m</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Exp. Base</span>
-                  <span class="pdetail__about-value">{{ p.baseExperience }}</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Taxa de Captura</span>
-                  <span class="pdetail__about-value">{{ ex.captureRate }} / 255</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Gênero</span>
-                  <span class="pdetail__about-value">{{ genderLabel(ex.genderRate) }}</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Geração</span>
-                  <span class="pdetail__about-value">{{ generationLabel(ex.generation) }}</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Crescimento</span>
-                  <span class="pdetail__about-value">{{ growthLabel(ex.growthRate) }}</span>
-                </div>
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Felicidade Base</span>
-                  <span class="pdetail__about-value">{{ ex.baseHappiness }}</span>
-                </div>
-                @if (ex.habitat; as habitat) {
-                  <div class="pdetail__about-row">
-                    <span class="pdetail__about-label">Habitat</span>
-                    <span class="pdetail__about-value">{{ habitatLabel(habitat) }}</span>
-                  </div>
-                }
-                <div class="pdetail__about-row">
-                  <span class="pdetail__about-label">Grupos de Ovo</span>
-                  <span class="pdetail__about-value">
-                    @for (group of ex.eggGroups; track group; let last = $last) {
-                      {{ eggGroupLabel(group) }}{{ last ? '' : ', ' }}
-                    }
-                  </span>
-                </div>
-              </div>
-
-              <h3 class="pdetail__section-title">Habilidades</h3>
-              <div class="pdetail__abilities">
-                @for (ability of p.abilities; track ability) {
-                  <span class="pdetail__ability-pill">{{ formatAbility(ability) }}</span>
-                }
-              </div>
-
-              <h3 class="pdetail__section-title">Efetividade contra tipos</h3>
-              @let groups = effectivenessGroups();
-              @if (groups.length) {
-                <div class="pdetail__type-chart">
-                  @for (group of groups; track group.multiplier) {
-                    <div class="pdetail__type-chart-group">
-                      <span class="pdetail__type-chart-group-label">
-                        @if (group.multiplier === 0) { Imune (0×) }
-                        @else if (group.multiplier < 1) { Resiste (×{{ group.multiplier }}) }
-                        @else { Fraqueza (×{{ group.multiplier }}) }
-                      </span>
-                      <div class="pdetail__type-chart-badges">
-                        @for (type of group.types; track type) {
-                          <app-type-badge [type]="type"></app-type-badge>
-                        }
+              <div class="pdetail__about-columns">
+                <div class="pdetail__about-col">
+                  <h3 class="pdetail__section-title">Sobre</h3>
+                  <div class="pdetail__about-rows">
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Peso</span>
+                      <span class="pdetail__about-value">{{ formatDecimal(p.weight) }} kg</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Altura</span>
+                      <span class="pdetail__about-value">{{ formatDecimal(p.height) }} m</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Exp. Base</span>
+                      <span class="pdetail__about-value">{{ p.baseExperience }}</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Taxa de Captura</span>
+                      <span class="pdetail__about-value">{{ ex.captureRate }} / 255</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Gênero</span>
+                      <span class="pdetail__about-value">{{ genderLabel(ex.genderRate) }}</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Geração</span>
+                      <span class="pdetail__about-value">{{ generationLabel(ex.generation) }}</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Crescimento</span>
+                      <span class="pdetail__about-value">{{ growthLabel(ex.growthRate) }}</span>
+                    </div>
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Felicidade Base</span>
+                      <span class="pdetail__about-value">{{ ex.baseHappiness }}</span>
+                    </div>
+                    @if (ex.habitat; as habitat) {
+                      <div class="pdetail__about-row">
+                        <span class="pdetail__about-label">Habitat</span>
+                        <span class="pdetail__about-value">{{ habitatLabel(habitat) }}</span>
                       </div>
+                    }
+                    <div class="pdetail__about-row">
+                      <span class="pdetail__about-label">Grupos de Ovo</span>
+                      <span class="pdetail__about-value">
+                        @for (group of ex.eggGroups; track group; let last = $last) {
+                          {{ eggGroupLabel(group) }}{{ last ? '' : ', ' }}
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pdetail__about-col">
+                  <h3 class="pdetail__section-title">Habilidades</h3>
+                  <div class="pdetail__abilities">
+                    @for (ability of p.abilities; track ability) {
+                      <span class="pdetail__ability-pill">{{ formatAbility(ability) }}</span>
+                    }
+                  </div>
+
+                  <h3 class="pdetail__section-title">Efetividade contra tipos</h3>
+                  @let groups = effectivenessGroups();
+                  @if (groups.length) {
+                    <div class="pdetail__type-chart">
+                      @for (group of groups; track group.multiplier) {
+                        <div class="pdetail__type-chart-group">
+                          <span class="pdetail__type-chart-group-label">
+                            @if (group.multiplier === 0) { Imune (0×) }
+                            @else if (group.multiplier < 1) { Resiste (×{{ group.multiplier }}) }
+                            @else { Fraqueza (×{{ group.multiplier }}) }
+                          </span>
+                          <div class="pdetail__type-chart-badges">
+                            @for (type of group.types; track type) {
+                              <app-type-badge [type]="type"></app-type-badge>
+                            }
+                          </div>
+                        </div>
+                      }
                     </div>
                   }
                 </div>
-              }
+              </div>
             } @else {
               <app-loading-spinner></app-loading-spinner>
             }
@@ -221,38 +236,40 @@
         @case ('estatisticas') {
           <div @tabFade class="pdetail__panel" role="tabpanel" aria-label="Estatísticas">
             <h3 class="pdetail__section-title">Estatísticas Base</h3>
-            <app-radar-chart [stats]="p.stats" [typeColor]="solidColor()"></app-radar-chart>
-            <div class="pdetail__stats">
-              @for (stat of p.stats; track stat.name) {
-                <div class="pdetail-stat">
+            <div class="pdetail__stats-layout">
+              <app-radar-chart [stats]="p.stats" [typeColor]="solidColor()"></app-radar-chart>
+              <div class="pdetail__stats">
+                @for (stat of p.stats; track stat.name) {
+                  <div class="pdetail-stat">
+                    <div class="pdetail-stat__left">
+                      <span class="pdetail-stat__label">{{ statLabel(stat.name) }}</span>
+                      <span class="pdetail-stat__value">{{ stat.baseStat }}</span>
+                      @if (stat.effort > 0) {
+                        <span class="pdetail-stat__ev">+{{ stat.effort }} EV</span>
+                      }
+                    </div>
+                    <span class="pdetail-stat__track">
+                      <span
+                        class="pdetail-stat__fill"
+                        [style.width.%]="statPercent(stat.baseStat)"
+                        [style.background]="solidColor()"
+                      ></span>
+                    </span>
+                  </div>
+                }
+                <div class="pdetail-stat pdetail-stat--total">
                   <div class="pdetail-stat__left">
-                    <span class="pdetail-stat__label">{{ statLabel(stat.name) }}</span>
-                    <span class="pdetail-stat__value">{{ stat.baseStat }}</span>
-                    @if (stat.effort > 0) {
-                      <span class="pdetail-stat__ev">+{{ stat.effort }} EV</span>
-                    }
+                    <span class="pdetail-stat__label">TOTAL</span>
+                    <span class="pdetail-stat__value">{{ totalBaseStats() }}</span>
                   </div>
                   <span class="pdetail-stat__track">
                     <span
                       class="pdetail-stat__fill"
-                      [style.width.%]="statPercent(stat.baseStat)"
+                      [style.width.%]="statPercent(totalBaseStats())"
                       [style.background]="solidColor()"
                     ></span>
                   </span>
                 </div>
-              }
-              <div class="pdetail-stat pdetail-stat--total">
-                <div class="pdetail-stat__left">
-                  <span class="pdetail-stat__label">TOTAL</span>
-                  <span class="pdetail-stat__value">{{ totalBaseStats() }}</span>
-                </div>
-                <span class="pdetail-stat__track">
-                  <span
-                    class="pdetail-stat__fill"
-                    [style.width.%]="statPercent(totalBaseStats())"
-                    [style.background]="solidColor()"
-                  ></span>
-                </span>
               </div>
             </div>
           </div>

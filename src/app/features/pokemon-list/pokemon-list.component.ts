@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { Subject, debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,7 +28,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-pokemon-list',
   standalone: true,
-  imports: [MatIconModule, PokemonCardComponent, SkeletonCardComponent],
+  imports: [MatIconModule, MatTooltipModule, PokemonCardComponent, SkeletonCardComponent],
   templateUrl: './pokemon-list.component.html',
   styleUrl: './pokemon-list.component.scss',
   animations: [listStagger],
@@ -60,6 +61,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   typesById = signal<Map<number, string[]>>(new Map());
   availableTypes = signal<{ name: string; label: string; color: string }[]>([]);
   selectedTypes = signal<Set<string>>(new Set());
+  filtersOpen = signal(false);
 
   filteredItems = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -121,6 +123,14 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       this.scrollEl.addEventListener('scroll', this.onScrollHandler, { passive: true });
     }
+    setTimeout(() => this.fillViewportIfNeeded(), 0);
+  }
+
+  private fillViewportIfNeeded(): void {
+    if (this.loading() || !this.hasMore() || this.searchTerm().trim() || this.selectedTypes().size > 0) return;
+    if (this.scrollEl && this.scrollEl.scrollHeight <= this.scrollEl.clientHeight + 50) {
+      this.loadNextPage();
+    }
   }
 
   ngOnDestroy(): void {
@@ -139,6 +149,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
         this.total.set(page.total);
         this.offset.update((o) => o + PAGE_SIZE);
         this.loading.set(false);
+        setTimeout(() => this.fillViewportIfNeeded(), 0);
       },
       error: () => {
         this.loading.set(false);

@@ -3,40 +3,63 @@
     <mat-icon [class.pull-indicator--spinning]="pullDistance() >= 60">refresh</mat-icon>
   </div>
   <div class="pokemon-list__filters">
-    <div class="dex-search">
-      <mat-icon>search</mat-icon>
-      <input
-        class="dex-search__input"
-        type="text"
-        placeholder="Buscar por nome, ID ou tipo"
-        aria-label="Buscar Pokémon"
-        [value]="searchTerm()"
-        (input)="onSearchChange($any($event.target).value)"
-      />
-    </div>
-    <div class="pokemon-list__type-filters">
-      @for (type of availableTypes(); track type.name) {
-        <button
-          class="type-chip"
-          [class.type-chip--active]="selectedTypes().has(type.name)"
-          [style.--type-color]="type.color"
-          [attr.aria-pressed]="selectedTypes().has(type.name)"
-          (click)="toggleTypeFilter(type.name)"
-        >
-          {{ type.label }}
-        </button>
-      }
-      @if (selectedTypes().size > 0) {
-        <button class="type-chip type-chip--clear" (click)="clearAllFilters()" aria-label="Limpar filtros de tipo">
-          <mat-icon>close</mat-icon>
-          Limpar
-        </button>
-      }
-      <button class="type-chip type-chip--surprise" (click)="randomPokemon()" aria-label="Pokémon aleatório">
-        <mat-icon>casino</mat-icon>
-        Surpresa!
+    <div class="pokemon-list__search-row">
+      <div class="dex-search">
+        <mat-icon>search</mat-icon>
+        <input
+          class="dex-search__input"
+          type="text"
+          placeholder="Buscar por nome, ID ou tipo"
+          aria-label="Buscar Pokémon"
+          [value]="searchTerm()"
+          (input)="onSearchChange($any($event.target).value)"
+          matTooltip="Buscar por nome, ID ou tipo"
+          matTooltipPosition="below"
+        />
+      </div>
+      <button
+        class="pokemon-list__filter-btn"
+        [class.pokemon-list__filter-btn--active]="selectedTypes().size > 0"
+        (click)="filtersOpen.set(!filtersOpen())"
+        aria-haspopup="true"
+        [attr.aria-expanded]="filtersOpen()"
+        aria-label="Filtrar por tipo"
+        matTooltip="Filtrar por tipo"
+        matTooltipPosition="below"
+      >
+        <mat-icon>tune</mat-icon>
+        @if (selectedTypes().size > 0) {
+          <span class="pokemon-list__filter-badge">{{ selectedTypes().size }}</span>
+        }
       </button>
     </div>
+
+    @if (filtersOpen()) {
+      <div class="pokemon-list__filters-backdrop" (click)="filtersOpen.set(false)"></div>
+      <div class="pokemon-list__type-filters" role="dialog" aria-label="Filtros de tipo">
+        @for (type of availableTypes(); track type.name) {
+          <button
+            class="type-chip"
+            [class.type-chip--active]="selectedTypes().has(type.name)"
+            [style.--type-color]="type.color"
+            [attr.aria-pressed]="selectedTypes().has(type.name)"
+            (click)="toggleTypeFilter(type.name)"
+          >
+            {{ type.label }}
+          </button>
+        }
+        @if (selectedTypes().size > 0) {
+          <button class="type-chip type-chip--clear" (click)="clearAllFilters()" aria-label="Limpar filtros de tipo">
+            <mat-icon>close</mat-icon>
+            Limpar
+          </button>
+        }
+        <button class="type-chip type-chip--surprise" (click)="randomPokemon(); filtersOpen.set(false)" aria-label="Pokémon aleatório">
+          <mat-icon>auto_awesome</mat-icon>
+          Surpresa!
+        </button>
+      </div>
+    }
   </div>
 
   <div class="pokemon-list__grid" [@listStagger]="filteredItems().length" role="list">
@@ -67,7 +90,7 @@
     </div>
   }
 
-  @if (loading()) {
+  @if (loading() && allItems().length === 0) {
     <div class="pokemon-list__grid">
       @for (_ of [1,2,3,4,5,6]; track _) {
         <app-skeleton-card></app-skeleton-card>
@@ -75,9 +98,16 @@
     </div>
   }
 
+  @if (loading() && allItems().length > 0) {
+    <div class="pokemon-list__loading-more">
+      <img src="/pokeball.png" alt="" class="pokemon-list__loading-more-icon" aria-hidden="true" />
+      <span>Carregando mais...</span>
+    </div>
+  }
+
   <div #sentinel class="pokemon-list__sentinel"></div>
   @if (showScrollTop()) {
-    <button class="scroll-top-fab" (click)="scrollToTop()" aria-label="Voltar ao topo">
+    <button class="scroll-top-fab" (click)="scrollToTop()" aria-label="Voltar ao topo" matTooltip="Voltar ao topo" matTooltipPosition="left">
       <mat-icon>keyboard_arrow_up</mat-icon>
     </button>
   }
