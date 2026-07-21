@@ -68,6 +68,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   });
   evolutionsLoading = signal(true);
   extras = signal<PokemonExtras | null>(null);
+  isShiny = signal(false);
 
   evolutions = computed(() => this.extras()?.evolutions ?? []);
 
@@ -210,6 +211,10 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     if (p) {
       this.favoritesService.toggleFavorite(p.id);
     }
+  }
+
+  toggleShiny(): void {
+    this.isShiny.update((v) => !v);
   }
 
   paddedId(id: number): string {

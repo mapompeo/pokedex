@@ -54,7 +54,7 @@ interface RawPokemonDetail {
   height: number;
   weight: number;
   base_experience: number;
-  sprites: { front_default: string | null };
+  sprites: { front_default: string | null; front_shiny: string | null; other: { home: { front_default: string | null; front_shiny: string | null } } };
   types: { type: { name: string } }[];
   stats: { base_stat: number; effort: number; stat: { name: string } }[];
   abilities: { ability: { name: string } }[];
@@ -227,12 +227,12 @@ export class PokemonService {
   }
 
   private pickFlavorText(entries: { flavor_text: string; language: { name: string } }[]): string {
-    const entry = entries.find((e) => e.language.name === 'en') ?? entries[0];
+    const entry = entries.find((e) => e.language.name === 'pt') ?? entries.find((e) => e.language.name === 'en') ?? entries[0];
     return (entry?.flavor_text ?? '').replace(/[\n\f\r]+/g, ' ').trim();
   }
 
   private pickGenus(genera: { genus: string; language: { name: string } }[]): string {
-    const entry = genera.find((g) => g.language.name === 'en') ?? genera[0];
+    const entry = genera.find((g) => g.language.name === 'pt') ?? genera.find((g) => g.language.name === 'en') ?? genera[0];
     return entry?.genus ?? '';
   }
 
@@ -333,6 +333,7 @@ export class PokemonService {
       height: raw.height / 10,
       weight: raw.weight / 10,
       spriteUrl: `${ARTWORK_BASE_URL}/${raw.id}.png`,
+      shinyUrl: raw.sprites.other.home.front_shiny ?? raw.sprites.front_shiny ?? `${ARTWORK_BASE_URL}/${raw.id}.png`,
       cryUrl: `${CRIES_BASE_URL}/${raw.id}.ogg`,
       baseExperience: raw.base_experience,
       types,

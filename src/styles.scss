@@ -123,6 +123,12 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+app-root {
+  display: block;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; -ms-overflow-style: none; }
 

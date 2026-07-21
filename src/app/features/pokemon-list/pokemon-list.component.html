@@ -19,6 +19,15 @@
       </div>
       <button
         class="pokemon-list__filter-btn"
+        (click)="randomPokemon()"
+        aria-label="Surpreenda-me"
+        matTooltip="Surpreenda-me"
+        matTooltipPosition="below"
+      >
+        <mat-icon>shuffle</mat-icon>
+      </button>
+      <button
+        class="pokemon-list__filter-btn"
         [class.pokemon-list__filter-btn--active]="selectedTypes().size > 0"
         (click)="filtersOpen.set(!filtersOpen())"
         aria-haspopup="true"
@@ -48,16 +57,16 @@
             {{ type.label }}
           </button>
         }
+        <button class="type-chip type-chip--surprise" (click)="randomPokemon(); filtersOpen.set(false)" aria-label="Pokémon aleatório">
+          <mat-icon>auto_awesome</mat-icon>
+          Surpreenda-me!
+        </button>
         @if (selectedTypes().size > 0) {
           <button class="type-chip type-chip--clear" (click)="clearAllFilters()" aria-label="Limpar filtros de tipo">
             <mat-icon>close</mat-icon>
             Limpar
           </button>
         }
-        <button class="type-chip type-chip--surprise" (click)="randomPokemon(); filtersOpen.set(false)" aria-label="Pokémon aleatório">
-          <mat-icon>auto_awesome</mat-icon>
-          Surpresa!
-        </button>
       </div>
     }
   </div>

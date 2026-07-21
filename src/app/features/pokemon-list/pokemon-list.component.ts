@@ -80,7 +80,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       if (types.size > 0) {
         const itemTypes = this.typesById().get(item.id) ?? [];
-        if (!itemTypes.some((t) => types.has(t))) {
+        if (!Array.from(types).every((t) => itemTypes.includes(t))) {
           return false;
         }
       }

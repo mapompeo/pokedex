@@ -32,6 +32,7 @@ export interface PokemonDetail {
   height: number;
   weight: number;
   spriteUrl: string;
+  shinyUrl: string;
   cryUrl: string;
   baseExperience: number;
   types: string[];

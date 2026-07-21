@@ -34,29 +34,54 @@
       <div class="pdetail__hero" [style.background]="typeColor()">
         <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" loading="lazy" />
         <div class="pdetail__actions">
-          <a routerLink="/" class="pdetail__back" aria-label="Voltar" matTooltip="Voltar" matTooltipPosition="right">
-            <mat-icon>arrow_back</mat-icon>
-          </a>
-          <div class="pdetail__nav-arrows">
-            <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
-              <mat-icon>chevron_left</mat-icon>
+          <div class="pdetail__actions-row">
+            <a routerLink="/" class="pdetail__back" aria-label="Voltar" matTooltip="Voltar" matTooltipPosition="right">
+              <mat-icon>arrow_back</mat-icon>
             </a>
-            <a [routerLink]="['/pokemon', nextId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" aria-label="Próximo Pokémon" matTooltip="Próximo Pokémon" matTooltipPosition="above">
-              <mat-icon>chevron_right</mat-icon>
-            </a>
+            <div class="pdetail__nav-arrows">
+              <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
+                <mat-icon>chevron_left</mat-icon>
+              </a>
+              <a [routerLink]="['/pokemon', nextId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" aria-label="Próximo Pokémon" matTooltip="Próximo Pokémon" matTooltipPosition="above">
+                <mat-icon>chevron_right</mat-icon>
+              </a>
+            </div>
+            <button
+              type="button"
+              class="pdetail__fav"
+              (click)="toggleFavorite()"
+              [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+              [matTooltip]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+              matTooltipPosition="left"
+            >
+              <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
+                isFavorite() ? 'favorite' : 'favorite_border'
+              }}</mat-icon>
+            </button>
           </div>
-          <button
-            type="button"
-            class="pdetail__fav"
-            (click)="toggleFavorite()"
-            [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-            [matTooltip]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-            matTooltipPosition="left"
-          >
-            <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
-              isFavorite() ? 'favorite' : 'favorite_border'
-            }}</mat-icon>
-          </button>
+          <div class="pdetail__actions-row pdetail__actions-row--bottom">
+            <button
+              type="button"
+              class="pdetail__action-btn"
+              (click)="playCry()"
+              aria-label="Ouvir grito"
+              matTooltip="Ouvir grito"
+              matTooltipPosition="right"
+            >
+              <mat-icon>volume_up</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="pdetail__action-btn"
+              [class.pdetail__action-btn--active]="isShiny()"
+              (click)="toggleShiny()"
+              [attr.aria-label]="isShiny() ? 'Versão normal' : 'Versão shiny'"
+              [matTooltip]="isShiny() ? 'Versão normal' : 'Versão shiny'"
+              matTooltipPosition="left"
+            >
+              <mat-icon>auto_awesome</mat-icon>
+            </button>
+          </div>
         </div>
 
         <div class="pdetail__heading">
@@ -71,7 +96,7 @@
       </div>
     </div>
 
-    <img [src]="p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" loading="lazy" />
+    <img [src]="isShiny() ? p.shinyUrl : p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" loading="lazy" />
 
     <div class="pdetail__sheet">
       <nav class="pdetail__tabs" role="tablist" aria-label="Aba de informações" [class.pdetail__tabs--tab1]="activeTabIndex() === 1" [class.pdetail__tabs--tab2]="activeTabIndex() === 2" [class.pdetail__tabs--tab3]="activeTabIndex() === 3">
