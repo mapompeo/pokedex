@@ -32,7 +32,8 @@
   &__content--sheet {
     background: var(--dex-bg);
     border-radius: 32px 32px 0 0;
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 16px -2px color-mix(in srgb, var(--dex-ink) 16%, transparent);
   }
 
   &__header {
@@ -40,7 +41,6 @@
     padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px;
     box-sizing: border-box;
     background: transparent;
-    z-index: 1;
   }
 
   &__header-watermark {
@@ -60,7 +60,7 @@
     position: relative;
     z-index: 1;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: flex-start;
   }
 
@@ -68,10 +68,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
   }
 
   &__theme-btn {
+    position: absolute;
+    right: 16px;
+    top: calc(20px + env(safe-area-inset-top, 0px));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -117,20 +119,20 @@
     display: flex;
     position: fixed;
     left: 50%;
+    bottom: 16px;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
-    z-index: 10;
+    z-index: 100;
     gap: 8px;
-    background: color-mix(in srgb, var(--dex-bg) 92%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
+    background: var(--dex-bg);
+    border: 1px solid color-mix(in srgb, var(--dex-ink) 14%, transparent);
     border-radius: 999px;
-    padding: 6px 12px;
-    box-shadow:
-      var(--dex-shadow-lg),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 12px;
     overflow: hidden;
+  }
+
+  &__bottom-nav--hidden {
+    display: none;
   }
 
   &__bottom-pill {
@@ -179,7 +181,6 @@
       width: 21px;
       height: 21px;
       flex-shrink: 0;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     > span:last-child {
@@ -193,10 +194,6 @@
 
     &:hover {
       color: var(--dex-ink);
-
-      mat-icon {
-        transform: scale(1.1);
-      }
     }
   }
 
@@ -211,14 +208,6 @@
       opacity: 1;
       margin-left: 6px;
     }
-
-    &:hover {
-      color: var(--dex-nav-active);
-
-      mat-icon {
-        transform: scale(1.05);
-      }
-    }
   }
 
 }
@@ -227,8 +216,6 @@
   .pokedex-frame {
     &__content--sheet {
       padding-bottom: 32px;
-      padding-left: 16px;
-      padding-right: 16px;
     }
 
     &__header {
@@ -250,6 +237,10 @@
       align-items: flex-start;
     }
 
+    &__theme-btn {
+      position: static;
+    }
+
     &__logo {
       height: 64px;
       margin-bottom: 0;
@@ -260,12 +251,25 @@
     }
 
     &__bottom-nav {
-      position: relative;
+      position: absolute;
       left: auto;
+      right: 32px;
       bottom: auto;
+      top: 24px;
       transform: none;
-      margin: 0 0 0 auto;
-      flex-shrink: 0;
+      margin: 0;
     }
+  }
+}
+
+@media (min-width: 1200px) {
+  .pokedex-frame {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .pokedex-frame__content--sheet,
+  .pdetail__sheet {
+    box-shadow: 0 0 20px -8px color-mix(in srgb, var(--dex-ink) 10%, transparent);
   }
 }

@@ -28,7 +28,7 @@ export class App {
   favoriteCount = computed(() => this.favoritesService.favoriteIds().size);
   isDarkMode = signal(document.body.classList.contains('dark-mode'));
 
-  private static readonly BRAND_BAND = '#f1f1f1';
+  private static readonly BRAND_BAND = 'var(--dex-bg)';
   frameBackground = computed(() =>
     this.isDetailRoute() ? this.pageBackground.color() ?? 'var(--dex-bg)' : App.BRAND_BAND
   );
@@ -42,10 +42,25 @@ export class App {
     }
     this.isDarkMode.set(document.body.classList.contains('dark-mode'));
 
-    // Sincroniza a cor de fundo com o <body> real (nao so uma div aninhada),
-    // pra o Safari conseguir tingir a status bar / toolbar por tras do notch.
+    // Atualiza theme-color dinamicamente p/ Safari tingir notch + toolbar
     effect(() => {
-      document.body.style.backgroundColor = this.frameBackground();
+      const isDetail = this.isDetailRoute();
+      const heroColor = this.pageBackground.color();
+      const _dm = this.isDarkMode(); // dependência p/ re-avaliar ao trocar modo
+
+      let themeColor: string;
+      if (isDetail && heroColor) {
+        themeColor = heroColor;
+      } else {
+        themeColor =
+          getComputedStyle(document.documentElement).getPropertyValue('--dex-bg').trim() ||
+          '#ffffff';
+      }
+
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute('content', themeColor);
+      }
     });
 
     if (this.swUpdate.isEnabled) {

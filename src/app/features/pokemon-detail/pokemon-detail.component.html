@@ -339,39 +339,88 @@
         @case ('movimentos') {
           <div class="pdetail__panel" role="tabpanel" aria-label="Movimentos">
             @let moves = pokemon()?.moves ?? [];
+            @let insight = moveInsights();
             @if (moves.length === 0) {
               <app-loading-spinner></app-loading-spinner>
             } @else {
-              <div class="pdetail__moves">
-                <div class="pdetail__moves-header">
-                  <span class="pdetail__moves-header-cell">Nome</span>
-                  <span class="pdetail__moves-header-cell">Cat.</span>
-                  <span class="pdetail__moves-header-cell">Poder</span>
-                  <span class="pdetail__moves-header-cell">Prec.</span>
-                  <span class="pdetail__moves-header-cell">PP</span>
-                  <span class="pdetail__moves-header-cell">Método</span>
+              <div class="pdetail__move-summary">
+                <div class="pdetail__move-summary-row">
+                  <span class="pdetail__move-summary-stat">
+                    <strong>{{ insight.totalMoves }}</strong>
+                    <span>movimentos</span>
+                  </span>
+                  <span class="pdetail__move-summary-stat">
+                    <strong>{{ insight.physicalPct }}%</strong>
+                    <span><mat-icon class="pdetail__move-summary-icon">handyman</mat-icon> Físico</span>
+                  </span>
+                  <span class="pdetail__move-summary-stat">
+                    <strong>{{ insight.specialPct }}%</strong>
+                    <span><mat-icon class="pdetail__move-summary-icon">auto_fix_high</mat-icon> Especial</span>
+                  </span>
+                  <span class="pdetail__move-summary-stat">
+                    <strong>{{ insight.statusPct }}%</strong>
+                    <span><mat-icon class="pdetail__move-summary-icon">psychology</mat-icon> Status</span>
+                  </span>
                 </div>
-                @for (move of moves; track move.name) {
-                  @let detail = movesWithDetails().get(move.name);
-                  <div class="pdetail__move">
-                    <span class="pdetail__move-name">{{ formatMoveName(move.name) }}</span>
-                    <span class="pdetail__move-cat">
-                      @if (detail?.damageClass) {
-                        <mat-icon class="pdetail__move-cat-icon">{{ damageClassIcon(move) }}</mat-icon>
-                        {{ damageClassLabel(move) }}
+                @if (insight.hasBest) {
+                  <div class="pdetail__move-summary-highlight">
+                    <span class="pdetail__move-summary-label">Mais fortes</span>
+                    <div class="pdetail__move-summary-moves">
+                      @for (m of insight.best; track m.name) {
+                        <span class="pdetail__move-summary-move">
+                          <span class="pdetail__move-summary-name">{{ formatMoveName(m.name) }}</span>
+                          <span class="pdetail__move-summary-power">{{ m.detail?.power }}</span>
+                        </span>
                       }
-                    </span>
-                    <span class="pdetail__move-power">{{ detail?.power ?? '—' }}</span>
-                    <span class="pdetail__move-acc">{{ detail?.accuracy ?? '—' }}</span>
-                    <span class="pdetail__move-pp">{{ detail?.pp ?? '—' }}</span>
-                    <span class="pdetail__move-method">
-                      @if (move.learnMethod === 'level-up') {
-                        {{ learnMethodLabel(move.learnMethod) }} {{ move.level }}
-                      } @else {
-                        {{ learnMethodLabel(move.learnMethod) }}
-                      }
-                    </span>
+                    </div>
                   </div>
+                }
+              </div>
+
+              <div class="pdetail__moves-accordion">
+                @for (group of movesByMethod(); track group.method; let i = $index) {
+                  <details class="pdetail__move-group" [open]="i === 0">
+                    <summary class="pdetail__move-group-summary">
+                      {{ group.label }}
+                      <span class="pdetail__move-group-count">{{ group.items.length }}</span>
+                    </summary>
+                    <div class="pdetail__move-group-grid">
+                      @for (m of group.items; track m.name) {
+                        <div class="pdetail__move-card">
+                          <div class="pdetail__move-card-top">
+                            <span class="pdetail__move-card-name">{{ formatMoveName(m.name) }}</span>
+                            @if (m.detail?.damageClass) {
+                              <mat-icon class="pdetail__move-card-icon">{{ damageClassIcon({ name: m.name }) }}</mat-icon>
+                            }
+                          </div>
+                          <div class="pdetail__move-card-stats">
+                            @if (m.detail?.power != null) {
+                              <span class="pdetail__move-card-stat">
+                                <span class="pdetail__move-card-stat-value">{{ m.detail?.power }}</span>
+                                <span class="pdetail__move-card-stat-label">Poder</span>
+                              </span>
+                            }
+                            @if (m.level > 0) {
+                              <span class="pdetail__move-card-stat">
+                                <span class="pdetail__move-card-stat-value">Nv.{{ m.level }}</span>
+                                <span class="pdetail__move-card-stat-label">Aprende</span>
+                              </span>
+                            }
+                            @if (m.detail?.accuracy != null) {
+                              <span class="pdetail__move-card-stat">
+                                <span class="pdetail__move-card-stat-value">{{ m.detail?.accuracy }}%</span>
+                                <span class="pdetail__move-card-stat-label">Precisão</span>
+                              </span>
+                            }
+                            <span class="pdetail__move-card-stat">
+                              <span class="pdetail__move-card-stat-value">{{ m.detail?.pp ?? '—' }}</span>
+                              <span class="pdetail__move-card-stat-label">PP</span>
+                            </span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </details>
                 }
               </div>
             }

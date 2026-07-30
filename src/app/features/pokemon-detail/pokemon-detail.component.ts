@@ -117,6 +117,63 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   movesLoading = signal(false);
   abilityNames = signal<Map<string, string>>(new Map());
 
+  moveInsights = computed(() => {
+    const moves = this.pokemon()?.moves ?? [];
+    const details = this.movesWithDetails();
+    const withPower = moves
+      .map((m) => ({ ...m, detail: details.get(m.name) }))
+      .filter((m) => m.detail?.power != null && m.detail.power > 0);
+
+    const sorted = [...withPower].sort((a, b) => (b.detail?.power ?? 0) - (a.detail?.power ?? 0));
+    const best = sorted.slice(0, 3);
+    const worst = sorted.filter((m) => m.detail?.power != null && m.detail.power <= 40).slice(0, 3);
+
+    const byClass = { physical: 0, special: 0, status: 0 };
+    moves.forEach((m) => {
+      const dc = details.get(m.name)?.damageClass;
+      if (dc === 'physical') byClass.physical++;
+      else if (dc === 'special') byClass.special++;
+      else if (dc === 'status') byClass.status++;
+    });
+
+    const totalMoves = moves.length;
+    const physicalPct = totalMoves ? Math.round((byClass.physical / totalMoves) * 100) : 0;
+    const specialPct = totalMoves ? Math.round((byClass.special / totalMoves) * 100) : 0;
+    const statusPct = totalMoves ? Math.round((byClass.status / totalMoves) * 100) : 0;
+
+    return {
+      totalMoves,
+      best,
+      worst,
+      byClass,
+      physicalPct,
+      specialPct,
+      statusPct,
+      hasBest: best.length > 0,
+    };
+  });
+
+  movesByMethod = computed(() => {
+    const moves = this.pokemon()?.moves ?? [];
+    const details = this.movesWithDetails();
+    const groups = new Map<string, { name: string; level: number; detail: MoveDetail | undefined }[]>();
+
+    for (const move of moves) {
+      const key = move.learnMethod === 'level-up' ? 'level-up' : move.learnMethod;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push({ name: move.name, level: move.level, detail: details.get(move.name) });
+    }
+
+    const order = ['level-up', 'machine', 'egg', 'tutor', 'form-change'];
+    return order
+      .filter((key) => groups.has(key))
+      .map((key) => {
+        const items = groups.get(key)!;
+        if (key === 'level-up') items.sort((a, b) => a.level - b.level);
+        return { method: key, label: LEARN_METHOD_LABELS[key] ?? key, items };
+      });
+  });
+
   constructor() {
     // Reage a cada mudança de :id (o Angular reaproveita este componente ao
     // navegar entre /pokemon/:id, então snapshot no construtor não bastaria).

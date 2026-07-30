@@ -3,52 +3,11 @@
     <div class="pokedex-frame__screen-scroll">
       @if (!isDetailRoute()) {
         <header class="pokedex-frame__header">
-          <img src="/pokeball.png" alt="" class="pokedex-frame__header-watermark" aria-hidden="true" loading="lazy" />
           <div class="pokedex-frame__header-row">
             <div>
               <img src="/pokedex-logo.png" alt="Pokédex" class="pokedex-frame__logo" fetchpriority="high" />
               <p class="pokedex-frame__subtitle">{{ subtitle() }}</p>
             </div>
-            <nav class="pokedex-frame__bottom-nav" [class.pokedex-frame__bottom-nav--tab1]="activeTabIndex() === 1" [class.pokedex-frame__bottom-nav--tab2]="activeTabIndex() === 2">
-              <span class="pokedex-frame__bottom-pill"></span>
-              <a
-                routerLink="/"
-                routerLinkActive="pokedex-frame__bottom-tab--active"
-                [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
-                class="pokedex-frame__bottom-tab"
-                aria-label="Lista de Pokémon"
-                [attr.aria-current]="activeTabIndex() === 0 ? 'page' : null"
-                matTooltip="Lista de Pokémon"
-                matTooltipPosition="above"
-              >
-                <mat-icon>grid_view</mat-icon>
-                <span>Lista</span>
-              </a>
-              <a
-                routerLink="/favoritos"
-                routerLinkActive="pokedex-frame__bottom-tab--active"
-                class="pokedex-frame__bottom-tab"
-                aria-label="Favoritos"
-                [attr.aria-current]="activeTabIndex() === 1 ? 'page' : null"
-                matTooltip="Pokémons favoritos"
-                matTooltipPosition="above"
-              >
-                  <mat-icon>favorite</mat-icon>
-                <span>Favoritos</span>
-              </a>
-              <a
-                routerLink="/comparar"
-                routerLinkActive="pokedex-frame__bottom-tab--active"
-                class="pokedex-frame__bottom-tab"
-                aria-label="Comparar Pokémon"
-                [attr.aria-current]="activeTabIndex() === 2 ? 'page' : null"
-                matTooltip="Comparar Pokémon"
-                matTooltipPosition="above"
-              >
-                <mat-icon>compare_arrows</mat-icon>
-                <span>Comparar</span>
-              </a>
-            </nav>
             <button class="pokedex-frame__theme-btn" (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'" [matTooltip]="isDarkMode() ? 'Modo claro' : 'Modo escuro'" matTooltipPosition="below">
               <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             </button>
@@ -62,4 +21,44 @@
       </div>
     </div>
   </div>
+  <nav class="pokedex-frame__bottom-nav" [class.pokedex-frame__bottom-nav--hidden]="isDetailRoute()" [class.pokedex-frame__bottom-nav--tab1]="activeTabIndex() === 1" [class.pokedex-frame__bottom-nav--tab2]="activeTabIndex() === 2">
+    <span class="pokedex-frame__bottom-pill"></span>
+    <a
+      routerLink="/"
+      routerLinkActive="pokedex-frame__bottom-tab--active"
+      [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
+      class="pokedex-frame__bottom-tab"
+      aria-label="Lista de Pokémon"
+      [attr.aria-current]="activeTabIndex() === 0 ? 'page' : null"
+      matTooltip="Lista de Pokémon"
+      matTooltipPosition="above"
+    >
+      <mat-icon>grid_view</mat-icon>
+      <span>Lista</span>
+    </a>
+    <a
+      routerLink="/favoritos"
+      routerLinkActive="pokedex-frame__bottom-tab--active"
+      class="pokedex-frame__bottom-tab"
+      aria-label="Favoritos"
+      [attr.aria-current]="activeTabIndex() === 1 ? 'page' : null"
+      matTooltip="Pokémons favoritos"
+      matTooltipPosition="above"
+    >
+        <mat-icon>favorite</mat-icon>
+      <span>Favoritos</span>
+    </a>
+    <a
+      routerLink="/comparar"
+      routerLinkActive="pokedex-frame__bottom-tab--active"
+      class="pokedex-frame__bottom-tab"
+      aria-label="Comparar Pokémon"
+      [attr.aria-current]="activeTabIndex() === 2 ? 'page' : null"
+      matTooltip="Comparar Pokémon"
+      matTooltipPosition="above"
+    >
+      <mat-icon>compare_arrows</mat-icon>
+      <span>Comparar</span>
+    </a>
+  </nav>
 </div>

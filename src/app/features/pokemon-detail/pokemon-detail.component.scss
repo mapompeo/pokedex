@@ -3,7 +3,6 @@
   flex-direction: column;
   width: 100%;
   min-height: 100dvh;
-  background: var(--dex-bg);
 
   &__hero-wrap {
     position: relative;
@@ -92,7 +91,6 @@
     justify-content: space-between;
     z-index: 100;
     padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 14px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
   }
 
   &__back {
@@ -244,9 +242,9 @@
     border-radius: 32px 32px 0 0;
     margin-top: -12px;
     position: sticky;
-    top: 62px;
+    top: 0;
     z-index: 5;
-    padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0px));
+    padding: 12px 12px calc(120px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
   }
 
@@ -289,6 +287,9 @@
   &__panel {
     padding: 0 4px;
     text-align: center;
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   &__tabs {
@@ -503,9 +504,6 @@
     flex-direction: column;
     gap: 24px;
     text-align: left;
-    max-width: 768px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   &__abilities {
@@ -537,9 +535,6 @@
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
-    max-width: 768px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   &__evolutions {
@@ -548,9 +543,6 @@
     align-items: center;
     gap: 0;
     padding: 8px 0;
-    max-width: 768px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   &__evo-stage {
@@ -910,80 +902,203 @@
   gap: 2px;
   overflow-x: auto;
   text-align: left;
-  max-width: 768px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.pdetail__moves-header {
-  display: grid;
-  grid-template-columns: 1fr 70px 40px 34px 30px 70px;
-  gap: 4px;
-  padding: 8px 12px;
-  font-size: 0.625rem;
-  font-weight: 800;
-  color: var(--dex-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  min-width: 300px;
-}
-
-.pdetail__move {
-  display: grid;
-  grid-template-columns: 1fr 70px 40px 34px 30px 70px;
-  gap: 4px;
-  align-items: center;
-  padding: 10px 12px;
+.pdetail__move-summary {
+  margin-bottom: 16px;
+  padding: 16px;
   border-radius: 8px;
-  min-width: 300px;
+  background: color-mix(in srgb, var(--dex-ink) 3%, transparent);
 
-  &:nth-child(odd) {
-    background: color-mix(in srgb, var(--dex-ink) 3%, transparent);
+  &-row {
+    display: flex;
+    justify-content: space-around;
   }
 
-  &__name {
+  &-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+    strong {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: var(--dex-ink);
+      line-height: 1.2;
+    }
+
+    span:last-child {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.5625rem;
+      font-weight: 800;
+      color: var(--dex-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  &-icon {
+    font-size: 11px;
+    width: 11px;
+    height: 11px;
+  }
+
+  &-highlight {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--dex-ink) 8%, transparent);
+  }
+
+  &-label {
+    font-size: 0.625rem;
+    font-weight: 800;
+    color: var(--dex-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  &-moves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &-move {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--dex-gold) 14%, transparent);
+  }
+
+  &-name {
+    font-size: 0.6875rem;
+    font-weight: 700;
     color: var(--dex-ink);
+    text-transform: capitalize;
+  }
+
+  &-power {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--dex-gold);
+  }
+}
+
+.pdetail__moves-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pdetail__move-group {
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dex-ink) 3%, transparent);
+  overflow: hidden;
+
+  &-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--dex-ink);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &:hover {
+      background: color-mix(in srgb, var(--dex-ink) 6%, transparent);
+    }
+  }
+
+  &-count {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--dex-text-muted);
+    background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  &-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px;
+    padding: 0 12px 12px;
+  }
+}
+
+.pdetail__move-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--dex-bg);
+  overflow: hidden;
+
+  &-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-bottom: 8px;
+    min-width: 0;
+  }
+
+  &-name {
     font-size: 0.75rem;
     font-weight: 700;
+    color: var(--dex-ink);
     text-transform: capitalize;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  &__cat,
-  &__power,
-  &__acc,
-  &__pp {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--dex-ink);
-    text-align: center;
+  &-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: var(--dex-text-muted);
   }
 
-  &__cat {
+  &-stats {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-wrap: wrap;
     gap: 4px;
   }
 
-  &__name {
-    text-align: left;
+  &-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 28px;
   }
 
-  &__cat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &__method {
-    color: var(--dex-text-muted);
-    font-size: 0.65rem;
+  &-stat-value {
+    font-size: 0.6875rem;
     font-weight: 700;
-    white-space: nowrap;
-    text-align: right;
+    color: var(--dex-ink);
+  }
+
+  &-stat-label {
+    font-size: 0.5rem;
+    font-weight: 800;
+    color: var(--dex-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 }
 
@@ -1005,5 +1120,16 @@
     mat-icon {
       transform: rotate(-90deg);
     }
+  }
+}
+
+@media (min-width: 1200px) {
+  .pdetail__actions {
+    left: 50%;
+    right: auto;
+    width: 100%;
+    max-width: 1200px;
+    transform: translateX(-50%);
+    box-sizing: border-box;
   }
 }

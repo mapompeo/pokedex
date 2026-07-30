@@ -114,11 +114,12 @@ html {
 
 body {
   color-scheme: light;
-  background-color: var(--dex-bg);
   color: var(--dex-ink);
   font: var(--mat-sys-body-medium);
   margin: 0;
-  min-height: 100%;
+  min-height: 100dvh;
+  // background via .pokedex-frame ou .pokedex-frame__content--sheet  
+  background: transparent;
   overflow-x: hidden;
   overscroll-behavior: contain;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -157,6 +158,17 @@ app-root {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .dex-search .dex-search__icon {
+    display: none;
+  }
+
+  .dex-search__clear {
+    margin-right: -6px;
+    padding: 0;
   }
 }
 
