@@ -13,6 +13,7 @@
           aria-label="Buscar Pokémon"
           [value]="searchTerm()"
           (input)="onSearchChange($any($event.target).value)"
+          (click)="openPicker()"
           matTooltip="Buscar por nome, ID ou tipo"
           matTooltipPosition="below"
         />
@@ -116,4 +117,11 @@
       <mat-icon>keyboard_arrow_up</mat-icon>
     </button>
   }
+
+  <app-pokemon-picker
+    [open]="pickerOpen()"
+    title="Buscar Pokémon"
+    (pokemonSelected)="onPicked($event)"
+    (dismissed)="closePicker()"
+  ></app-pokemon-picker>
 </div>

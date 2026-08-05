@@ -1,22 +1,20 @@
-import { AfterViewInit, Component, computed, ElementRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { PokemonDetail, PokemonListItem } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
+import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
 import { getCapBackground, getTypeColor } from '../../shared/type-colors';
 import { getStatPercent } from '../../shared/stat-utils';
 import { getStatLabel } from '../../shared/stat-labels';
 import { formatDecimalPtBr } from '../../shared/format-utils';
 
-const MAX_SUGGESTIONS = 8;
-
 @Component({
   selector: 'app-compare',
   standalone: true,
-  imports: [MatIconModule, MatAutocompleteModule, LoadingSpinnerComponent, TypeBadgeComponent],
+  imports: [MatIconModule, LoadingSpinnerComponent, TypeBadgeComponent, PokemonPickerComponent],
   templateUrl: './compare.component.html',
   styleUrl: './compare.component.scss',
   animations: [
@@ -51,8 +49,7 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
   placeholderA = signal('');
   placeholderB = signal('');
 
-  suggestionsA = computed(() => this.suggestionsFor(this.queryA()));
-  suggestionsB = computed(() => this.suggestionsFor(this.queryB()));
+  pickerSide = signal<'A' | 'B' | null>(null);
 
   private typingTimers: ReturnType<typeof setTimeout>[] = [];
   private exampleNames = [
@@ -138,12 +135,22 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
     this.typingTimers.push(setTimeout(tick, 600 + (side === 'B' ? 400 : 0)));
   }
 
-  private suggestionsFor(query: string): PokemonListItem[] {
-    const term = query.trim().toLowerCase();
-    if (!term) return [];
-    return this.allNames()
-      .filter((item) => item.name.toLowerCase().includes(term))
-      .slice(0, MAX_SUGGESTIONS);
+  openPicker(side: 'A' | 'B'): void {
+    this.pickerSide.set(side);
+  }
+
+  closePicker(): void {
+    this.pickerSide.set(null);
+  }
+
+  onPicked(item: PokemonListItem): void {
+    const side = this.pickerSide();
+    this.pickerSide.set(null);
+    if (side === 'A') {
+      this.selectA(item);
+    } else if (side === 'B') {
+      this.selectB(item);
+    }
   }
 
   onQueryAChange(value: string): void {

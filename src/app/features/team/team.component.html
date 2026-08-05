@@ -1,0 +1,467 @@
+<div class="dex-page team-page">
+  <div class="team__header">
+    <h2 class="dex-title">Meu Time</h2>
+    <div class="team__header-right">
+      @if (totalPower() > 0) {
+        <span
+          class="team__power"
+          matTooltip="Status total: soma dos atributos base de todos os membros do time. Uma boa referência de força geral."
+          matTooltipPosition="left"
+        >
+          Status
+          <strong>{{ totalPower() }}</strong>
+        </span>
+      }
+      @if (teamService.team().length < maxSize) {
+        <button
+          type="button"
+          class="team__surprise"
+          (click)="surprise()"
+          [disabled]="surpriseLoading()"
+          matTooltip="Preencher os slots vazios com Pokémon aleatórios"
+          matTooltipPosition="left"
+          aria-label="Preencher os slots vazios com Pokémon aleatórios"
+        >
+          <mat-icon>casino</mat-icon>
+          Surpreenda-me
+        </button>
+      }
+      @if (teamService.team().length > 0) {
+        <button
+          type="button"
+          class="team__clear-btn"
+          (click)="requestClear()"
+          matTooltip="Remover todos os Pokémon do time"
+          matTooltipPosition="left"
+          aria-label="Remover todos os Pokémon do time"
+        >
+          <mat-icon>delete_sweep</mat-icon>
+        </button>
+      }
+      <span class="team__count">{{ teamService.team().length }}/{{ maxSize }}</span>
+    </div>
+  </div>
+
+  @if (teamService.team().length === 0) {
+    <div class="team__empty">
+      <img src="/pokeball.png" alt="" class="team__empty-img" loading="lazy" />
+      <h2 class="team__empty-title">Seu time está vazio</h2>
+      <p class="team__empty-text">Toque em um slot e adicione até {{ maxSize }} pokémons!</p>
+      <button type="button" class="team__empty-surprise" (click)="surprise()" [disabled]="surpriseLoading()">
+        <mat-icon>casino</mat-icon>
+        Surpreenda-me
+      </button>
+    </div>
+  }
+
+  @if (teamCoverage(); as cov) {
+    <section class="team__coverage" aria-label="Análise de cobertura de tipos do time">
+      <div class="team__coverage-head">
+        <h3 class="team__coverage-title">Cobertura de tipos</h3>
+        <span class="team__coverage-sub">Como o time todo responde a cada tipo</span>
+      </div>
+
+      @if (composition(); as comp) {
+        <div class="team__comp">
+          <span class="team__comp-label">Composição</span>
+          <div class="team__comp-chips">
+            @for (c of comp; track c.type) {
+              <span class="team__comp-chip" [style.--type-color]="typeColor(c.type)">
+                <app-type-badge [type]="c.type"></app-type-badge>
+                ×{{ c.count }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="team__coverage-block">
+        <span class="team__coverage-label team__coverage-label--weak">
+          Fraquezas
+          <span class="team__coverage-hint">(tipos que causam o dobro de dano em {{ cov.weakThreshold }} {{ cov.weakThreshold === 1 ? 'membro' : 'ou mais membros' }})</span>
+        </span>
+        @if (cov.weaknesses.length) {
+          <div class="team__coverage-chips">
+            @for (row of cov.weaknesses; track row.type) {
+              <span
+                class="team__coverage-chip team__coverage-chip--weak"
+                [matTooltip]="row.weak + ' membro(s) tomam o dobro de dano de golpes ' + typeNamePt(row.type)"
+                matTooltipPosition="above"
+              >
+                <app-type-badge [type]="row.type"></app-type-badge>
+                <span class="team__coverage-count">×{{ row.weak }}</span>
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="team__coverage-none">Nenhum tipo causa o dobro de dano contra esse time.</p>
+        }
+      </div>
+
+      <div class="team__coverage-block">
+        <span class="team__coverage-label team__coverage-label--resist">
+          Resistências
+          <span class="team__coverage-hint">({{ cov.resistThreshold === 1 ? '1 membro ou mais' : cov.resistThreshold + ' ou mais membros' }} aguenta bem)</span>
+        </span>
+        @if (cov.resistances.length) {
+          <div class="team__coverage-chips">
+            @for (row of cov.resistances; track row.type) {
+              <span
+                class="team__coverage-chip team__coverage-chip--resist"
+                [matTooltip]="row.resist + ' membro(s) aguentam golpes ' + typeNamePt(row.type) + ' com menos dano'"
+                matTooltipPosition="above"
+              >
+                <app-type-badge [type]="row.type"></app-type-badge>
+                <span class="team__coverage-count">×{{ row.resist }}</span>
+              </span>
+            }
+          </div>
+        } @else {
+          <p class="team__coverage-none">O time não aguenta bem golpes de nenhum tipo.</p>
+        }
+      </div>
+
+      @if (offensiveGaps(); as off) {
+        <div class="team__coverage-block">
+          <span class="team__coverage-label team__coverage-label--off">
+            Cobertura de golpes
+            <span class="team__coverage-hint">(golpes do próprio tipo do Pokémon causam mais dano)</span>
+          </span>
+          @if (off.gaps.length) {
+            <div class="team__coverage-chips">
+              @for (type of off.gaps; track type) {
+                <span
+                  class="team__coverage-chip team__coverage-chip--off"
+                  [matTooltip]="'Nenhum membro acerta ' + typeNamePt(type) + ' de forma super efetiva com golpes do próprio tipo'"
+                  matTooltipPosition="above"
+                >
+                  <app-type-badge [type]="type"></app-type-badge>
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="team__coverage-none">O time consegue causar o dobro de dano em todos os tipos!</p>
+          }
+        </div>
+      }
+
+      @if (coverageTip(); as tip) {
+        <button type="button" class="team__coverage-tip" (click)="openTipPicker(tip.counters)">
+          <mat-icon>tips_and_updates</mat-icon>
+          <p class="team__coverage-tip-text">
+            Para cobrir a fraqueza a
+            <app-type-badge [type]="tip.weakness"></app-type-badge>,
+            considere adicionar um Pokémon dos tipos
+            @for (type of tip.counters; track type) {
+              <app-type-badge [type]="type"></app-type-badge>
+            }.
+          </p>
+          <span class="team__coverage-tip-cta">
+            Ver sugestões
+            <mat-icon>arrow_forward</mat-icon>
+          </span>
+        </button>
+      }
+
+      <button
+        type="button"
+        class="team__table-toggle"
+        (click)="typeTableOpen.set(!typeTableOpen())"
+        [attr.aria-expanded]="typeTableOpen()"
+        aria-label="Mostrar ou ocultar a tabela de tipos"
+      >
+        <mat-icon>{{ typeTableOpen() ? 'grid_off' : 'grid_on' }}</mat-icon>
+        Tabela de tipos
+        <mat-icon class="team__table-toggle-chevron">{{ typeTableOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+      @if (typeTableOpen()) {
+        <div class="team__table" role="grid" aria-label="Como cada tipo atinge o seu time">
+          @for (row of cov.all; track row.type) {
+            @let status = row.weak >= cov.weakThreshold ? 'weak' : (row.resist >= cov.resistThreshold ? 'resist' : 'ok');
+            @let tip = status === 'weak'
+              ? (row.weak + ' membro(s) tomam o dobro de dano de golpes ' + typeNamePt(row.type))
+              : (status === 'resist'
+                  ? (row.resist + ' membro(s) aguentam golpes ' + typeNamePt(row.type) + ' com menos dano')
+                  : 'Neutro contra golpes ' + typeNamePt(row.type));
+            <div
+              class="team__table-cell team__table-cell--{{status}}"
+              role="gridcell"
+              [matTooltip]="tip"
+              matTooltipPosition="above"
+            >
+              <span class="team__table-abbr">{{ typeAbbr(row.type) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (teamService.team().length > 0) {
+    <p class="team__drag-hint">
+      <mat-icon>open_with</mat-icon>
+      Arraste os cards para reordenar o time.
+    </p>
+  }
+
+  <div class="team__grid" role="list" aria-label="Seu time de pokémons" cdkDropList (cdkDropListDropped)="onDrop($event)">
+    @for (slot of slots(); track $index) {
+      @if (slot; as item) {
+        <div class="team__slot team__slot--filled" role="listitem" cdkDrag [cdkDragData]="item" [style.--slot-color]="cardColor(typesById().get(item.id) ?? [])">
+          <span class="team__slot-index">#{{ paddedId(item.id) }}</span>
+          <span class="team__slot-grip" cdkDragHandle aria-hidden="true">
+            <mat-icon>drag_indicator</mat-icon>
+          </span>
+          <a [routerLink]="['/pokemon', item.id]" class="team__slot-link" aria-label="Ver detalhes de {{ item.name }}">
+            <img [src]="item.spriteUrl" [alt]="item.name" class="team__slot-sprite" loading="lazy" />
+            <span class="team__slot-name">{{ item.name }}</span>
+            <span class="team__slot-types">
+              @for (type of typesById().get(item.id) ?? []; track type) {
+                <app-type-badge [type]="type"></app-type-badge>
+              }
+            </span>
+            @if (statsById().get(item.id); as stats) {
+              <span
+                class="team__slot-bst"
+                matTooltip="Status total: soma dos atributos base do Pokémon (Vida, Ataque, Defesa, Atq. Esp., Def. Esp. e Velocidade). Quanto maior, mais forte em geral."
+                matTooltipPosition="above"
+              >
+                Status
+                <strong>{{ bstOf(item.id) }}</strong>
+              </span>
+            }
+          </a>
+          <div class="team__slot-actions">
+            <button
+              type="button"
+              class="team__slot-action-btn"
+              (click)="openAnalysis(item.id)"
+              [attr.aria-label]="'Ver análise de ' + item.name"
+              matTooltip="Ver análise"
+              matTooltipPosition="left"
+            >
+              <mat-icon>bar_chart</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="team__slot-action-btn"
+              (click)="openReplace($index)"
+              [attr.aria-label]="'Trocar ' + item.name"
+              matTooltip="Trocar"
+              matTooltipPosition="left"
+            >
+              <mat-icon>swap_horiz</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="team__slot-action-btn team__slot-action-btn--remove"
+              (click)="requestRemove(item.id)"
+              [attr.aria-label]="'Remover ' + item.name + ' do time'"
+              matTooltip="Remover do time"
+              matTooltipPosition="left"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div
+          class="team__slot team__slot--empty"
+          cdkDrag
+          [cdkDragData]="null"
+          role="button"
+          tabindex="0"
+          (click)="openPicker()"
+          (keydown.enter)="openPicker()"
+          (keydown.space)="openPicker()"
+          aria-label="Adicionar pokémon ao time"
+          matTooltip="Adicionar ao time"
+          matTooltipPosition="above"
+        >
+          <mat-icon>add</mat-icon>
+          <span>Adicionar</span>
+        </div>
+      }
+    }
+  </div>
+
+  @if (pickerOpen()) {
+    <app-pokemon-picker
+      [open]="pickerOpen()"
+      [title]="replacingIndex() !== null ? 'Trocar pokémon' : 'Escolher pokémon'"
+      [hint]="replacingIndex() !== null ? 'O pokémon escolhido substituirá o slot ' + (replacingIndex()! + 1) + '.' : ''"
+      [excludeIds]="teamExcludeIds()"
+      [preselectTypes]="pickerPreselect()"
+      (pokemonSelected)="handlePicked($event)"
+      (dismissed)="closePicker()"
+    ></app-pokemon-picker>
+  }
+
+  @if (confirmRemoveId(); as id) {
+    <div class="team__overlay team__overlay--center" (click)="cancelRemove()">
+      <div class="team__confirm" role="alertdialog" aria-label="Confirmar remoção" (click)="$event.stopPropagation()">
+        <div class="team__confirm-head">
+          <span class="team__confirm-icon">
+            <mat-icon>delete</mat-icon>
+          </span>
+          <div>
+            <h3 class="team__confirm-title">Remover do time?</h3>
+            <p class="team__confirm-text">{{ memberName(id) }} será removido do seu time.</p>
+          </div>
+        </div>
+        <div class="team__confirm-actions">
+          <button type="button" class="team__confirm-btn" (click)="cancelRemove()">Cancelar</button>
+          <button type="button" class="team__confirm-btn team__confirm-btn--danger" (click)="confirmRemove()">Remover</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (confirmClear()) {
+    <div class="team__overlay team__overlay--center" (click)="cancelClear()">
+      <div class="team__confirm" role="alertdialog" aria-label="Confirmar limpar time" (click)="$event.stopPropagation()">
+        <div class="team__confirm-head">
+          <span class="team__confirm-icon">
+            <mat-icon>delete_sweep</mat-icon>
+          </span>
+          <div>
+            <h3 class="team__confirm-title">Limpar o time?</h3>
+            <p class="team__confirm-text">Todos os {{ teamService.team().length }} Pokémon serão removidos.</p>
+          </div>
+        </div>
+        <div class="team__confirm-actions">
+          <button type="button" class="team__confirm-btn" (click)="cancelClear()">Cancelar</button>
+          <button type="button" class="team__confirm-btn team__confirm-btn--danger" (click)="confirmClearTeam()">Limpar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (analysisId(); as id) {
+    <div class="team__overlay team__overlay--center" (click)="closeAnalysis()">
+      <div class="team__analysis" role="dialog" aria-label="Análise do membro" (click)="$event.stopPropagation()">
+        <div class="team__analysis-head">
+          <img [src]="memberSprite(id)" [alt]="memberName(id)" class="team__analysis-sprite" />
+          <div class="team__analysis-meta">
+            <h3 class="team__analysis-name">{{ memberName(id) }}</h3>
+            <span class="team__analysis-id">#{{ paddedId(id) }}</span>
+            <span class="team__analysis-types">
+              @for (type of typesById().get(id) ?? []; track type) {
+                <app-type-badge [type]="type"></app-type-badge>
+              }
+            </span>
+          </div>
+          <button type="button" class="team__analysis-close" (click)="closeAnalysis()" aria-label="Fechar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        @if (statsById().get(id); as stats) {
+          <div class="team__analysis-stats">
+            @for (stat of stats; track stat.name) {
+              <div
+                class="team__analysis-stat"
+                [class.team__analysis-stat--best]="stat.baseStat === statBest(stats)"
+              >
+                <span class="team__analysis-stat-label">
+                  @if (stat.baseStat === statBest(stats)) {
+                    <mat-icon class="team__analysis-stat-star" matTooltip="Maior atributo" matTooltipPosition="above">star</mat-icon>
+                  }
+                  {{ statLabel(stat.name) }}
+                </span>
+                <div class="team__analysis-bar">
+                  <div
+                    class="team__analysis-bar-fill"
+                    [style.width.%]="statPct(stat.baseStat)"
+                    [matTooltip]="stat.baseStat + ' / 255'"
+                    matTooltipPosition="above"
+                  ></div>
+                </div>
+                <span class="team__analysis-stat-value">{{ stat.baseStat }}</span>
+              </div>
+            }
+          </div>
+          <p class="team__analysis-power">
+            Status total:
+            <strong>{{ bstOf(id) }}</strong>
+          </p>
+        } @else {
+          <app-loading-spinner></app-loading-spinner>
+        }
+
+        @if (memberCoverage(id); as cov) {
+          <div class="team__analysis-coverage">
+            <div class="team__analysis-coverage-block">
+              <span class="team__analysis-coverage-label team__analysis-coverage-label--weak">Fraquezas</span>
+              @if (cov.weaknesses.length) {
+                <div class="team__analysis-coverage-chips">
+                  @for (row of cov.weaknesses; track row.type) {
+                    <span
+                      class="team__analysis-chip team__analysis-chip--weak"
+                      [matTooltip]="'Toma o dobro de dano de golpes ' + typeNamePt(row.type)"
+                      matTooltipPosition="above"
+                    >
+                      <app-type-badge [type]="row.type"></app-type-badge>
+                      <span class="team__analysis-chip-mult">×{{ row.mult }}</span>
+                    </span>
+                  }
+                </div>
+              } @else {
+                <p class="team__analysis-none">Nenhum tipo causa o dobro de dano nele.</p>
+              }
+            </div>
+            <div class="team__analysis-coverage-block">
+              <span class="team__analysis-coverage-label team__analysis-coverage-label--resist">Resistências</span>
+              @if (cov.resistances.length) {
+                <div class="team__analysis-coverage-chips">
+                  @for (row of cov.resistances; track row.type) {
+                    <span
+                      class="team__analysis-chip team__analysis-chip--resist"
+                      [matTooltip]="'Aguenta golpes ' + typeNamePt(row.type) + ' com menos dano'"
+                      matTooltipPosition="above"
+                    >
+                      <app-type-badge [type]="row.type"></app-type-badge>
+                      <span class="team__analysis-chip-mult">×{{ row.mult }}</span>
+                    </span>
+                  }
+                </div>
+              } @else {
+                <p class="team__analysis-none">Nenhum tipo causa menos dano nele.</p>
+              }
+            </div>
+            <div class="team__analysis-coverage-block">
+              <span class="team__analysis-coverage-label team__analysis-coverage-label--off">Ataques fortes</span>
+              <span class="team__analysis-coverage-hint">golpes do próprio tipo do Pokémon causam mais dano que o normal</span>
+              @if (cov.offenses.length) {
+                <div class="team__analysis-coverage-chips">
+                  @for (type of cov.offenses; track type) {
+                    <span
+                      class="team__analysis-chip team__analysis-chip--off"
+                      [matTooltip]="'Golpes do próprio tipo acertam ' + typeNamePt(type) + ' com o dobro de dano'"
+                      matTooltipPosition="above"
+                    >
+                      <app-type-badge [type]="type"></app-type-badge>
+                    </span>
+                  }
+                </div>
+              } @else {
+                <p class="team__analysis-none">Golpes do próprio tipo não têm vantagem contra tempo nenhum.</p>
+              }
+          </div>
+          </div>
+        }
+
+        <div class="team__analysis-actions">
+          <button type="button" class="team__analysis-btn" (click)="openReplaceFor(id)">
+            <mat-icon>swap_horiz</mat-icon>
+            Trocar
+          </button>
+          <button type="button" class="team__analysis-btn team__analysis-btn--danger" (click)="analysisRemove()">
+            <mat-icon>close</mat-icon>
+            Remover
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

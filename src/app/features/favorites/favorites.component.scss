@@ -5,6 +5,51 @@
   padding: 0 0 12px;
 }
 
+.favorites__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--dex-text-muted);
+  font-size: 0.8125rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+.favorites__error-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.favorites__retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: color-mix(in srgb, var(--pokedex-red) 12%, transparent);
+  color: var(--pokedex-red);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--pokedex-red) 22%, transparent);
+  }
+}
+
 .favorites__empty {
   display: flex;
   flex-direction: column;

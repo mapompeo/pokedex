@@ -1,0 +1,118 @@
+@if (open()) {
+  <div class="pp-overlay" (click)="dismiss()">
+    <div class="pp-dialog" role="dialog" [attr.aria-label]="title()" (click)="$event.stopPropagation()">
+      <div class="pp-head">
+        <div class="pp-head-text">
+          <h3 class="pp-title">{{ title() }}</h3>
+          @if (hint()) {
+            <p class="pp-hint">{{ hint() }}</p>
+          }
+        </div>
+        <button type="button" class="pp-close" (click)="dismiss()" aria-label="Fechar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="pp-search-row">
+        <div class="dex-search">
+          <mat-icon>search</mat-icon>
+          <input
+            #searchInput
+            class="dex-search__input"
+            type="text"
+            placeholder="Buscar por nome ou ID"
+            aria-label="Buscar Pokémon"
+            [value]="query()"
+            (input)="query.set($any($event.target).value)"
+          />
+        </div>
+        <button
+          type="button"
+          class="pp-filter-btn"
+          [class.pp-filter-btn--active]="typeFilter().length > 0"
+          (click)="filtersOpen.set(!filtersOpen())"
+          aria-haspopup="true"
+          [attr.aria-expanded]="filtersOpen()"
+          aria-label="Filtrar por tipo"
+          matTooltip="Filtrar por tipo"
+          matTooltipPosition="below"
+        >
+          <mat-icon>tune</mat-icon>
+          @if (typeFilter().length > 0) {
+            <span class="pp-filter-badge">{{ typeFilter().length }}</span>
+          }
+        </button>
+
+        @if (filtersOpen()) {
+          <div class="pp-type-filters" role="group" aria-label="Filtrar por tipo">
+            @for (type of allTypes; track type) {
+              <button
+                type="button"
+                class="type-chip"
+                [class.type-chip--active]="typeFilter().includes(type)"
+                [style.--type-color]="typeColor(type)"
+                (click)="toggleTypeFilter(type)"
+                [attr.aria-pressed]="typeFilter().includes(type)"
+              >
+                {{ typeNamePt(type) }}
+              </button>
+            }
+            @if (typeFilter().length > 0) {
+              <button type="button" class="type-chip type-chip--clear" (click)="clearTypeFilter()">
+                <mat-icon>close</mat-icon>
+                Limpar
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (typeFilter().length > 0 && !filtersOpen()) {
+        <div class="pp-filter">
+          <span class="pp-filter-label">
+            Filtrando por:
+            @for (type of typeFilter(); track type) {
+              <app-type-badge [type]="type"></app-type-badge>
+            }
+          </span>
+          <button type="button" class="pp-filter-clear" (click)="clearTypeFilter()">Limpar</button>
+        </div>
+      }
+
+      @if (dataError()) {
+        <div class="pp-error">
+          <mat-icon>cloud_off</mat-icon>
+          <p>Não foi possível carregar os Pokémon.</p>
+          <button type="button" class="pp-retry" (click)="loadData()">
+            <mat-icon>refresh</mat-icon>
+            Tentar novamente
+          </button>
+        </div>
+      } @else if (dataLoading()) {
+        <app-loading-spinner></app-loading-spinner>
+      } @else {
+        <div class="pp-list">
+          @for (item of suggestions(); track item.id) {
+            <button type="button" class="pp-item" (click)="select(item)">
+              <img [src]="item.spriteUrl" [alt]="item.name" class="pp-item-sprite" loading="lazy" />
+              <span class="pp-item-meta">
+                <span class="pp-item-id">#{{ paddedId(item.id) }}</span>
+                <span class="pp-item-name">{{ item.name }}</span>
+                <span class="pp-item-types">
+                  @for (type of typesById().get(item.id) ?? []; track type) {
+                    <app-type-badge [type]="type"></app-type-badge>
+                  }
+                </span>
+              </span>
+              <mat-icon class="pp-item-add">add_circle</mat-icon>
+            </button>
+          } @empty {
+            <p class="pp-empty">
+              {{ typeFilter().length || query() ? 'Nenhum Pokémon encontrado com esses critérios' : 'Digite um nome ou ID para buscar' }}
+            </p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

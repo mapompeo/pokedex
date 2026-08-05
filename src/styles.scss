@@ -118,11 +118,15 @@ body {
   font: var(--mat-sys-body-medium);
   margin: 0;
   min-height: 100dvh;
-  // background via .pokedex-frame ou .pokedex-frame__content--sheet  
-  background: transparent;
+  // Fundo do app inteiro (bleed do dark mode em telas grandes) via var(--dex-bg).
+  background: var(--dex-bg);
   overflow-x: hidden;
   overscroll-behavior: contain;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  color-scheme: dark;
 }
 
 app-root {

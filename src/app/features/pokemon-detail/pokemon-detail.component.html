@@ -35,9 +35,9 @@
         <div class="pdetail__hero-shimmer" [class.pdetail__hero-shimmer--active]="isShiny()"></div>
         <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" loading="lazy" />
         <div class="pdetail__actions">
-          <a routerLink="/" class="pdetail__back" aria-label="Voltar" matTooltip="Voltar" matTooltipPosition="right">
+          <button type="button" class="pdetail__back" (click)="goBack()" aria-label="Voltar" matTooltip="Voltar" matTooltipPosition="right">
             <mat-icon>arrow_back</mat-icon>
-          </a>
+          </button>
           <div class="pdetail__nav-arrows">
             <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
               <mat-icon>chevron_left</mat-icon>
@@ -46,18 +46,31 @@
               <mat-icon>chevron_right</mat-icon>
             </a>
           </div>
-          <button
-            type="button"
-            class="pdetail__fav"
-            (click)="toggleFavorite()"
-            [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-            [matTooltip]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-            matTooltipPosition="left"
-          >
-            <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
-              isFavorite() ? 'favorite' : 'favorite_border'
-            }}</mat-icon>
-          </button>
+          <div class="pdetail__action-group">
+            <button
+              type="button"
+              class="pdetail__action-btn"
+              [class.pdetail__action-btn--active]="isInTeam()"
+              (click)="toggleTeam()"
+              [attr.aria-label]="teamButtonLabel()"
+              [matTooltip]="teamButtonLabel()"
+              matTooltipPosition="left"
+            >
+              <mat-icon>{{ isInTeam() ? 'groups' : 'group_add' }}</mat-icon>
+            </button>
+            <button
+              type="button"
+              class="pdetail__fav"
+              (click)="toggleFavorite()"
+              [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+              [matTooltip]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+              matTooltipPosition="left"
+            >
+              <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
+                isFavorite() ? 'favorite' : 'favorite_border'
+              }}</mat-icon>
+            </button>
+          </div>
         </div>
 
         <div class="pdetail__heading">

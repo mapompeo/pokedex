@@ -99,7 +99,12 @@
     justify-content: center;
     width: 44px;
     height: 44px;
+    border: none;
+    background: transparent;
+    padding: 0;
     color: #fff;
+    cursor: pointer;
+    font-family: inherit;
 
     &:focus-visible {
       outline: 2px solid var(--dex-gold);

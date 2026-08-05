@@ -6,7 +6,28 @@ import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter } from 'rxjs';
 import { FavoritesService } from './core/services/favorites.service';
 import { PageBackgroundService } from './core/services/page-background.service';
+import { NavigationService } from './core/services/navigation.service';
 import { routeFade } from './shared/animations';
+
+/**
+ * Resolve qualquer cor CSS (color-mix(), color(srgb ...), etc.) para um
+ * "#rrggbb" simples que o parser de meta[name=theme-color] do Safari entende.
+ * getComputedStyle() nao serve sozinho aqui: em alguns navegadores ele devolve
+ * a cor resolvida em notacoes modernas (ex.: "color(srgb ...)") que o Safari
+ * tambem nao reconhece no meta tag. Pintar num canvas e ler o pixel de volta
+ * sempre da valores RGB concretos (0-255), independente da funcao de origem.
+ */
+function resolveToRgb(cssColor: string): string {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return cssColor;
+  ctx.fillStyle = cssColor;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return `#${[r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('')}`;
+}
 
 @Component({
   selector: 'app-root',
@@ -20,6 +41,7 @@ export class App {
   private ngZone = inject(NgZone);
   private favoritesService = inject(FavoritesService);
   private pageBackground = inject(PageBackgroundService);
+  private navigationService = inject(NavigationService);
   private swUpdate = inject(SwUpdate);
 
   title = 'Pokédex';
@@ -36,30 +58,32 @@ export class App {
   activeTabIndex = signal(0);
 
   constructor() {
+    // Scroll é restaurado manualmente pela listagem (voltar do detalhe mantém posição).
+    history.scrollRestoration = 'manual';
+
     const stored = localStorage.getItem('pokedex-dark-mode');
     if (stored === 'true') {
       document.body.classList.add('dark-mode');
     }
     this.isDarkMode.set(document.body.classList.contains('dark-mode'));
 
-    // Atualiza theme-color dinamicamente p/ Safari tingir notch + toolbar
+    // Atualiza theme-color dinamicamente p/ Safari tingir notch + toolbar.
+    // O parser de cor do meta[name=theme-color] nao entende color-mix() (usado
+    // em getPastelCardColor) - por isso resolvemos via getComputedStyle antes,
+    // que sempre devolve um rgb() simples que o Safari consegue ler.
     effect(() => {
       const isDetail = this.isDetailRoute();
       const heroColor = this.pageBackground.color();
       const _dm = this.isDarkMode(); // dependência p/ re-avaliar ao trocar modo
 
-      let themeColor: string;
-      if (isDetail && heroColor) {
-        themeColor = heroColor;
-      } else {
-        themeColor =
-          getComputedStyle(document.documentElement).getPropertyValue('--dex-bg').trim() ||
-          '#ffffff';
-      }
+      const rawColor =
+        isDetail && heroColor
+          ? heroColor
+          : getComputedStyle(document.documentElement).getPropertyValue('--dex-bg').trim() || '#ffffff';
 
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) {
-        meta.setAttribute('content', themeColor);
+        meta.setAttribute('content', resolveToRgb(rawColor));
       }
     });
 
@@ -74,6 +98,9 @@ export class App {
       .subscribe((event) => {
         this.ngZone.run(() => {
           this.isDetailRoute.set(event.urlAfterRedirects.startsWith('/pokemon/'));
+          if (!this.isDetailRoute()) {
+            this.navigationService.setLastNonDetailUrl(event.urlAfterRedirects);
+          }
           const url = event.urlAfterRedirects;
           if (url === '/') {
             this.activeTabIndex.set(0);
@@ -84,6 +111,9 @@ export class App {
           } else if (url.startsWith('/comparar')) {
             this.activeTabIndex.set(2);
             this.subtitle.set('Compare status de dois pokémons!');
+          } else if (url.startsWith('/time')) {
+            this.activeTabIndex.set(3);
+            this.subtitle.set('Monte sua equipe com até 6 pokémons!');
           }
         });
       });

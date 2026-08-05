@@ -1,13 +1,17 @@
 import { Component, computed, effect, inject, signal, OnDestroy, AfterViewInit, NgZone, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { EMPTY, catchError, filter, forkJoin, map, switchMap } from 'rxjs';
 import { MoveDetail, PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
+import { TeamService } from '../../core/services/team.service';
 import { PageBackgroundService } from '../../core/services/page-background.service';
+import { NavigationService } from '../../core/services/navigation.service';
 import { PokemonDetail, PokemonExtras } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
@@ -52,9 +56,13 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
   private pokemonService = inject(PokemonService);
   private titleService = inject(Title);
   private pageBackground = inject(PageBackgroundService);
+  private navigationService = inject(NavigationService);
+  private location = inject(Location);
   private ngZone = inject(NgZone);
+  private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
   favoritesService = inject(FavoritesService);
+  teamService = inject(TeamService);
 
   pokemon = signal<PokemonDetail | null>(null);
   loading = signal(true);
@@ -84,6 +92,13 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     const p = this.pokemon();
     return p ? this.favoritesService.isFavorite(p.id) : false;
   });
+
+  isInTeam = computed(() => {
+    const p = this.pokemon();
+    return p ? this.teamService.isInTeam(p.id) : false;
+  });
+
+  teamFull = computed(() => this.teamService.isFull());
 
   prevId = computed(() => {
     const p = this.pokemon();
@@ -289,6 +304,45 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     const p = this.pokemon();
     if (p) {
       this.favoritesService.toggleFavorite(p.id);
+    }
+  }
+
+  toggleTeam(): void {
+    const p = this.pokemon();
+    if (!p) return;
+    if (this.isInTeam()) {
+      this.teamService.remove(p.id);
+      this.snackBar.open(`${this.capitalize(p.name)} removido do time`, 'Fechar', {
+        duration: 2500,
+        panelClass: 'app-snackbar',
+      });
+      return;
+    }
+    if (this.teamFull()) {
+      this.snackBar.open('Time cheio — remova um pokémon antes de adicionar', 'Fechar', {
+        duration: 3000,
+        panelClass: 'app-snackbar',
+      });
+      return;
+    }
+    this.teamService.add({ id: p.id, name: p.name, spriteUrl: p.spriteUrl });
+    this.snackBar.open(`${this.capitalize(p.name)} adicionado ao time`, 'Ver time', {
+      duration: 3000,
+      panelClass: 'app-snackbar',
+    }).onAction().subscribe(() => this.router.navigate(['/time']));
+  }
+
+  teamButtonLabel(): string {
+    if (this.isInTeam()) return 'Remover do time';
+    if (this.teamFull()) return 'Time cheio';
+    return 'Adicionar ao time';
+  }
+
+  goBack(): void {
+    if (this.navigationService.cameFromInside) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/']);
     }
   }
 

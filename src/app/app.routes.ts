@@ -21,5 +21,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/compare/compare.component').then((m) => m.CompareComponent),
   },
+  {
+    path: 'time',
+    loadComponent: () =>
+      import('./features/team/team.component').then((m) => m.TeamComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

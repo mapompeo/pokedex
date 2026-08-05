@@ -68,6 +68,48 @@
       flex: 1 1 0;
       min-width: 0;
     }
+
+    .dex-search__trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: text;
+      text-align: left;
+      font: inherit;
+
+      &-value {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--dex-ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      &-placeholder {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.875rem;
+        color: var(--dex-text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      &-icon {
+        flex-shrink: 0;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: var(--dex-text-muted);
+      }
+    }
   }
 
   .dex-search__clear {

@@ -8,9 +8,6 @@
               <img src="/pokedex-logo.png" alt="Pokédex" class="pokedex-frame__logo" fetchpriority="high" />
               <p class="pokedex-frame__subtitle">{{ subtitle() }}</p>
             </div>
-            <button class="pokedex-frame__theme-btn" (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'" [matTooltip]="isDarkMode() ? 'Modo claro' : 'Modo escuro'" matTooltipPosition="below">
-              <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-            </button>
           </div>
         </header>
       }
@@ -21,10 +18,11 @@
       </div>
     </div>
   </div>
-  <nav class="pokedex-frame__bottom-nav" [class.pokedex-frame__bottom-nav--hidden]="isDetailRoute()" [class.pokedex-frame__bottom-nav--tab1]="activeTabIndex() === 1" [class.pokedex-frame__bottom-nav--tab2]="activeTabIndex() === 2">
-    <span class="pokedex-frame__bottom-pill"></span>
-    <a
-      routerLink="/"
+  <div class="pokedex-frame__nav-wrap" [class.pokedex-frame__nav-wrap--hidden]="isDetailRoute()">
+    <nav class="pokedex-frame__bottom-nav" [class.pokedex-frame__bottom-nav--tab1]="activeTabIndex() === 1" [class.pokedex-frame__bottom-nav--tab2]="activeTabIndex() === 2" [class.pokedex-frame__bottom-nav--tab3]="activeTabIndex() === 3">
+      <span class="pokedex-frame__bottom-pill"></span>
+      <a
+        routerLink="/"
       routerLinkActive="pokedex-frame__bottom-tab--active"
       [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }"
       class="pokedex-frame__bottom-tab"
@@ -60,5 +58,29 @@
       <mat-icon>compare_arrows</mat-icon>
       <span>Comparar</span>
     </a>
+    <a
+      routerLink="/time"
+      routerLinkActive="pokedex-frame__bottom-tab--active"
+      class="pokedex-frame__bottom-tab"
+      aria-label="Meu Time"
+      [attr.aria-current]="activeTabIndex() === 3 ? 'page' : null"
+      matTooltip="Meu Time"
+      matTooltipPosition="above"
+    >
+      <mat-icon>groups</mat-icon>
+      <span>Time</span>
+    </a>
+      <span class="pokedex-frame__nav-divider" aria-hidden="true"></span>
+      <button
+        type="button"
+        class="pokedex-frame__theme-btn"
+        (click)="toggleDarkMode()"
+        [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'"
+        [matTooltip]="isDarkMode() ? 'Modo claro' : 'Modo escuro'"
+        matTooltipPosition="above"
+      >
+        <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
   </nav>
+  </div>
 </div>

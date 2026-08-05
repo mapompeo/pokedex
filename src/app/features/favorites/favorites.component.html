@@ -1,9 +1,20 @@
 <div class="dex-page">
+  @if (error()) {
+    <div class="favorites__error">
+      <mat-icon class="favorites__error-icon">cloud_off</mat-icon>
+      <p>Não foi possível carregar seus favoritos.</p>
+      <button class="favorites__retry" (click)="retry()">
+        <mat-icon>refresh</mat-icon>
+        Tentar novamente
+      </button>
+    </div>
+  }
+
   @if (loading()) {
     <app-loading-spinner></app-loading-spinner>
   }
 
-  @if (!loading() && items().length === 0) {
+  @if (!loading() && !error() && items().length === 0) {
     <div class="favorites__empty">
       <img src="/pokeball.png" alt="" class="favorites__empty-img" loading="lazy" />
       <h2 class="favorites__empty-title">Nenhum favorito ainda</h2>

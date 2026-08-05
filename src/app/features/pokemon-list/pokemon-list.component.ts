@@ -16,9 +16,11 @@ import { Subject, debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
+import { PokemonListStateService } from '../../core/services/pokemon-list-state.service';
 import { PokemonListItem } from '../../core/models/pokemon.model';
 import { PokemonCardComponent } from '../../shared/components/pokemon-card/pokemon-card.component';
 import { SkeletonCardComponent } from '../../shared/components/skeleton-card/skeleton-card.component';
+import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
 import { getTypeColor } from '../../shared/type-colors';
 import { getTypeNamePt } from '../../shared/type-translations';
 import { listStagger } from '../../shared/animations';
@@ -28,7 +30,7 @@ const PAGE_SIZE = 20;
 @Component({
   selector: 'app-pokemon-list',
   standalone: true,
-  imports: [MatIconModule, MatTooltipModule, PokemonCardComponent, SkeletonCardComponent],
+  imports: [MatIconModule, MatTooltipModule, PokemonCardComponent, SkeletonCardComponent, PokemonPickerComponent],
   templateUrl: './pokemon-list.component.html',
   styleUrl: './pokemon-list.component.scss',
   animations: [listStagger],
@@ -36,6 +38,7 @@ const PAGE_SIZE = 20;
 export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   private pokemonService = inject(PokemonService);
   private router = inject(Router);
+  private state = inject(PokemonListStateService);
   favoritesService = inject(FavoritesService);
 
   @ViewChild('sentinel') sentinel?: ElementRef<HTMLDivElement>;
@@ -50,17 +53,20 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   private touchMoveY = 0;
   private readonly PULL_THRESHOLD = 60;
 
-  allItems = signal<PokemonListItem[]>([]);
-  allNames = signal<PokemonListItem[]>([]);
   loading = signal(false);
   error = signal(false);
-  offset = signal(0);
-  total = signal<number | null>(null);
-  searchTerm = signal('');
-  typesById = signal<Map<number, string[]>>(new Map());
-  availableTypes = signal<{ name: string; label: string; color: string }[]>([]);
-  selectedTypes = signal<Set<string>>(new Set());
   filtersOpen = signal(false);
+  pickerOpen = signal(false);
+
+  // Estado persistente (sobrevive à navegação para o detalhe e volta)
+  allItems = this.state.allItems;
+  allNames = this.state.allNames;
+  typesById = this.state.typesById;
+  availableTypes = this.state.availableTypes;
+  offset = this.state.offset;
+  total = this.state.total;
+  searchTerm = this.state.searchTerm;
+  selectedTypes = this.state.selectedTypes;
 
   filteredItems = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -96,14 +102,22 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.pokemonService.getAllPokemonListItems().subscribe((items) => this.allNames.set(items));
-    this.pokemonService.getTypesByPokemonId().subscribe((idToTypes) => this.typesById.set(idToTypes));
-    this.pokemonService.getTypes().subscribe((types) =>
-      this.availableTypes.set(
-        types.map((t) => ({ name: t.name, label: getTypeNamePt(t.name), color: getTypeColor(t.name) }))
-      )
-    );
-    this.loadNextPage();
+    if (this.allNames().length === 0) {
+      this.pokemonService.getAllPokemonListItems().subscribe((items) => this.allNames.set(items));
+    }
+    if (this.typesById().size === 0) {
+      this.pokemonService.getTypesByPokemonId().subscribe((idToTypes) => this.typesById.set(idToTypes));
+    }
+    if (this.availableTypes().length === 0) {
+      this.pokemonService.getTypes().subscribe((types) =>
+        this.availableTypes.set(
+          types.map((t) => ({ name: t.name, label: getTypeNamePt(t.name), color: getTypeColor(t.name) }))
+        )
+      );
+    }
+    if (this.allItems().length === 0) {
+      this.loadNextPage();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -117,8 +131,13 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.onScrollHandler = () => {
       this.showScrollTop.set(window.scrollY > 400);
+      this.state.scrollY = window.scrollY;
     };
     window.addEventListener('scroll', this.onScrollHandler, { passive: true });
+    const savedScrollY = this.state.scrollY;
+    if (savedScrollY > 0) {
+      setTimeout(() => window.scrollTo(0, savedScrollY), 0);
+    }
     setTimeout(() => this.fillViewportIfNeeded(), 0);
   }
 
@@ -156,6 +175,19 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onSearchChange(value: string): void {
     this.searchSubject.next(value);
+  }
+
+  openPicker(): void {
+    this.pickerOpen.set(true);
+  }
+
+  closePicker(): void {
+    this.pickerOpen.set(false);
+  }
+
+  onPicked(item: PokemonListItem): void {
+    this.pickerOpen.set(false);
+    this.router.navigate(['/pokemon', item.id]);
   }
 
   toggleTypeFilter(typeName: string): void {
@@ -206,6 +238,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
       this.allItems.set([]);
       this.offset.set(0);
       this.total.set(null);
+      this.state.scrollY = 0;
       this.loadNextPage();
       this.clearAllFilters();
     } else {
