@@ -17,20 +17,24 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { PokemonListStateService } from '../../core/services/pokemon-list-state.service';
-import { PokemonListItem } from '../../core/models/pokemon.model';
 import { PokemonCardComponent } from '../../shared/components/pokemon-card/pokemon-card.component';
 import { SkeletonCardComponent } from '../../shared/components/skeleton-card/skeleton-card.component';
-import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
 import { getTypeColor } from '../../shared/type-colors';
 import { getTypeNamePt } from '../../shared/type-translations';
 import { listStagger } from '../../shared/animations';
 
 const PAGE_SIZE = 20;
 
+const EXAMPLE_NAMES = [
+  'Pikachu', 'Charizard', 'Bulbasaur', 'Squirtle', 'Mewtwo',
+  'Gengar', 'Lucario', 'Eevee', 'Dragonite', 'Gyarados',
+  'Snorlax', 'Greninja', 'Sylveon', 'Arcanine', 'Blaziken',
+];
+
 @Component({
   selector: 'app-pokemon-list',
   standalone: true,
-  imports: [MatIconModule, MatTooltipModule, PokemonCardComponent, SkeletonCardComponent, PokemonPickerComponent],
+  imports: [MatIconModule, MatTooltipModule, PokemonCardComponent, SkeletonCardComponent],
   templateUrl: './pokemon-list.component.html',
   styleUrl: './pokemon-list.component.scss',
   animations: [listStagger],
@@ -45,6 +49,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer?: IntersectionObserver;
   private searchSubject = new Subject<string>();
   private onScrollHandler?: () => void;
+  private placeholderTimers: ReturnType<typeof setTimeout>[] = [];
 
   showScrollTop = signal(false);
   isPulling = signal(false);
@@ -56,7 +61,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   loading = signal(false);
   error = signal(false);
   filtersOpen = signal(false);
-  pickerOpen = signal(false);
+  placeholder = signal('');
 
   // Estado persistente (sobrevive à navegação para o detalhe e volta)
   allItems = this.state.allItems;
@@ -139,6 +144,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => window.scrollTo(0, savedScrollY), 0);
     }
     setTimeout(() => this.fillViewportIfNeeded(), 0);
+    this.startPlaceholderTyping();
   }
 
   private fillViewportIfNeeded(): void {
@@ -148,11 +154,44 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  startPlaceholderTyping(): void {
+    const shuffled = [...EXAMPLE_NAMES].sort(() => Math.random() - 0.5);
+    let nameIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+
+    const tick = () => {
+      const name = shuffled[nameIdx % shuffled.length];
+      if (!deleting) {
+        charIdx++;
+        this.placeholder.set(name.slice(0, charIdx));
+        if (charIdx === name.length) {
+          this.placeholderTimers.push(setTimeout(tick, 1800));
+          deleting = true;
+          return;
+        }
+        this.placeholderTimers.push(setTimeout(tick, 90 + Math.random() * 60));
+      } else {
+        charIdx--;
+        this.placeholder.set(name.slice(0, charIdx));
+        if (charIdx === 0) {
+          deleting = false;
+          nameIdx++;
+          this.placeholderTimers.push(setTimeout(tick, 500));
+          return;
+        }
+        this.placeholderTimers.push(setTimeout(tick, 50 + Math.random() * 30));
+      }
+    };
+    this.placeholderTimers.push(setTimeout(tick, 600));
+  }
+
   ngOnDestroy(): void {
     this.observer?.disconnect();
     if (this.onScrollHandler) {
       window.removeEventListener('scroll', this.onScrollHandler);
     }
+    this.placeholderTimers.forEach((t) => clearTimeout(t));
   }
 
   loadNextPage(): void {
@@ -175,19 +214,6 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onSearchChange(value: string): void {
     this.searchSubject.next(value);
-  }
-
-  openPicker(): void {
-    this.pickerOpen.set(true);
-  }
-
-  closePicker(): void {
-    this.pickerOpen.set(false);
-  }
-
-  onPicked(item: PokemonListItem): void {
-    this.pickerOpen.set(false);
-    this.router.navigate(['/pokemon', item.id]);
   }
 
   toggleTypeFilter(typeName: string): void {

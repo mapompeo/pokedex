@@ -59,6 +59,17 @@ html {
   --dex-badge-mythical-text: #d0b0f0;
 }
 
+// Tooltip padrão do projeto: sempre preto com texto branco, formato pill.
+.mat-mdc-tooltip {
+  --mdc-tooltip-container-color: #000000;
+  --mdc-tooltip-supporting-text-color: #ffffff;
+  --mdc-tooltip-container-shape: 999px;
+  --mdc-tooltip-supporting-text-size: 0.75rem;
+  --mdc-tooltip-supporting-text-line-height: 1.1;
+  --mdc-tooltip-supporting-text-font: 'Nunito Sans', sans-serif;
+  --mdc-tooltip-supporting-text-weight: 700;
+}
+
 .dex-page {
   padding: 16px;
 

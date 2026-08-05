@@ -207,29 +207,38 @@
   <div class="team__grid" role="list" aria-label="Seu time de pokémons" cdkDropList (cdkDropListDropped)="onDrop($event)">
     @for (slot of slots(); track $index) {
       @if (slot; as item) {
-        <div class="team__slot team__slot--filled" role="listitem" cdkDrag [cdkDragData]="item" [style.--slot-color]="cardColor(typesById().get(item.id) ?? [])">
-          <span class="team__slot-index">#{{ paddedId(item.id) }}</span>
+        <div
+          class="team__slot team__slot--filled"
+          role="listitem"
+          cdkDrag
+          [cdkDragData]="item"
+          [style.background]="cardColor(typesById().get(item.id) ?? [])"
+        >
+          <img src="/pokeball.png" alt="" class="team__slot-watermark" aria-hidden="true" loading="lazy" />
           <span class="team__slot-grip" cdkDragHandle aria-hidden="true">
             <mat-icon>drag_indicator</mat-icon>
           </span>
           <a [routerLink]="['/pokemon', item.id]" class="team__slot-link" aria-label="Ver detalhes de {{ item.name }}">
-            <img [src]="item.spriteUrl" [alt]="item.name" class="team__slot-sprite" loading="lazy" />
-            <span class="team__slot-name">{{ item.name }}</span>
-            <span class="team__slot-types">
-              @for (type of typesById().get(item.id) ?? []; track type) {
-                <app-type-badge [type]="type"></app-type-badge>
-              }
-            </span>
-            @if (statsById().get(item.id); as stats) {
-              <span
-                class="team__slot-bst"
-                matTooltip="Status total: soma dos atributos base do Pokémon (Vida, Ataque, Defesa, Atq. Esp., Def. Esp. e Velocidade). Quanto maior, mais forte em geral."
-                matTooltipPosition="above"
-              >
-                Status
-                <strong>{{ bstOf(item.id) }}</strong>
+            <div class="team__slot-info">
+              <span class="team__slot-id">#{{ paddedId(item.id) }}</span>
+              <span class="team__slot-name">{{ item.name }}</span>
+              <span class="team__slot-types">
+                @for (type of typesById().get(item.id) ?? []; track type) {
+                  <app-type-badge [type]="type"></app-type-badge>
+                }
               </span>
-            }
+              @if (statsById().get(item.id)) {
+                <span
+                  class="team__slot-bst"
+                  matTooltip="Status total: soma dos atributos base do Pokémon (Vida, Ataque, Defesa, Atq. Esp., Def. Esp. e Velocidade). Quanto maior, mais forte em geral."
+                  matTooltipPosition="above"
+                >
+                  Status
+                  <strong>{{ bstOf(item.id) }}</strong>
+                </span>
+              }
+            </div>
+            <img [src]="item.spriteUrl" [alt]="item.name" class="team__slot-sprite" loading="lazy" />
           </a>
           <div class="team__slot-actions">
             <button
@@ -287,6 +296,7 @@
 
   @if (pickerOpen()) {
     <app-pokemon-picker
+      [modal]="true"
       [open]="pickerOpen()"
       [title]="replacingIndex() !== null ? 'Trocar pokémon' : 'Escolher pokémon'"
       [hint]="replacingIndex() !== null ? 'O pokémon escolhido substituirá o slot ' + (replacingIndex()! + 1) + '.' : ''"

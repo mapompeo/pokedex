@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, ElementRef, HostListener, inject, input, output, signal, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,24 +16,43 @@ const ATTACKING_TYPES = Object.keys(TYPE_CHART);
 @Component({
   selector: 'app-pokemon-picker',
   standalone: true,
-  imports: [MatIconModule, MatTooltipModule, TypeBadgeComponent, LoadingSpinnerComponent],
+  imports: [NgTemplateOutlet, MatIconModule, MatTooltipModule, TypeBadgeComponent, LoadingSpinnerComponent],
   templateUrl: './pokemon-picker.component.html',
   styleUrl: './pokemon-picker.component.scss',
+  host: {
+    '[class.pp--modal]': 'modal()',
+  },
 })
 export class PokemonPickerComponent {
   private pokemonService = inject(PokemonService);
 
-  /** Controla a abertura do popup. Quando fica true, o picker se reinicia e foca a busca. */
+  /** Modo de exibição. Default: dropdown (autocomplete inline). true = popup modal centralizado. */
+  modal = input(false);
+  /** Força a abertura do dropdown a partir do pai (ex.: escolha de slot no time). */
   open = input(false);
-  title = input('Escolher Pokémon');
-  hint = input('');
+  /** Valor exibido no campo quando o usuário não está digitando (ex.: Pokémon já escolhido). */
+  value = input('');
   /** IDs que não devem aparecer na lista (ex.: os que já estão no time). */
   excludeIds = input<number[]>([]);
   /** Tipos pré-selecionados no filtro ao abrir. */
   preselectTypes = input<string[]>([]);
+  /** Mostra o botão de filtro por tipo dentro da searchbar. */
+  filterButton = input(true);
+  /** Título exibido no painel (opcional). */
+  title = input('');
+  /** Dica de contexto exibida no painel (opcional). */
+  hint = input('');
+  /** Texto do placeholder do campo de busca. */
+  placeholder = input('Buscar por nome ou ID');
+  /** Mostra um botão de limpar a busca quando há texto digitado. */
+  clearable = input(false);
 
   pokemonSelected = output<PokemonListItem>();
   dismissed = output<void>();
+  /** Emite a consulta digitada (para o pai sincronizar filtros externos). */
+  queryChange = output<string>();
+  /** Emite quando o usuário limpa o campo de busca. */
+  cleared = output<void>();
 
   allTypes = ATTACKING_TYPES;
 
@@ -44,6 +64,12 @@ export class PokemonPickerComponent {
   dataLoading = signal(true);
   dataError = signal(false);
 
+  /** Abre ao focar/digitar (uso como autocomplete). */
+  show = signal(false);
+  fieldFocused = signal(false);
+  panelVisible = computed(() => this.show() || this.open());
+
+  @ViewChild('root') root?: ElementRef<HTMLDivElement>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   private pendingData = 0;
@@ -67,17 +93,44 @@ export class PokemonPickerComponent {
     this.loadData();
 
     effect(() => {
-      if (this.open()) {
-        this.reset();
+      if (this.modal()) {
+        if (this.open()) {
+          this.resetForOpen();
+        }
+      } else if (!this.open()) {
+        this.show.set(false);
+      }
+    });
+
+    effect(() => {
+      if (this.modal()) return;
+      const v = this.value();
+      if (v && !this.fieldFocused()) {
+        this.query.set(v);
       }
     });
   }
 
-  private reset(): void {
+  private resetForOpen(): void {
     this.filtersOpen.set(false);
     this.typeFilter.set(this.preselectTypes());
-    this.query.set('');
+    this.show.set(true);
     setTimeout(() => this.searchInput?.nativeElement?.focus(), 0);
+  }
+
+  onQueryInput(value: string): void {
+    this.query.set(value);
+    if (!this.modal()) this.show.set(true);
+    this.queryChange.emit(value);
+  }
+
+  onFocus(): void {
+    this.fieldFocused.set(true);
+    if (!this.modal()) this.show.set(true);
+  }
+
+  onBlur(): void {
+    this.fieldFocused.set(false);
   }
 
   loadData(): void {
@@ -113,19 +166,39 @@ export class PokemonPickerComponent {
     this.typeFilter.set([]);
   }
 
+  clearQuery(): void {
+    this.query.set('');
+    this.queryChange.emit('');
+    this.cleared.emit();
+    this.show.set(true);
+    this.searchInput?.nativeElement?.focus();
+  }
+
   select(item: PokemonListItem): void {
+    this.show.set(false);
     this.pokemonSelected.emit(item);
   }
 
   dismiss(): void {
+    this.show.set(false);
     if (this.open()) {
       this.dismissed.emit();
     }
   }
 
+  @HostListener('document:pointerdown', ['$event'])
+  onGlobalClick(event: PointerEvent): void {
+    if (this.modal()) return;
+    if ((this.show() || this.open()) && this.root && !this.root.nativeElement.contains(event.target as Node)) {
+      this.dismiss();
+    }
+  }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.dismiss();
+    if (this.show() || this.open()) {
+      this.dismiss();
+    }
   }
 
   typeColor(type: string): string {

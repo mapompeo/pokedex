@@ -49,8 +49,6 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
   placeholderA = signal('');
   placeholderB = signal('');
 
-  pickerSide = signal<'A' | 'B' | null>(null);
-
   private typingTimers: ReturnType<typeof setTimeout>[] = [];
   private exampleNames = [
     'Pikachu', 'Charizard', 'Bulbasaur', 'Squirtle', 'Mewtwo',
@@ -133,24 +131,6 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
       }
     };
     this.typingTimers.push(setTimeout(tick, 600 + (side === 'B' ? 400 : 0)));
-  }
-
-  openPicker(side: 'A' | 'B'): void {
-    this.pickerSide.set(side);
-  }
-
-  closePicker(): void {
-    this.pickerSide.set(null);
-  }
-
-  onPicked(item: PokemonListItem): void {
-    const side = this.pickerSide();
-    this.pickerSide.set(null);
-    if (side === 'A') {
-      this.selectA(item);
-    } else if (side === 'B') {
-      this.selectB(item);
-    }
   }
 
   onQueryAChange(value: string): void {

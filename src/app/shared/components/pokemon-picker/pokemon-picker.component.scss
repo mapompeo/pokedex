@@ -1,5 +1,55 @@
 :host {
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+:host.pp--modal {
   display: contents;
+}
+
+.pp-root {
+  position: relative;
+  width: 100%;
+}
+
+.pp-search-row {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+}
+
+.pp-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--dex-bg);
+  border: 1px solid color-mix(in srgb, var(--dex-ink) 12%, transparent);
+  border-radius: 16px;
+  box-shadow: var(--dex-shadow-xl);
+  padding: 12px;
+  box-sizing: border-box;
+  max-height: 60vh;
+}
+
+.pp--modal {
+  .pp-panel {
+    position: static;
+    flex: 1 1 auto;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
 }
 
 .pp-overlay {
@@ -33,6 +83,10 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+:host:not(.pp--modal) .pp-root > .pp-head {
+  flex-direction: column;
 }
 
 .pp-title {
@@ -72,11 +126,28 @@
   }
 }
 
-.pp-search-row {
+.pp-clear {
   display: flex;
-  gap: 8px;
-  position: relative;
-  z-index: 30;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
+  color: var(--dex-ink);
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--dex-ink) 16%, transparent);
+  }
 }
 
 .pp-filter-btn {

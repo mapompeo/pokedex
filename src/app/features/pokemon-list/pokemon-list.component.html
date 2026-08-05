@@ -2,22 +2,19 @@
   <div class="pull-indicator" [class.pull-indicator--visible]="isPulling()" [style.height.px]="pullDistance()">
     <mat-icon [class.pull-indicator--spinning]="pullDistance() >= 60">refresh</mat-icon>
   </div>
-  <div class="pokemon-list__filters">
-    <div class="pokemon-list__search-row">
-      <div class="dex-search">
-        <mat-icon>search</mat-icon>
-        <input
-          class="dex-search__input"
-          type="text"
-          placeholder="Buscar por nome, ID ou tipo"
-          aria-label="Buscar Pokémon"
-          [value]="searchTerm()"
-          (input)="onSearchChange($any($event.target).value)"
-          (click)="openPicker()"
-          matTooltip="Buscar por nome, ID ou tipo"
-          matTooltipPosition="below"
-        />
-      </div>
+<div class="pokemon-list__filters">
+      <div class="pokemon-list__search-row">
+        <div class="dex-search">
+          <mat-icon>search</mat-icon>
+          <input
+            class="dex-search__input"
+            type="text"
+            [placeholder]="placeholder()"
+            aria-label="Buscar Pokémon"
+            [value]="searchTerm()"
+            (input)="onSearchChange($any($event.target).value)"
+          />
+        </div>
       <button
         class="pokemon-list__filter-btn"
         (click)="randomPokemon()"
@@ -26,9 +23,10 @@
         matTooltipPosition="below"
       >
         <mat-icon>shuffle</mat-icon>
+        <span class="pokemon-list__filter-btn-label">Surpreenda-me</span>
       </button>
       <button
-        class="pokemon-list__filter-btn"
+        class="pokemon-list__filter-btn pokemon-list__filter-btn--filter"
         [class.pokemon-list__filter-btn--active]="selectedTypes().size > 0"
         (click)="filtersOpen.set(!filtersOpen())"
         aria-haspopup="true"
@@ -38,6 +36,7 @@
         matTooltipPosition="below"
       >
         <mat-icon>tune</mat-icon>
+        <span class="pokemon-list__filter-btn-label">Filtrar</span>
         @if (selectedTypes().size > 0) {
           <span class="pokemon-list__filter-badge">{{ selectedTypes().size }}</span>
         }
@@ -117,11 +116,4 @@
       <mat-icon>keyboard_arrow_up</mat-icon>
     </button>
   }
-
-  <app-pokemon-picker
-    [open]="pickerOpen()"
-    title="Buscar Pokémon"
-    (pokemonSelected)="onPicked($event)"
-    (dismissed)="closePicker()"
-  ></app-pokemon-picker>
 </div>

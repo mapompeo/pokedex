@@ -10,49 +10,28 @@
   }
 
   <div class="compare__search-row">
-    <div class="dex-search">
-      <mat-icon class="dex-search__icon">search</mat-icon>
-      <button class="dex-search__trigger" type="button" (click)="openPicker('A')" [attr.aria-label]="'Buscar primeiro Pokémon para comparar'">
-        @if (queryA()) {
-          <span class="dex-search__trigger-value">{{ queryA() }}</span>
-        } @else {
-          <span class="dex-search__trigger-placeholder">{{ placeholderA() || 'Buscar Pokémon A' }}</span>
-        }
-        <mat-icon class="dex-search__trigger-icon">expand_more</mat-icon>
-      </button>
-      @if (queryA()) {
-        <button class="dex-search__clear" (click)="clearA()" aria-label="Limpar busca">
-          <mat-icon>close</mat-icon>
-        </button>
-      }
-    </div>
-
-    <div class="dex-search">
-      <mat-icon class="dex-search__icon">search</mat-icon>
-      <button class="dex-search__trigger" type="button" (click)="openPicker('B')" [attr.aria-label]="'Buscar segundo Pokémon para comparar'">
-        @if (queryB()) {
-          <span class="dex-search__trigger-value">{{ queryB() }}</span>
-        } @else {
-          <span class="dex-search__trigger-placeholder">{{ placeholderB() || 'Buscar Pokémon B' }}</span>
-        }
-        <mat-icon class="dex-search__trigger-icon">expand_more</mat-icon>
-      </button>
-      @if (queryB()) {
-        <button class="dex-search__clear" (click)="clearB()" aria-label="Limpar seleção">
-          <mat-icon>close</mat-icon>
-        </button>
-      }
-    </div>
-  </div>
-
-  @if (pickerSide() !== null) {
     <app-pokemon-picker
-      [open]="pickerSide() !== null"
-      [title]="pickerSide() === 'A' ? 'Escolher primeiro Pokémon' : 'Escolher segundo Pokémon'"
-      (pokemonSelected)="onPicked($event)"
-      (dismissed)="closePicker()"
+      class="compare__picker"
+      [value]="queryA()"
+      [placeholder]="placeholderA()"
+      [clearable]="true"
+      [filterButton]="false"
+      (pokemonSelected)="selectA($event)"
+      (queryChange)="onQueryAChange($event)"
+      (cleared)="clearA()"
     ></app-pokemon-picker>
-  }
+
+    <app-pokemon-picker
+      class="compare__picker"
+      [value]="queryB()"
+      [placeholder]="placeholderB()"
+      [clearable]="true"
+      [filterButton]="false"
+      (pokemonSelected)="selectB($event)"
+      (queryChange)="onQueryBChange($event)"
+      (cleared)="clearB()"
+    ></app-pokemon-picker>
+  </div>
 
   @if (bothLoaded()) {
     @let a = pokemonA()!;
