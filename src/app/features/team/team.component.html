@@ -204,7 +204,7 @@
     </p>
   }
 
-  <div class="team__grid" role="list" aria-label="Seu time de pokémons" cdkDropList (cdkDropListDropped)="onDrop($event)">
+  <div class="team__grid" role="list" aria-label="Seu time de pokémons" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="onDrop($event)">
     @for (slot of slots(); track $index) {
       @if (slot; as item) {
         <app-pokemon-card

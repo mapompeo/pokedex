@@ -1,5 +1,5 @@
 <div class="pokemon-card" [style.background]="cardColor">
-  <img src="/pokeball.png" alt="" class="pokemon-card__watermark" aria-hidden="true" loading="lazy" />
+  <img src="/pokeball.png" alt="" class="pokemon-card__watermark" aria-hidden="true" loading="lazy" draggable="false" />
   <ng-content select="[cardGrip]"></ng-content>
   @if (showFavorite()) {
     <button
@@ -26,7 +26,7 @@
       }
       <ng-content select="[cardExtra]"></ng-content>
     </div>
-    <img [src]="pokemon().spriteUrl" [alt]="pokemon().name" class="pokemon-card__sprite" loading="lazy" />
+    <img [src]="pokemon().spriteUrl" [alt]="pokemon().name" class="pokemon-card__sprite" loading="lazy" draggable="false" />
   </a>
   <ng-content select="[cardActions]"></ng-content>
 </div>
