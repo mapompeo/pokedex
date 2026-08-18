@@ -1,27 +1,32 @@
 <div class="pokemon-card" [style.background]="cardColor">
   <img src="/pokeball.png" alt="" class="pokemon-card__watermark" aria-hidden="true" loading="lazy" />
-  <button
-    type="button"
-    class="pokemon-card__fav"
-    (click)="favoriteToggled.emit(pokemon.id)"
-    [attr.aria-label]="isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-  >
-    <mat-icon [style.color]="isFavorite ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
-      isFavorite ? 'favorite' : 'favorite_border'
-    }}</mat-icon>
-  </button>
-  <a [routerLink]="['/pokemon', pokemon.id]" class="pokemon-card__link" [attr.aria-label]="'Ver detalhes de ' + pokemon.name">
+  <ng-content select="[cardGrip]"></ng-content>
+  @if (showFavorite()) {
+    <button
+      type="button"
+      class="pokemon-card__fav"
+      (click)="favoriteToggled.emit(pokemon().id)"
+      [attr.aria-label]="isFavorite() ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+    >
+      <mat-icon [style.color]="isFavorite() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)'">{{
+        isFavorite() ? 'favorite' : 'favorite_border'
+      }}</mat-icon>
+    </button>
+  }
+  <a [routerLink]="['/pokemon', pokemon().id]" class="pokemon-card__link" [attr.aria-label]="'Ver detalhes de ' + pokemon().name">
     <div class="pokemon-card__info">
       <span class="pokemon-card__id">#{{ paddedId }}</span>
-      <span class="pokemon-card__name">{{ pokemon.name }}</span>
-      @if (types.length) {
+      <span class="pokemon-card__name">{{ pokemon().name }}</span>
+      @if (types().length) {
         <div class="pokemon-card__types">
-          @for (type of types; track type) {
+          @for (type of types(); track type) {
             <app-type-badge [type]="type"></app-type-badge>
           }
         </div>
       }
+      <ng-content select="[cardExtra]"></ng-content>
     </div>
-    <img [src]="pokemon.spriteUrl" [alt]="pokemon.name" class="pokemon-card__sprite" loading="lazy" />
+    <img [src]="pokemon().spriteUrl" [alt]="pokemon().name" class="pokemon-card__sprite" loading="lazy" />
   </a>
+  <ng-content select="[cardActions]"></ng-content>
 </div>

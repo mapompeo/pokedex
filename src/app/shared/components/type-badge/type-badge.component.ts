@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { getTypeColor } from '../../type-colors';
 import { getTypeNamePt } from '../../type-translations';
 
@@ -7,8 +7,8 @@ import { getTypeNamePt } from '../../type-translations';
   standalone: true,
   template: `<span
     class="type-badge"
-    [class.type-badge--ghost]="ghost"
-    [style.background]="ghost ? ghostBg : badgeBg"
+    [class.type-badge--ghost]="ghost()"
+    [style.background]="ghost() ? ghostBg : badgeBg"
     >{{ label }}</span
   >`,
   styles: [
@@ -32,15 +32,15 @@ import { getTypeNamePt } from '../../type-translations';
   ],
 })
 export class TypeBadgeComponent {
-  @Input({ required: true }) type!: string;
-  @Input() ghost = false;
+  type = input.required<string>();
+  ghost = input(false);
 
   get color(): string {
-    return getTypeColor(this.type);
+    return getTypeColor(this.type());
   }
 
   get label(): string {
-    return getTypeNamePt(this.type);
+    return getTypeNamePt(this.type());
   }
 
   get badgeBg(): string {

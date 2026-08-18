@@ -1,5 +1,7 @@
 .pokemon-card {
   position: relative;
+  display: flex;
+  align-items: center;
   border-radius: 20px;
   box-shadow: var(--dex-shadow-md);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -53,6 +55,8 @@
   &__link {
     position: relative;
     display: flex;
+    width: 100%;
+    box-sizing: border-box;
     min-height: 108px;
     padding: 16px 110px 16px 16px;
     text-decoration: none;

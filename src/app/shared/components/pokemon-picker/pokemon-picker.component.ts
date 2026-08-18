@@ -2,12 +2,13 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, ElementRef, HostListener, inject, input, output, signal, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Observable } from 'rxjs';
 import { PokemonService } from '../../../core/services/pokemon.service';
 import { PokemonListItem } from '../../../core/models/pokemon.model';
 import { getTypeColor } from '../../type-colors';
 import { getTypeNamePt } from '../../type-translations';
 import { TYPE_CHART } from '../../type-chart';
+import { loadDataParts } from '../../load-data-parts';
+import { formatPokemonId } from '../../format-utils';
 import { TypeBadgeComponent } from '../type-badge/type-badge.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 
@@ -72,8 +73,6 @@ export class PokemonPickerComponent {
   @ViewChild('root') root?: ElementRef<HTMLDivElement>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
-  private pendingData = 0;
-
   suggestions = computed(() => {
     const term = this.query().trim().toLowerCase();
     const filters = this.typeFilter();
@@ -134,26 +133,14 @@ export class PokemonPickerComponent {
   }
 
   loadData(): void {
-    this.dataLoading.set(true);
-    this.dataError.set(false);
-    this.pendingData = 2;
-    this.loadPart(this.pokemonService.getAllPokemonListItems(), (items) => this.allNames.set(items));
-    this.loadPart(this.pokemonService.getTypesByPokemonId(), (map) => this.typesById.set(map));
-  }
-
-  private loadPart<T>(obs: Observable<T>, apply: (value: T) => void): void {
-    obs.subscribe({
-      next: apply,
-      error: () => {
-        this.pendingData--;
-        this.dataError.set(true);
-        if (this.pendingData <= 0) this.dataLoading.set(false);
-      },
-      complete: () => {
-        this.pendingData--;
-        if (this.pendingData <= 0) this.dataLoading.set(false);
-      },
-    });
+    loadDataParts(
+      [
+        { obs: this.pokemonService.getAllPokemonListItems(), apply: (items) => this.allNames.set(items) },
+        { obs: this.pokemonService.getTypesByPokemonId(), apply: (map) => this.typesById.set(map) },
+      ],
+      this.dataLoading,
+      this.dataError
+    );
   }
 
   toggleTypeFilter(type: string): void {
@@ -210,6 +197,6 @@ export class PokemonPickerComponent {
   }
 
   paddedId(id: number): string {
-    return String(id).padStart(3, '0');
+    return formatPokemonId(id);
   }
 }

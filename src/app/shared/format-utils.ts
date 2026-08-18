@@ -9,6 +9,16 @@ export function formatSlug(value: string): string {
     .join(' ');
 }
 
+/** Deixa só a primeira letra maiúscula, preservando o resto da string (hífens inclusive). */
+export function capitalizeFirst(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/** Formata o ID do Pokémon com zero-padding, ex.: 7 -> "007". */
+export function formatPokemonId(id: number): string {
+  return String(id).padStart(3, '0');
+}
+
 export function formatGenderRate(rate: number): string {
   if (rate === -1) return 'Sem gênero';
   const female = (rate / 8) * 100;

@@ -23,22 +23,6 @@ export function getDefenseMultiplier(attackingType: string, defendingTypes: stri
   return defendingTypes.reduce((mult, def) => mult * (TYPE_CHART[attackingType]?.[def] ?? 1), 1);
 }
 
-const MULT_LABELS = [
-  { max: 0, label: '0×', className: 'immunity' },
-  { max: 0.26, label: '¼×', className: 'quad-resist' },
-  { max: 0.51, label: '½×', className: 'resist' },
-  { max: 2, label: '1×', className: 'normal' },
-  { max: 3, label: '2×', className: 'weak' },
-  { max: 9, label: '4×', className: 'quad-weak' },
-];
-
-export function getMultiplierLabel(mult: number): { label: string; className: string } {
-  for (const entry of MULT_LABELS) {
-    if (mult <= entry.max) return entry;
-  }
-  return { label: `${mult}×`, className: 'unknown' };
-}
-
 export function getEffectivenessSummary(defendingTypes: string[]): { type: string; multiplier: number }[] {
   const allTypes = Object.keys(TYPE_CHART);
   return allTypes.map((type) => {

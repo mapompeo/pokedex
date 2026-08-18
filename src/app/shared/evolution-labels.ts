@@ -1,3 +1,5 @@
+import { formatSlug } from './format-utils';
+
 const ITEM_NAMES_PT: Record<string, string> = {
   'thunder-stone': 'Pedra do Trovão',
   'water-stone': 'Pedra da Água',
@@ -36,13 +38,6 @@ const ITEM_NAMES_PT: Record<string, string> = {
   'black-augurite': 'Augurita Negra',
 };
 
-function formatFallbackItemName(name: string): string {
-  return name
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
 export function getItemNamePt(name: string): string {
-  return ITEM_NAMES_PT[name] ?? formatFallbackItemName(name);
+  return ITEM_NAMES_PT[name] ?? formatSlug(name);
 }

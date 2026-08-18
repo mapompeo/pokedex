@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
+import { loadJsonFromStorage, saveJsonToStorage } from '../../shared/storage-utils';
 
 const STORAGE_KEY = 'pokedex.translations.en-ptbr';
 const TRANSLATE_URL = 'https://api.mymemory.translated.net/get';
@@ -39,18 +40,10 @@ export class TranslationService {
   }
 
   private loadCache(): Record<string, string> {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
-    } catch {
-      return {};
-    }
+    return loadJsonFromStorage<Record<string, string>>(STORAGE_KEY, {});
   }
 
   private saveCache(): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.cache));
-    } catch {
-      // localStorage indisponível ou quota excedida — cache segue só em memória.
-    }
+    saveJsonToStorage(STORAGE_KEY, this.cache);
   }
 }
