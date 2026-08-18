@@ -29,7 +29,9 @@ Pokédex é um projeto de estudo em **Angular 20 + TypeScript**, construído par
 - **Detalhes do pokémon**: sprite, tipos, altura, peso, stats, habilidades, movimentos e cadeia de evolução
 - **Favoritos** persistidos em `localStorage`, com tela dedicada
 - **Comparação** lado a lado entre 2 pokémons, escolhidos por busca com autocomplete
-- **Tema claro/escuro** com persistência local
+- **Meu Time**: monte um time de até 6 pokémons (drag-and-drop pra reordenar), com análise de cobertura de tipos — fraquezas, resistências e sugestão de contra-picks
+- **Traduções pt-BR sob demanda**: nomes de habilidades e movimentos sem tradução oficial na PokéAPI são traduzidos via [MyMemory](https://mymemory.translated.net/) e cacheados em `localStorage`
+- **Instalável como PWA** (service worker + manifest), com tema claro/escuro persistido localmente
 
 ---
 
@@ -58,11 +60,12 @@ Template (Angular control flow: @if / @for / @switch)
 
 ### Camadas
 
-- **`core/services`** — `PokemonService` (toda a integração com a PokéAPI, incluindo cache e montagem da cadeia de evolução) e `FavoritesService` (favoritos em `localStorage`)
+- **`core/services`** — `PokemonService` (toda a integração com a PokéAPI, incluindo cache e montagem da cadeia de evolução), `FavoritesService` e `TeamService` (persistidos em `localStorage`) e `TranslationService` (traduções sob demanda, com cache)
 - **`core/models`** — interfaces de domínio (`PokemonDetail`, `PokemonExtras`, `PokemonListItem`, ...), desacopladas do formato bruto da API
 - **`core/interceptors`** — interceptor HTTP global de erros
-- **`shared/components`** — componentes reutilizáveis (card, badge de tipo, spinner)
-- **`features`** — uma pasta por tela (`pokemon-list`, `pokemon-detail`, `favorites`, `compare`), cada uma isolada e lazy-loaded via rotas
+- **`shared/components`** — componentes reutilizáveis (card, badge de tipo, spinner, seletor de pokémon)
+- **`shared/*.ts`** — helpers puros reutilizados entre features (formatação, cores/tradução de tipos, cálculo de efetividade, storage JSON, efeito de digitação do placeholder)
+- **`features`** — uma pasta por tela (`pokemon-list`, `pokemon-detail`, `favorites`, `compare`, `team`), cada uma isolada e lazy-loaded via rotas
 
 ### Por que Signals em vez de NgRx?
 
@@ -109,16 +112,18 @@ Os artefatos ficam em `dist/pokedex`. As URLs da PokéAPI usadas em cada ambient
 src/app/
 ├── core/
 │   ├── models/           # Interfaces de domínio (PokemonDetail, PokemonExtras, ...)
-│   ├── services/         # PokemonService (PokéAPI) e FavoritesService (localStorage)
+│   ├── services/         # PokemonService (PokéAPI), FavoritesService/TeamService
+│   │                     # (localStorage) e TranslationService (MyMemory, com cache)
 │   └── interceptors/     # Interceptor global de erros HTTP
 ├── shared/
-│   ├── components/       # Componentes reutilizáveis (card, type-badge, spinner)
-│   └── *.ts              # Helpers de formatação e tradução (pt-BR)
+│   ├── components/       # Componentes reutilizáveis (card, type-badge, spinner, picker)
+│   └── *.ts              # Helpers de formatação, tradução (pt-BR) e storage
 ├── features/
 │   ├── pokemon-list/     # Tela principal: listagem, busca e filtro por tipo
 │   ├── pokemon-detail/   # Detalhes, stats, evolução e movimentos
 │   ├── favorites/        # Tela de favoritos
-│   └── compare/          # Comparação entre 2 pokémons
+│   ├── compare/          # Comparação entre 2 pokémons
+│   └── team/             # Monte seu time (drag-and-drop) e análise de cobertura
 └── app.routes.ts         # Rotas lazy-loaded por feature
 ```
 
