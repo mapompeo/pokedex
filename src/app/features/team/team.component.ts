@@ -2,7 +2,7 @@ import { Component, computed, effect, HostListener, inject, signal } from '@angu
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TeamService, TEAM_MAX_SIZE } from '../../core/services/team.service';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { PokemonListItem, PokemonStat } from '../../core/models/pokemon.model';
@@ -279,11 +279,18 @@ export class TeamComponent {
   }
 
   onDrop(event: CdkDragDrop<unknown>): void {
-    // Lê a ordem visual FINAL de todos os 6 slots (incluindo os vazios, data null).
-    // Isso dispensa o índice do CDK, que falha em grids, e permite reposicionar
+    // getSortedItems() lê a posição dos elementos no DOM, mas o CDK sempre
+    // desfaz a reordenação visual do DOM (reset()) ANTES de disparar este
+    // evento — especificamente para não quebrar o @for do Angular, que usa
+    // nós-comentário como âncora. Ou seja, getSortedItems() aqui sempre
+    // devolvia a ordem ORIGINAL, nunca a nova. previousIndex/currentIndex
+    // vêm do próprio evento (calculados durante o arrasto, antes do reset) e
+    // são a forma correta e documentada de aplicar a reordenação —
+    // moveItemInArray sobre os 6 slots (incluindo vazios) permite mover
     // também "para dentro" de posições vazias.
-    const ordered = (event.container.getSortedItems() as CdkDrag<PokemonListItem | null>[]).map((d) => d.data);
-    this.teamService.setTeam(ordered.filter((x): x is PokemonListItem => !!x));
+    const reordered = [...this.slots()];
+    moveItemInArray(reordered, event.previousIndex, event.currentIndex);
+    this.teamService.setTeam(reordered.filter((x): x is PokemonListItem => !!x));
   }
 
   /** Soma dos status de todos os membros (status total do time). */
