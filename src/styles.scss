@@ -117,7 +117,8 @@ html {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 0.875rem;
+  // 16px é o mínimo para o Safari/iOS não aplicar zoom automático ao focar o input.
+  font-size: 1rem;
   flex: 1;
   color: var(--dex-ink);
   font-family: inherit;

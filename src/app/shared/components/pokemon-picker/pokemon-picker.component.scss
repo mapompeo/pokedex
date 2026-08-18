@@ -67,7 +67,9 @@
 .pp-dialog {
   width: 100%;
   max-width: 480px;
-  max-height: 80vh;
+  // dvh (não vh) evita que o diálogo seja cortado quando a barra de
+  // endereço do navegador mobile aparece/some (ex.: Safari iOS).
+  max-height: 80dvh;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -103,6 +105,7 @@
 }
 
 .pp-close {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,6 +117,13 @@
   background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
   color: var(--dex-ink);
   cursor: pointer;
+
+  // Expande a área de toque para 44x44px sem aumentar o botão visualmente.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
 
   mat-icon {
     font-size: 18px;
@@ -127,6 +137,7 @@
 }
 
 .pp-clear {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -138,6 +149,13 @@
   background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
   color: var(--dex-ink);
   cursor: pointer;
+
+  // Expande a área de toque para 44x44px sem aumentar o botão visualmente.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
 
   mat-icon {
     font-size: 16px;

@@ -341,7 +341,7 @@
     <div class="team__overlay team__overlay--center" (click)="closeAnalysis()">
       <div class="team__analysis" role="dialog" aria-label="Análise do membro" (click)="$event.stopPropagation()">
         <div class="team__analysis-head">
-          <img [src]="memberSprite(id)" [alt]="memberName(id)" class="team__analysis-sprite" />
+          <img [src]="memberSprite(id)" [alt]="memberName(id)" class="team__analysis-sprite" loading="lazy" />
           <div class="team__analysis-meta">
             <h3 class="team__analysis-name">{{ memberName(id) }}</h3>
             <span class="team__analysis-id">#{{ paddedId(id) }}</span>

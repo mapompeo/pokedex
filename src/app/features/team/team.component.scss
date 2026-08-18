@@ -516,10 +516,13 @@
   right: 8px;
   z-index: 2;
   display: flex;
-  gap: 4px;
+  // Gap aumentado para acomodar a área de toque expandida dos botões (44px)
+  // sem sobrepor os alvos de toque um do outro.
+  gap: 16px;
 }
 
 .team__slot-action-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -531,6 +534,14 @@
   color: #fff;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+
+  // Expande a área de toque para 44x44px (mínimo recomendado) sem alterar
+  // o tamanho visual do botão, que precisa ficar pequeno nesse card compacto.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
 
   mat-icon {
     font-size: 16px;
@@ -706,6 +717,7 @@
 }
 
 .team__analysis-close {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -717,6 +729,13 @@
   background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
   color: var(--dex-ink);
   cursor: pointer;
+
+  // Expande a área de toque para 44x44px sem aumentar o botão visualmente.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
 
   mat-icon {
     font-size: 18px;
