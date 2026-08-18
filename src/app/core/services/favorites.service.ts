@@ -1,24 +1,16 @@
 import { Injectable, effect, signal } from '@angular/core';
+import { loadJsonFromStorage, saveJsonToStorage } from '../../shared/storage-utils';
 
 const STORAGE_KEY = 'pokedex-favorites';
 
 function loadFromStorage(): Set<number> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return new Set();
-    const parsed: number[] = JSON.parse(raw);
-    return new Set(parsed);
-  } catch {
-    return new Set();
-  }
+  return loadJsonFromStorage<Set<number>>(STORAGE_KEY, new Set(), (parsed) =>
+    Array.isArray(parsed) ? new Set(parsed) : new Set()
+  );
 }
 
 function saveToStorage(ids: Set<number>): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {
-    // localStorage indisponível (ex: modo privado) — favorito não persiste, app segue funcional
-  }
+  saveJsonToStorage(STORAGE_KEY, [...ids]);
 }
 
 @Injectable({ providedIn: 'root' })

@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { PokemonService } from '../../core/services/pokemon.service';
@@ -6,14 +7,16 @@ import { PokemonDetail, PokemonListItem } from '../../core/models/pokemon.model'
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
-import { getCapBackground, getTypeColor } from '../../shared/type-colors';
-import { getStatPercent } from '../../shared/stat-utils';
+import { getTypeColor } from '../../shared/type-colors';
+import { MAX_TOTAL_STAT, getStatPercent } from '../../shared/stat-utils';
 import { getStatLabel } from '../../shared/stat-labels';
-import { formatDecimalPtBr } from '../../shared/format-utils';
+import { formatDecimalPtBr, formatPokemonId } from '../../shared/format-utils';
+import { startTypewriter } from '../../shared/typewriter';
 
 @Component({
   selector: 'app-compare',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatIconModule, LoadingSpinnerComponent, TypeBadgeComponent, PokemonPickerComponent],
   templateUrl: './compare.component.html',
   styleUrl: './compare.component.scss',
@@ -28,6 +31,7 @@ import { formatDecimalPtBr } from '../../shared/format-utils';
 })
 export class CompareComponent implements AfterViewInit, OnDestroy {
   private pokemonService = inject(PokemonService);
+  private destroyRef = inject(DestroyRef);
 
   private static readonly STORAGE_KEY_A = 'pokedex:compare:a';
   private static readonly STORAGE_KEY_B = 'pokedex:compare:b';
@@ -46,6 +50,44 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
 
   bothLoaded = computed(() => this.pokemonA() && this.pokemonB());
 
+  colorA = computed(() => this.solidColor(this.pokemonA()?.types ?? []));
+  colorB = computed(() => this.solidColor(this.pokemonB()?.types ?? []));
+
+  // Memoizado: recalcula só quando pokemonA()/pokemonB() mudam, em vez de
+  // buscar no array de stats a cada ciclo de change detection (o template
+  // chamava winnerStat/statPercentA/statValueA etc. direto, sem OnPush).
+  statsRows = computed(() => {
+    const a = this.pokemonA();
+    const b = this.pokemonB();
+    return this.statLabels.map((name) => {
+      const valueA = a?.stats.find((s) => s.name === name)?.baseStat ?? 0;
+      const valueB = b?.stats.find((s) => s.name === name)?.baseStat ?? 0;
+      const winner: 'a' | 'b' | 'tie' = valueA > valueB ? 'a' : valueB > valueA ? 'b' : 'tie';
+      return {
+        name,
+        label: getStatLabel(name),
+        valueA,
+        valueB,
+        percentA: getStatPercent(valueA),
+        percentB: getStatPercent(valueB),
+        winner,
+      };
+    });
+  });
+
+  totalRow = computed(() => {
+    const totalA = this.totalStats(this.pokemonA());
+    const totalB = this.totalStats(this.pokemonB());
+    const winner: 'a' | 'b' | 'tie' = totalA > totalB ? 'a' : totalB > totalA ? 'b' : 'tie';
+    return {
+      totalA,
+      totalB,
+      percentA: getStatPercent(totalA, MAX_TOTAL_STAT),
+      percentB: getStatPercent(totalB, MAX_TOTAL_STAT),
+      winner,
+    };
+  });
+
   placeholderA = signal('');
   placeholderB = signal('');
 
@@ -59,10 +101,13 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
   statLabels = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
 
   constructor() {
-    this.pokemonService.getAllPokemonListItems().subscribe((items) => {
-      this.allNames.set(items);
-      this.restoreFromStorage();
-    });
+    this.pokemonService
+      .getAllPokemonListItems()
+      .pipe(takeUntilDestroyed())
+      .subscribe((items) => {
+        this.allNames.set(items);
+        this.restoreFromStorage();
+      });
   }
 
   private restoreFromStorage(): void {
@@ -85,10 +130,13 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
 
     setLoading.set(true);
     setError.set(false);
-    this.pokemonService.getPokemonDetail(name).subscribe({
-      next: (detail) => { setPokemon.set(detail); setLoading.set(false); },
-      error: () => { setLoading.set(false); setError.set(true); },
-    });
+    this.pokemonService
+      .getPokemonDetail(name)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (detail) => { setPokemon.set(detail); setLoading.set(false); },
+        error: () => { setLoading.set(false); setError.set(true); },
+      });
   }
 
   ngAfterViewInit(): void {
@@ -101,36 +149,8 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
   }
 
   private startTyping(side: 'A' | 'B'): void {
-    const shuffled = [...this.exampleNames].sort(() => Math.random() - 0.5);
-    let nameIdx = 0;
-    let charIdx = 0;
-    let deleting = false;
     const setter = side === 'A' ? this.placeholderA : this.placeholderB;
-
-    const tick = () => {
-      const name = shuffled[nameIdx % shuffled.length];
-      if (!deleting) {
-        charIdx++;
-        setter.set(name.slice(0, charIdx));
-        if (charIdx === name.length) {
-          this.typingTimers.push(setTimeout(tick, 1800));
-          deleting = true;
-          return;
-        }
-        this.typingTimers.push(setTimeout(tick, 90 + Math.random() * 60));
-      } else {
-        charIdx--;
-        setter.set(name.slice(0, charIdx));
-        if (charIdx === 0) {
-          deleting = false;
-          nameIdx++;
-          this.typingTimers.push(setTimeout(tick, 500));
-          return;
-        }
-        this.typingTimers.push(setTimeout(tick, 50 + Math.random() * 30));
-      }
-    };
-    this.typingTimers.push(setTimeout(tick, 600 + (side === 'B' ? 400 : 0)));
+    startTypewriter(this.exampleNames, (text) => setter.set(text), this.typingTimers, 600 + (side === 'B' ? 400 : 0));
   }
 
   onQueryAChange(value: string): void {
@@ -173,49 +193,15 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
     this.loadPokemon('B', item.name);
   }
 
-  winnerStat(statName: string): 'a' | 'b' | 'tie' {
-    const a = this.pokemonA()?.stats.find((s) => s.name === statName)?.baseStat ?? 0;
-    const b = this.pokemonB()?.stats.find((s) => s.name === statName)?.baseStat ?? 0;
-    if (a > b) return 'a';
-    if (b > a) return 'b';
-    return 'tie';
-  }
-
-  statPercentA(name: string): number {
-    const s = this.pokemonA()?.stats.find((st) => st.name === name);
-    return s ? getStatPercent(s.baseStat) : 0;
-  }
-
-  statPercentB(name: string): number {
-    const s = this.pokemonB()?.stats.find((st) => st.name === name);
-    return s ? getStatPercent(s.baseStat) : 0;
-  }
-
-  statValueA(name: string): number {
-    return this.pokemonA()?.stats.find((st) => st.name === name)?.baseStat ?? 0;
-  }
-
-  statValueB(name: string): number {
-    return this.pokemonB()?.stats.find((st) => st.name === name)?.baseStat ?? 0;
-  }
-
-  capBackground(types: string[]): string {
-    return getCapBackground(types);
-  }
-
-  solidColor(types: string[]): string {
+  private solidColor(types: string[]): string {
     return types.length ? getTypeColor(types[0]) : '#CBB994';
   }
 
   paddedId(id: number): string {
-    return String(id).padStart(3, '0');
+    return formatPokemonId(id);
   }
 
-  statLabel(name: string): string {
-    return getStatLabel(name);
-  }
-
-  totalStats(p: PokemonDetail | null): number {
+  private totalStats(p: PokemonDetail | null): number {
     return p ? p.stats.reduce((sum, s) => sum + s.baseStat, 0) : 0;
   }
 

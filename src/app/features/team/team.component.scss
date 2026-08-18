@@ -410,18 +410,20 @@
   overflow: hidden;
 }
 
+// O visual do slot preenchido (fundo pastel, watermark, hover, sprite,
+// nome, id, tipos) agora vem do PokemonCardComponent (shared/components/
+// pokemon-card) — só o que é específico do time (grip de arrastar, badge
+// de status, botões de ação) tem CSS próprio abaixo.
 .team__slot--filled {
-  background: color-mix(in srgb, var(--dex-ink) 8%, var(--dex-bg));
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  // .team__slot centraliza o filho via flex (bom pra caixa "Adicionar" do
+  // slot vazio); pro slot preenchido isso deixaria um vão vazio ao redor
+  // do card interno, que é mais baixo que os 150px do slot. display:block
+  // faz o <app-pokemon-card> ocupar 100% da largura (padrão de bloco) e o
+  // height:100% faz o card interno esticar pra preencher a altura toda.
+  display: block;
 
-  &:focus-within {
-    outline: 2px solid var(--dex-gold);
-    outline-offset: 2px;
-  }
-
-  &:hover {
-    transform: translateY(-4px) scale(1.03);
-    box-shadow: var(--dex-shadow-xl);
+  ::ng-deep .pokemon-card {
+    height: 100%;
   }
 }
 
@@ -449,19 +451,6 @@
     border-color: var(--dex-gold);
     color: var(--dex-ink);
   }
-}
-
-.team__slot-watermark {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: auto;
-  object-fit: contain;
-  opacity: 0.12;
-  filter: brightness(0) invert(1);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .team__slot-grip {
@@ -497,70 +486,6 @@
   border: 2px dashed color-mix(in srgb, var(--dex-ink) 20%, transparent);
   border-radius: 20px;
   background: color-mix(in srgb, var(--dex-ink) 5%, transparent);
-}
-
-.team__slot-link {
-  position: relative;
-  display: flex;
-  min-height: 108px;
-  padding: 16px 110px 16px 16px;
-  text-decoration: none;
-  color: inherit;
-  width: 100%;
-  box-sizing: border-box;
-
-  &:focus-visible {
-    outline: 2px solid var(--dex-gold);
-    outline-offset: -2px;
-  }
-}
-
-.team__slot-info {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 76px;
-  gap: 4px;
-}
-
-.team__slot-id {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  color: color-mix(in srgb, #fff 45%, transparent);
-}
-
-.team__slot-sprite {
-  position: absolute;
-  right: 4px;
-  bottom: 0;
-  width: 120px;
-  height: 120px;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 6px color-mix(in srgb, var(--dex-ink) 18%, transparent));
-  transition: transform 0.25s ease;
-}
-
-.team__slot:hover .team__slot-sprite {
-  transform: scale(1.08) rotate(-2deg);
-}
-
-.team__slot-name {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #fff;
-  text-transform: capitalize;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-}
-
-.team__slot-types {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
 }
 
 .team__slot ::ng-deep .type-badge {

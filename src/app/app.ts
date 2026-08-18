@@ -61,9 +61,15 @@ export class App {
     // Scroll é restaurado manualmente pela listagem (voltar do detalhe mantém posição).
     history.scrollRestoration = 'manual';
 
-    const stored = localStorage.getItem('pokedex-dark-mode');
-    if (stored === 'true') {
-      document.body.classList.add('dark-mode');
+    // Ao contrário dos outros serviços do app, essa leitura roda direto no
+    // bootstrap do componente raiz — sem try/catch, um localStorage bloqueado
+    // (política do navegador/empresa) travaria a inicialização do app inteiro.
+    try {
+      if (localStorage.getItem('pokedex-dark-mode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+    } catch {
+      // localStorage indisponível — segue com o tema padrão (claro).
     }
     this.isDarkMode.set(document.body.classList.contains('dark-mode'));
 
@@ -123,6 +129,10 @@ export class App {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     this.isDarkMode.set(isDark);
-    localStorage.setItem('pokedex-dark-mode', String(isDark));
+    try {
+      localStorage.setItem('pokedex-dark-mode', String(isDark));
+    } catch {
+      // localStorage indisponível — o tema não persiste, mas o toggle continua funcionando.
+    }
   }
 }

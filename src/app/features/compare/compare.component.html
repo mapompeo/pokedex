@@ -1,9 +1,6 @@
 <div class="compare">
   @if (bothLoaded()) {
-    @let a = pokemonA()!;
-    @let b = pokemonB()!;
-
-    <div class="compare__hero-bg" [style.background]="'linear-gradient(135deg, ' + solidColor(a.types) + ', ' + solidColor(b.types) + ')'">
+    <div class="compare__hero-bg" [style.background]="'linear-gradient(135deg, ' + colorA() + ', ' + colorB() + ')'">
       <div class="compare__hero-bg-pattern"></div>
       <img src="/pokeball.png" alt="" class="compare__watermark" aria-hidden="true" loading="lazy" />
     </div>
@@ -94,51 +91,52 @@
 
       <h3 class="compare__section-title">Estatísticas Base</h3>
       <div class="compare__stats">
-        @for (statName of statLabels; track statName) {
+        @for (row of statsRows(); track row.name) {
           <div class="compare-stat">
             <div class="compare-stat__bars">
               <div class="compare-stat__side compare-stat__side--a">
                 <span
                   class="compare-stat__bar"
-                  [style.width.%]="statPercentA(statName)"
-                  [style.background]="solidColor(a.types)"
-                  [class.compare-stat__bar--winner]="winnerStat(statName) === 'a'"
+                  [style.width.%]="row.percentA"
+                  [style.background]="colorA()"
+                  [class.compare-stat__bar--winner]="row.winner === 'a'"
                 ></span>
-                <span class="compare-stat__value compare-stat__value--a" [class.compare-stat__value--winner]="winnerStat(statName) === 'a'">{{ statValueA(statName) }}</span>
+                <span class="compare-stat__value compare-stat__value--a" [class.compare-stat__value--winner]="row.winner === 'a'">{{ row.valueA }}</span>
               </div>
-              <span class="compare-stat__label">{{ statLabel(statName) }}</span>
+              <span class="compare-stat__label">{{ row.label }}</span>
               <div class="compare-stat__side compare-stat__side--b">
                 <span
                   class="compare-stat__bar"
-                  [style.width.%]="statPercentB(statName)"
-                  [style.background]="solidColor(b.types)"
-                  [class.compare-stat__bar--winner]="winnerStat(statName) === 'b'"
+                  [style.width.%]="row.percentB"
+                  [style.background]="colorB()"
+                  [class.compare-stat__bar--winner]="row.winner === 'b'"
                 ></span>
-                <span class="compare-stat__value compare-stat__value--b" [class.compare-stat__value--winner]="winnerStat(statName) === 'b'">{{ statValueB(statName) }}</span>
+                <span class="compare-stat__value compare-stat__value--b" [class.compare-stat__value--winner]="row.winner === 'b'">{{ row.valueB }}</span>
               </div>
             </div>
           </div>
         }
+        @let total = totalRow();
         <div class="compare-stat compare-stat--total">
           <div class="compare-stat__bars">
             <div class="compare-stat__side compare-stat__side--a">
                 <span
                   class="compare-stat__bar"
-                  [style.width.%]="statPercentA('hp')"
-                  [style.background]="solidColor(a.types)"
-                  [class.compare-stat__bar--winner]="totalStats(a) > totalStats(b)"
+                  [style.width.%]="total.percentA"
+                  [style.background]="colorA()"
+                  [class.compare-stat__bar--winner]="total.winner === 'a'"
                 ></span>
-                <span class="compare-stat__value compare-stat__value--a" [class.compare-stat__value--winner]="totalStats(a) > totalStats(b)">{{ totalStats(a) }}</span>
+                <span class="compare-stat__value compare-stat__value--a" [class.compare-stat__value--winner]="total.winner === 'a'">{{ total.totalA }}</span>
               </div>
             <span class="compare-stat__label">TOTAL</span>
             <div class="compare-stat__side compare-stat__side--b">
               <span
                 class="compare-stat__bar"
-                [style.width.%]="statPercentB('hp')"
-                [style.background]="solidColor(b.types)"
-                [class.compare-stat__bar--winner]="totalStats(b) > totalStats(a)"
+                [style.width.%]="total.percentB"
+                [style.background]="colorB()"
+                [class.compare-stat__bar--winner]="total.winner === 'b'"
               ></span>
-              <span class="compare-stat__value compare-stat__value--b" [class.compare-stat__value--winner]="totalStats(b) > totalStats(a)">{{ totalStats(b) }}</span>
+              <span class="compare-stat__value compare-stat__value--b" [class.compare-stat__value--winner]="total.winner === 'b'">{{ total.totalB }}</span>
             </div>
           </div>
         </div>

@@ -39,10 +39,10 @@
             <mat-icon>arrow_back</mat-icon>
           </button>
           <div class="pdetail__nav-arrows">
-            <a [routerLink]="['/pokemon', prevId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
+            <a [routerLink]="prevId() ? ['/pokemon', prevId()] : null" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" [attr.aria-disabled]="!prevId() || null" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
               <mat-icon>chevron_left</mat-icon>
             </a>
-            <a [routerLink]="['/pokemon', nextId()]" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" aria-label="Próximo Pokémon" matTooltip="Próximo Pokémon" matTooltipPosition="above">
+            <a [routerLink]="nextId() ? ['/pokemon', nextId()] : null" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!nextId()" [attr.aria-disabled]="!nextId() || null" aria-label="Próximo Pokémon" matTooltip="Próximo Pokémon" matTooltipPosition="above">
               <mat-icon>chevron_right</mat-icon>
             </a>
           </div>

@@ -22,6 +22,7 @@ import { SkeletonCardComponent } from '../../shared/components/skeleton-card/ske
 import { getTypeColor } from '../../shared/type-colors';
 import { getTypeNamePt } from '../../shared/type-translations';
 import { listStagger } from '../../shared/animations';
+import { startTypewriter } from '../../shared/typewriter';
 
 const PAGE_SIZE = 20;
 
@@ -155,35 +156,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   startPlaceholderTyping(): void {
-    const shuffled = [...EXAMPLE_NAMES].sort(() => Math.random() - 0.5);
-    let nameIdx = 0;
-    let charIdx = 0;
-    let deleting = false;
-
-    const tick = () => {
-      const name = shuffled[nameIdx % shuffled.length];
-      if (!deleting) {
-        charIdx++;
-        this.placeholder.set(name.slice(0, charIdx));
-        if (charIdx === name.length) {
-          this.placeholderTimers.push(setTimeout(tick, 1800));
-          deleting = true;
-          return;
-        }
-        this.placeholderTimers.push(setTimeout(tick, 90 + Math.random() * 60));
-      } else {
-        charIdx--;
-        this.placeholder.set(name.slice(0, charIdx));
-        if (charIdx === 0) {
-          deleting = false;
-          nameIdx++;
-          this.placeholderTimers.push(setTimeout(tick, 500));
-          return;
-        }
-        this.placeholderTimers.push(setTimeout(tick, 50 + Math.random() * 30));
-      }
-    };
-    this.placeholderTimers.push(setTimeout(tick, 600));
+    startTypewriter(EXAMPLE_NAMES, (text) => this.placeholder.set(text), this.placeholderTimers);
   }
 
   ngOnDestroy(): void {
@@ -230,6 +203,10 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearAllFilters(): void {
     this.selectedTypes.set(new Set());
+    // O IntersectionObserver do infinite-scroll só dispara em transições de
+    // interseção; se a sentinela já estava visível com o filtro ativo (poucos
+    // resultados), limpar o filtro não gera uma nova transição por conta própria.
+    setTimeout(() => this.fillViewportIfNeeded(), 0);
   }
 
   randomPokemon(): void {

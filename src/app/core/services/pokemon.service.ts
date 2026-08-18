@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
 import {
   EvolutionNode,
   PokemonDetail,
@@ -138,8 +138,8 @@ export class PokemonService {
   private http = inject(HttpClient);
   private translation = inject(TranslationService);
   private detailCache = new Map<string, PokemonDetail>();
-  private allListItemsCache: PokemonListItem[] | null = null;
-  private idTypesCache: Map<number, string[]> | null = null;
+  private allListItems$: Observable<PokemonListItem[]> | null = null;
+  private idTypes$: Observable<Map<number, string[]>> | null = null;
   private moveCache = new Map<string, MoveDetail>();
   private abilityCache = new Map<string, string>();
 
@@ -168,7 +168,7 @@ export class PokemonService {
     if (cached) {
       return of(cached);
     }
-    return this.http.get<RawPokemonDetail>(`${BASE_URL}/pokemon/${nameOrId}`).pipe(
+    return this.http.get<RawPokemonDetail>(`${BASE_URL}/pokemon/${encodeURIComponent(nameOrId)}`).pipe(
       map((raw) => this.toDetail(raw)),
       map((detail) => {
         this.detailCache.set(nameOrId, detail);
@@ -179,16 +179,16 @@ export class PokemonService {
   }
 
   getAllPokemonListItems(): Observable<PokemonListItem[]> {
-    if (this.allListItemsCache) {
-      return of(this.allListItemsCache);
+    // shareReplay (não só cachear o valor já resolvido) evita que dois
+    // consumidores simultâneos com cache ainda frio (ex.: os dois
+    // <app-pokemon-picker> do compare) disparem a mesma requisição em duplicidade.
+    if (!this.allListItems$) {
+      this.allListItems$ = this.http.get<RawListResponse>(`${BASE_URL}/pokemon?limit=100000`).pipe(
+        map((res) => res.results.map((r) => this.toListItem(r.name, r.url))),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
     }
-    return this.http.get<RawListResponse>(`${BASE_URL}/pokemon?limit=100000`).pipe(
-      map((res) => res.results.map((r) => this.toListItem(r.name, r.url))),
-      map((items) => {
-        this.allListItemsCache = items;
-        return items;
-      })
-    );
+    return this.allListItems$;
   }
 
   getTypes(): Observable<PokemonType[]> {
@@ -203,42 +203,45 @@ export class PokemonService {
   }
 
   getTypesByPokemonId(): Observable<Map<number, string[]>> {
-    if (this.idTypesCache) {
-      return of(this.idTypesCache);
-    }
-    return this.getTypes().pipe(
-      switchMap((types) =>
-        forkJoin(
-          types.map((type) =>
-            this.http.get<RawTypePokemonResponse>(`${BASE_URL}/type/${type.name}`).pipe(
-              map((res) => ({
-                typeName: type.name,
-                ids: res.pokemon.map((p) => this.extractIdFromUrl(p.pokemon.url)),
-              }))
+    // Mesmo cuidado de getAllPokemonListItems(): shareReplay evita disparar
+    // as ~18 chamadas /type/{nome} de novo por consumidor concorrente com
+    // cache frio.
+    if (!this.idTypes$) {
+      this.idTypes$ = this.getTypes().pipe(
+        switchMap((types) =>
+          forkJoin(
+            types.map((type) =>
+              this.http.get<RawTypePokemonResponse>(`${BASE_URL}/type/${encodeURIComponent(type.name)}`).pipe(
+                map((res) => ({
+                  typeName: type.name,
+                  ids: res.pokemon.map((p) => this.extractIdFromUrl(p.pokemon.url)),
+                }))
+              )
             )
           )
-        )
-      ),
-      map((typeGroups) => {
-        const idToTypes = new Map<number, string[]>();
-        for (const group of typeGroups) {
-          for (const id of group.ids) {
-            const existing = idToTypes.get(id) ?? [];
-            existing.push(group.typeName);
-            idToTypes.set(id, existing);
+        ),
+        map((typeGroups) => {
+          const idToTypes = new Map<number, string[]>();
+          for (const group of typeGroups) {
+            for (const id of group.ids) {
+              const existing = idToTypes.get(id) ?? [];
+              existing.push(group.typeName);
+              idToTypes.set(id, existing);
+            }
           }
-        }
-        for (const [, types] of idToTypes) {
-          types.sort((a, b) => (TYPE_PRIORITY[a] ?? 99) - (TYPE_PRIORITY[b] ?? 99));
-        }
-        this.idTypesCache = idToTypes;
-        return idToTypes;
-      })
-    );
+          for (const [, types] of idToTypes) {
+            types.sort((a, b) => (TYPE_PRIORITY[a] ?? 99) - (TYPE_PRIORITY[b] ?? 99));
+          }
+          return idToTypes;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+    }
+    return this.idTypes$;
   }
 
   getPokemonExtras(nameOrId: string): Observable<PokemonExtras> {
-    return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${nameOrId}`).pipe(
+    return this.http.get<RawSpeciesResponse>(`${BASE_URL}/pokemon-species/${encodeURIComponent(nameOrId)}`).pipe(
       switchMap((species) =>
         this.http.get<RawEvolutionChainResponse>(species.evolution_chain.url).pipe(
           switchMap((chainRes) => {
@@ -343,7 +346,7 @@ export class PokemonService {
   getMoveDetail(moveName: string): Observable<MoveDetail> {
     const cached = this.moveCache.get(moveName);
     if (cached) return of(cached);
-    return this.http.get<RawMoveDetailResponse>(`${BASE_URL}/move/${moveName}`).pipe(
+    return this.http.get<RawMoveDetailResponse>(`${BASE_URL}/move/${encodeURIComponent(moveName)}`).pipe(
       switchMap((raw) => {
         const localized = this.pickLocalized(raw.names ?? []);
         const resolvedName = localized?.name ?? formatSlug(moveName);
@@ -372,7 +375,7 @@ export class PokemonService {
   getAbilityDisplayName(abilityName: string): Observable<string> {
     const cached = this.abilityCache.get(abilityName);
     if (cached) return of(cached);
-    return this.http.get<RawAbilityResponse>(`${BASE_URL}/ability/${abilityName}`).pipe(
+    return this.http.get<RawAbilityResponse>(`${BASE_URL}/ability/${encodeURIComponent(abilityName)}`).pipe(
       switchMap((raw) => {
         const localized = this.pickLocalized(raw.names ?? []);
         const resolvedName = localized?.name ?? formatSlug(abilityName);

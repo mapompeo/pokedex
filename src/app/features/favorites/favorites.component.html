@@ -14,6 +14,13 @@
     <app-loading-spinner></app-loading-spinner>
   }
 
+  @if (!loading() && partialError()) {
+    <div class="favorites__partial-error">
+      <mat-icon>error_outline</mat-icon>
+      <p>Alguns favoritos não puderam ser carregados agora. Eles continuam salvos — tente novamente mais tarde.</p>
+    </div>
+  }
+
   @if (!loading() && !error() && items().length === 0) {
     <div class="favorites__empty">
       <img src="/pokeball.png" alt="" class="favorites__empty-img" loading="lazy" />

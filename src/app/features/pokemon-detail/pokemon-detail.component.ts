@@ -6,7 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { EMPTY, catchError, filter, forkJoin, map, switchMap } from 'rxjs';
+import { EMPTY, Subscription, catchError, filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { MoveDetail, PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { TeamService } from '../../core/services/team.service';
@@ -180,12 +180,16 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     }
 
     const order = ['level-up', 'machine', 'egg', 'tutor', 'form-change'];
-    return order
+    // Métodos fora da whitelist (raros na PokeAPI) ainda entram num grupo
+    // próprio no final, senão o move fica contado no total mas não aparece
+    // em nenhum acordeão.
+    const extra = [...groups.keys()].filter((key) => !order.includes(key));
+    return [...order, ...extra]
       .filter((key) => groups.has(key))
       .map((key) => {
         const items = groups.get(key)!;
         if (key === 'level-up') items.sort((a, b) => a.level - b.level);
-        return { method: key, label: LEARN_METHOD_LABELS[key] ?? key, items };
+        return { method: key, label: LEARN_METHOD_LABELS[key] ?? fmt.formatSlug(key), items };
       });
   });
 
@@ -241,8 +245,13 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       });
 
     // Carrega detalhes dos movimentos
+    // Cancela o forkJoin anterior ao trocar de Pokémon antes dele responder,
+    // senão uma resposta antiga pode sobrescrever os moves do Pokémon atual
+    // (mesmo risco de race condition do id$ acima, daí o mesmo tratamento).
+    let movesSub: Subscription | undefined;
     effect(() => {
       const p = this.pokemon();
+      movesSub?.unsubscribe();
       if (!p) return;
       this.movesLoading.set(true);
       const moveNames = p.moves.map((m) => m.name);
@@ -250,25 +259,37 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
         this.movesLoading.set(false);
         return;
       }
-      forkJoin(moveNames.map((name) => this.pokemonService.getMoveDetail(name)))
+      // catchError por move: um move com erro (404, rede) não deve travar o
+      // loading para sempre nem impedir os demais de aparecer.
+      movesSub = forkJoin(
+        moveNames.map((name) => this.pokemonService.getMoveDetail(name).pipe(catchError(() => of(undefined))))
+      )
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((details) => {
           const map = new Map<string, MoveDetail>();
-          moveNames.forEach((name, i) => map.set(name, details[i]));
+          moveNames.forEach((name, i) => {
+            if (details[i]) map.set(name, details[i]!);
+          });
           this.movesWithDetails.set(map);
           this.movesLoading.set(false);
         });
     });
 
-    // Carrega nomes traduzidos das habilidades
+    // Carrega nomes traduzidos das habilidades (mesmo cuidado de cancelamento e catchError acima)
+    let abilitiesSub: Subscription | undefined;
     effect(() => {
       const p = this.pokemon();
+      abilitiesSub?.unsubscribe();
       if (!p || p.abilities.length === 0) return;
-      forkJoin(p.abilities.map((name) => this.pokemonService.getAbilityDisplayName(name)))
+      abilitiesSub = forkJoin(
+        p.abilities.map((name) => this.pokemonService.getAbilityDisplayName(name).pipe(catchError(() => of(undefined))))
+      )
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((names) => {
           const map = new Map<string, string>();
-          p.abilities.forEach((name, i) => map.set(name, names[i]));
+          p.abilities.forEach((name, i) => {
+            if (names[i]) map.set(name, names[i]!);
+          });
           this.abilityNames.set(map);
         });
     });
@@ -282,13 +303,9 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       }
       const shinyLabel = this.isShiny() ? ' (Shiny)' : '';
       this.titleService.setTitle(
-        `Pokédex | ${this.capitalize(p.name)}${shinyLabel} · ${TAB_LABELS[this.activeTab()]}`
+        `Pokédex | ${fmt.capitalizeFirst(p.name)}${shinyLabel} · ${TAB_LABELS[this.activeTab()]}`
       );
     });
-  }
-
-  private capitalize(name: string): string {
-    return name.charAt(0).toUpperCase() + name.slice(1);
   }
 
   private setAppBg(types: string[]): void {
@@ -312,7 +329,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     if (!p) return;
     if (this.isInTeam()) {
       this.teamService.remove(p.id);
-      this.snackBar.open(`${this.capitalize(p.name)} removido do time`, 'Fechar', {
+      this.snackBar.open(`${fmt.capitalizeFirst(p.name)} removido do time`, 'Fechar', {
         duration: 2500,
         panelClass: 'app-snackbar',
       });
@@ -326,7 +343,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       return;
     }
     this.teamService.add({ id: p.id, name: p.name, spriteUrl: p.spriteUrl });
-    this.snackBar.open(`${this.capitalize(p.name)} adicionado ao time`, 'Ver time', {
+    this.snackBar.open(`${fmt.capitalizeFirst(p.name)} adicionado ao time`, 'Ver time', {
       duration: 3000,
       panelClass: 'app-snackbar',
     }).onAction().subscribe(() => this.router.navigate(['/time']));
@@ -354,9 +371,6 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     });
   }
 
-  paddedId(id: number): string {
-    return String(id).padStart(3, '0');
-  }
 
   typeColor(): string {
     return getPastelCardColor(this.pokemon()?.types ?? []);
@@ -381,6 +395,10 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
 
   formatDecimal(value: number): string {
     return fmt.formatDecimalPtBr(value);
+  }
+
+  paddedId(id: number): string {
+    return fmt.formatPokemonId(id);
   }
 
   formatAbility(name: string): string {

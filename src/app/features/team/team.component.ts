@@ -2,18 +2,20 @@ import { Component, computed, effect, HostListener, inject, signal } from '@angu
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RouterLink } from '@angular/router';
-import { Observable } from 'rxjs';
 import { CdkDrag, CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { TeamService, TEAM_MAX_SIZE } from '../../core/services/team.service';
 import { PokemonService } from '../../core/services/pokemon.service';
 import { PokemonListItem, PokemonStat } from '../../core/models/pokemon.model';
-import { getPastelCardColor, getTypeColor } from '../../shared/type-colors';
+import { getTypeColor } from '../../shared/type-colors';
 import { getTypeNamePt } from '../../shared/type-translations';
 import { TYPE_CHART, getDefenseMultiplier } from '../../shared/type-chart';
+import { loadDataParts } from '../../shared/load-data-parts';
+import { capitalizeFirst, formatPokemonId } from '../../shared/format-utils';
+import { getStatLabel } from '../../shared/stat-labels';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
+import { PokemonCardComponent } from '../../shared/components/pokemon-card/pokemon-card.component';
 
 const ATTACKING_TYPES = Object.keys(TYPE_CHART);
 
@@ -23,11 +25,11 @@ const ATTACKING_TYPES = Object.keys(TYPE_CHART);
   imports: [
     MatIconModule,
     MatTooltipModule,
-    RouterLink,
     TypeBadgeComponent,
     DragDropModule,
     LoadingSpinnerComponent,
     PokemonPickerComponent,
+    PokemonCardComponent,
   ],
   templateUrl: './team.component.html',
   styleUrl: './team.component.scss',
@@ -54,8 +56,6 @@ export class TeamComponent {
   dataError = signal(false);
 
   allTypes = ATTACKING_TYPES;
-
-  private pendingData = 0;
 
   slots = computed(() => {
     const team = this.teamService.team();
@@ -126,13 +126,20 @@ export class TeamComponent {
     return { weakness: top.type, counters };
   });
 
+  // Guarda quais membros já tiveram a busca de stats disparada, fora de um
+  // signal: se o effect abaixo checasse statsById() (que ele mesmo escreve)
+  // para decidir quem já foi pedido, cada resposta que chega faria o effect
+  // reexecutar e disparar de novo a requisição dos membros ainda em voo.
+  private requestedStatIds = new Set<number>();
+
   constructor() {
     this.loadData();
 
     effect(() => {
       const team = this.teamService.team();
       for (const member of team) {
-        if (this.statsById().has(member.id)) continue;
+        if (this.requestedStatIds.has(member.id)) continue;
+        this.requestedStatIds.add(member.id);
         this.pokemonService.getPokemonDetail(String(member.id)).subscribe((d) => {
           this.statsById.update((map) => {
             if (map.has(d.id)) return map;
@@ -146,26 +153,14 @@ export class TeamComponent {
   }
 
   loadData(): void {
-    this.dataLoading.set(true);
-    this.dataError.set(false);
-    this.pendingData = 2;
-    this.loadPart(this.pokemonService.getAllPokemonListItems(), (items) => this.allNames.set(items));
-    this.loadPart(this.pokemonService.getTypesByPokemonId(), (map) => this.typesById.set(map));
-  }
-
-  private loadPart<T>(obs: Observable<T>, apply: (value: T) => void): void {
-    obs.subscribe({
-      next: apply,
-      error: () => {
-        this.pendingData--;
-        this.dataError.set(true);
-        if (this.pendingData <= 0) this.dataLoading.set(false);
-      },
-      complete: () => {
-        this.pendingData--;
-        if (this.pendingData <= 0) this.dataLoading.set(false);
-      },
-    });
+    loadDataParts(
+      [
+        { obs: this.pokemonService.getAllPokemonListItems(), apply: (items) => this.allNames.set(items) },
+        { obs: this.pokemonService.getTypesByPokemonId(), apply: (map) => this.typesById.set(map) },
+      ],
+      this.dataLoading,
+      this.dataError
+    );
   }
 
   openPicker(): void {
@@ -225,7 +220,7 @@ export class TeamComponent {
   handlePicked(item: PokemonListItem): void {
     const index = this.replacingIndex();
     if (this.teamService.isInTeam(item.id)) {
-      this.snackBar.open(`${this.capitalize(item.name)} já está no seu time`, 'Fechar', {
+      this.snackBar.open(`${capitalizeFirst(item.name)} já está no seu time`, 'Fechar', {
         duration: 2500,
         panelClass: 'app-snackbar',
       });
@@ -268,15 +263,11 @@ export class TeamComponent {
 
   memberName(id: number): string {
     const name = this.teamService.team().find((m) => m.id === id)?.name;
-    return name ? this.capitalize(name) : '';
+    return name ? capitalizeFirst(name) : '';
   }
 
   memberSprite(id: number): string {
     return this.teamService.team().find((m) => m.id === id)?.spriteUrl ?? '';
-  }
-
-  capitalize(value: string): string {
-    return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   onDrop(event: CdkDragDrop<unknown>): void {
@@ -327,15 +318,7 @@ export class TeamComponent {
   }
 
   statLabel(name: string): string {
-    switch (name) {
-      case 'hp': return 'Vida';
-      case 'attack': return 'Ataque';
-      case 'defense': return 'Defesa';
-      case 'special-attack': return 'Ataque Esp.';
-      case 'special-defense': return 'Defesa Esp.';
-      case 'speed': return 'Velocidade';
-      default: return this.capitalize(name);
-    }
+    return getStatLabel(name);
   }
 
   /** Percentual do valor máximo possível (255) para dimensionar a barra. */
@@ -364,9 +347,6 @@ export class TeamComponent {
     if (id !== null) this.requestRemove(id);
   }
 
-  cardColor(types: string[]): string {
-    return getPastelCardColor(types);
-  }
 
   typeColor(type: string): string {
     return getTypeColor(type);
@@ -397,6 +377,6 @@ export class TeamComponent {
   }
 
   paddedId(id: number): string {
-    return String(id).padStart(3, '0');
+    return formatPokemonId(id);
   }
 }
