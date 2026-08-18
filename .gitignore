@@ -41,5 +41,5 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Server logs
-server*.log
+# Logs (dev-server output, build logs etc. — nunca devem ser commitados)
+*.log
