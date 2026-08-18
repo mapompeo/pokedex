@@ -1,4 +1,4 @@
-# Pokédex — Design
+# Pokédex - Design
 
 **Data:** 2026-07-02
 **Objetivo:** projeto de aprendizado/portfólio (nível júnior/estagiário) para praticar Angular + TypeScript com uma API pública real.
@@ -16,7 +16,7 @@
 
 - Listagem de pokémons com **scroll infinito**
 - Busca por nome
-- Filtro por tipo com **multi-seleção (chips)** — interseção quando mais de um tipo selecionado
+- Filtro por tipo com **multi-seleção (chips)** - interseção quando mais de um tipo selecionado
 - Tela de detalhes ao clicar em um pokémon (stats, sprites, tipos, altura/peso)
 - **Favoritos**: marcar/desmarcar na lista e nos detalhes, persistidos em `localStorage`; tela dedicada listando só favoritos
 - **Comparação**: selecionar até 2 pokémons na lista (checkbox/botão "comparar"), navegar para tela de comparação lado a lado
@@ -40,12 +40,12 @@ src/app/
 └── app.routes.ts         # rotas: /, /pokemon/:id, /favoritos, /comparar
 ```
 
-Cada feature é standalone e só se comunica com as demais via `PokemonService` / `FavoritesService` e roteamento — sem acoplamento direto entre features.
+Cada feature é standalone e só se comunica com as demais via `PokemonService` / `FavoritesService` e roteamento - sem acoplamento direto entre features.
 
 ## 4. Fluxo de dados e estado
 
 ### `PokemonService`
-- `getPokemonPage(offset, limit)`: lista paginada (`/pokemon?offset=X&limit=20`) — alimenta o scroll infinito
+- `getPokemonPage(offset, limit)`: lista paginada (`/pokemon?offset=X&limit=20`) - alimenta o scroll infinito
 - `getPokemonDetail(nameOrId)`: detalhes completos de 1 pokémon, com cache em `Map` para evitar rebuscar
 - `getTypes()`: lista de tipos disponíveis, popula os chips do filtro
 - Filtro por tipo: a PokeAPI não permite filtrar a lista paginada por tipo diretamente. Ao selecionar tipo(s), o service busca `/type/{tipo}` (retorna todos os pokémons daquele tipo) e faz o cruzamento client-side. Com múltiplos tipos, faz interseção dos conjuntos.
@@ -70,4 +70,4 @@ Cada feature é standalone e só se comunica com as demais via `PokemonService` 
 
 - Testes automatizados (fica para uma v2)
 - Autenticação/backend próprio
-- Cadeia de evolução completa (ideia de v2 — a API oferece, mas exige chamadas extras)
+- Cadeia de evolução completa (ideia de v2 - a API oferece, mas exige chamadas extras)

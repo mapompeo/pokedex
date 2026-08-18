@@ -10,7 +10,11 @@ export function startTypewriter(
   timers: ReturnType<typeof setTimeout>[],
   initialDelay = 600
 ): void {
-  const shuffled = [...names].sort(() => Math.random() - 0.5);
+  const shuffled = [...names];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
   let nameIdx = 0;
   let charIdx = 0;
   let deleting = false;

@@ -2,28 +2,28 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Apply the "Kanto Pokédex" visual theme approved in `docs/2026-07-03-pokedex-ui-kanto-theme-design.md` — a red device-inspired frame/top-bar, colored type badges, a pixel-font title, and a red/yellow Material color retint — across all 4 existing screens, with zero behavior changes.
+**Goal:** Apply the "Kanto Pokédex" visual theme approved in `docs/2026-07-03-pokedex-ui-kanto-theme-design.md` - a red device-inspired frame/top-bar, colored type badges, a pixel-font title, and a red/yellow Material color retint - across all 4 existing screens, with zero behavior changes.
 
 **Architecture:** Two independent visual layers are added on top of the existing app, neither touching feature logic: (1) an app-level "frame" wrapping `<router-outlet>` in `app.html`/`app.ts`/`app.scss`, fixed on desktop with an internal scrolling region, collapsing to a slim top bar on mobile; (2) a small shared `TypeBadgeComponent` + color-lookup table, wired into the 3 places that already have type data available (`PokemonCardComponent` for list/favorites, `PokemonDetailComponent` for the detail screen) via one new cheap-but-cached `PokemonService` method for the list screen (favorites/detail already have full `PokemonDetail.types` on hand, so they need no new network calls). A single edit to `styles.scss` swaps the Angular Material theme's `primary`/`tertiary` palettes to red/yellow, re-coloring every existing Material component (buttons, toolbars, chips) with no per-component changes.
 
-**Tech Stack:** Same as the rest of the project — Angular standalone components, TypeScript, Angular Material's M3 `mat.theme()` mixin, SCSS, one new Google Font (`Press Start 2P`) loaded via `index.html`.
+**Tech Stack:** Same as the rest of the project - Angular standalone components, TypeScript, Angular Material's M3 `mat.theme()` mixin, SCSS, one new Google Font (`Press Start 2P`) loaded via `index.html`.
 
 ## Global Constraints
 
-- No automated tests — verification is `ng build` (compile correctness) plus manual checks in the browser via `ng serve`, including a check at a mobile viewport width (DevTools device toolbar, ≤768px).
-- This is a purely visual change — no feature/behavior change to any screen. Do not alter routes, service method signatures used by existing callers, or component `@Input`/`@Output` contracts beyond the additive ones this plan defines.
-- No officially licensed Pokémon Company assets (logos, official fonts) — colors/typography here are either generic (hex values) or freely-licensed (Google Fonts).
+- No automated tests - verification is `ng build` (compile correctness) plus manual checks in the browser via `ng serve`, including a check at a mobile viewport width (DevTools device toolbar, ≤768px).
+- This is a purely visual change - no feature/behavior change to any screen. Do not alter routes, service method signatures used by existing callers, or component `@Input`/`@Output` contracts beyond the additive ones this plan defines.
+- No officially licensed Pokémon Company assets (logos, official fonts) - colors/typography here are either generic (hex values) or freely-licensed (Google Fonts).
 - Color palette (from the design doc, copied verbatim):
   - `--pokedex-red: #CC0000` (frame, primary Material color)
   - `--pokedex-red-dark: #A00000` (frame border/shadow)
   - `--pokedex-blue: #3B4CCA` (large decorative light)
   - `--pokedex-yellow: #FFDE00` (small decorative light, tertiary Material color)
   - `--pokedex-green: #2ECC71` (small decorative light)
-- Type badge colors (from the design doc, copied verbatim — exact hex per type):
+- Type badge colors (from the design doc, copied verbatim - exact hex per type):
   normal `#A8A878`, fire `#F08030`, water `#6890F0`, electric `#F8D030`, grass `#78C850`, ice `#98D8D8`, fighting `#C03028`, poison `#A040A0`, ground `#E0C068`, flying `#A890F0`, psychic `#F85888`, bug `#A8B820`, rock `#B8A038`, ghost `#705898`, dragon `#7038F8`, dark `#705848`, steel `#B8B8D0`, fairy `#EE99AC`.
-- Type badges appear on: pokemon list cards, favorites cards, and the detail screen. They do **not** appear on the compare screen — out of scope per the approved design.
-- Mobile breakpoint: `max-width: 768px` (matches this project's existing convention — no other breakpoint is defined anywhere else in the codebase, so this plan establishes it).
-- Angular Material 3's default component shapes are already rounded (buttons are fully pill-shaped, cards use a medium corner radius, by default, verified in the installed `@angular/material` version) — this plan does **not** add custom Material shape-token overrides; the "cantos arredondados" requirement from the design doc is satisfied by M3's defaults for Material components, plus explicit `border-radius` on the new custom elements this plan authors directly (frame, type badges).
+- Type badges appear on: pokemon list cards, favorites cards, and the detail screen. They do **not** appear on the compare screen - out of scope per the approved design.
+- Mobile breakpoint: `max-width: 768px` (matches this project's existing convention - no other breakpoint is defined anywhere else in the codebase, so this plan establishes it).
+- Angular Material 3's default component shapes are already rounded (buttons are fully pill-shaped, cards use a medium corner radius, by default, verified in the installed `@angular/material` version) - this plan does **not** add custom Material shape-token overrides; the "cantos arredondados" requirement from the design doc is satisfied by M3's defaults for Material components, plus explicit `border-radius` on the new custom elements this plan authors directly (frame, type badges).
 
 ---
 
@@ -34,8 +34,8 @@
 - Create: `src/app/shared/components/type-badge/type-badge.component.ts`
 
 **Interfaces:**
-- Produces: `getTypeColor(type: string): string` — consumed by `TypeBadgeComponent` internally only (no other task calls it directly).
-- Produces: `TypeBadgeComponent` (selector `app-type-badge`), `@Input({required: true}) type!: string` — consumed by Task 16 (`PokemonCardComponent`, `PokemonDetailComponent`).
+- Produces: `getTypeColor(type: string): string` - consumed by `TypeBadgeComponent` internally only (no other task calls it directly).
+- Produces: `TypeBadgeComponent` (selector `app-type-badge`), `@Input({required: true}) type!: string` - consumed by Task 16 (`PokemonCardComponent`, `PokemonDetailComponent`).
 
 - [ ] **Step 1: Write the type color lookup table**
 
@@ -117,14 +117,14 @@ git commit -m "feat: adiciona paleta de cores por tipo e componente TypeBadgeCom
 
 ---
 
-### Task 15: PokemonService — cached id→types lookup for the list screen
+### Task 15: PokemonService - cached id→types lookup for the list screen
 
 **Files:**
 - Modify: `src/app/core/services/pokemon.service.ts`
 
 **Interfaces:**
-- Consumes: existing `getTypes()`, existing `RawTypePokemonResponse` interface, existing `extractIdFromUrl()` — all already defined in this same file.
-- Produces: `PokemonService.getTypesByPokemonId(): Observable<Map<number, string[]>>` — cached after first call. Consumed by Task 16 (`PokemonListComponent` only — `FavoritesComponent`, `PokemonDetailComponent`, and `CompareComponent` already have full `PokemonDetail.types` from `getPokemonDetail()` and do not need this method).
+- Consumes: existing `getTypes()`, existing `RawTypePokemonResponse` interface, existing `extractIdFromUrl()` - all already defined in this same file.
+- Produces: `PokemonService.getTypesByPokemonId(): Observable<Map<number, string[]>>` - cached after first call. Consumed by Task 16 (`PokemonListComponent` only - `FavoritesComponent`, `PokemonDetailComponent`, and `CompareComponent` already have full `PokemonDetail.types` from `getPokemonDetail()` and do not need this method).
 
 - [ ] **Step 1: Add the `switchMap` import**
 
@@ -533,7 +533,7 @@ Replace it with:
 
 - [ ] **Step 10: Add spacing for the detail screen's badge row**
 
-Open `src/app/features/pokemon-detail/pokemon-detail.component.scss`. Its current content wraps everything in a `.pokemon-detail { ... }` block — add this new nested rule inside it:
+Open `src/app/features/pokemon-detail/pokemon-detail.component.scss`. Its current content wraps everything in a `.pokemon-detail { ... }` block - add this new nested rule inside it:
 
 ```scss
   &__types {
@@ -546,7 +546,7 @@ Open `src/app/features/pokemon-detail/pokemon-detail.component.scss`. Its curren
 
 - [ ] **Step 11: Verify it compiles**
 
-Run: `ng build`. Expected: zero errors. In particular, confirm there's no leftover reference to `MatChipsModule`/`mat-chip-set`/`mat-chip` anywhere in `pokemon-detail.component.ts`/`.html` (an unused import would still compile in this Angular version, but a template still referencing `mat-chip-set` after removing the module from `imports` would fail to compile — treat that as a real error to fix, not something to leave broken).
+Run: `ng build`. Expected: zero errors. In particular, confirm there's no leftover reference to `MatChipsModule`/`mat-chip-set`/`mat-chip` anywhere in `pokemon-detail.component.ts`/`.html` (an unused import would still compile in this Angular version, but a template still referencing `mat-chip-set` after removing the module from `imports` would fail to compile - treat that as a real error to fix, not something to leave broken).
 
 - [ ] **Step 12: Manual verification in the browser**
 
@@ -554,7 +554,7 @@ Run: `ng serve`. Verify:
 1. Cards in the main list and in favorites show colored type badges under the name (e.g. Charizard shows "fire" in orange and "flying" in light purple).
 2. The detail screen shows the same colored badges instead of plain gray chips.
 3. A pokémon with only one type shows only one badge (no empty second badge).
-4. The compare screen is unchanged (no badges) — confirms scope was respected.
+4. The compare screen is unchanged (no badges) - confirms scope was respected.
 
 - [ ] **Step 13: Commit**
 
@@ -639,14 +639,14 @@ Add a third link right after them:
 
 - [ ] **Step 4: Verify it compiles**
 
-Run: `ng build`. Expected: zero errors (a Sass palette-name typo would fail the build here — if `mat.$red-palette` or `mat.$yellow-palette` don't exist in the installed Material version, the build fails with a clear Sass error naming the missing variable; if that happens, stop and report BLOCKED rather than guessing a replacement name).
+Run: `ng build`. Expected: zero errors (a Sass palette-name typo would fail the build here - if `mat.$red-palette` or `mat.$yellow-palette` don't exist in the installed Material version, the build fails with a clear Sass error naming the missing variable; if that happens, stop and report BLOCKED rather than guessing a replacement name).
 
 - [ ] **Step 5: Manual verification in the browser**
 
 Run: `ng serve`. Verify:
 1. The list screen's top toolbar is now red instead of the previous blue/azure.
 2. Raised/filled buttons (e.g. the favorite button on the detail screen) are red.
-3. No visual regression in text contrast (white text should still be clearly readable on the new red toolbar/buttons — Material's M3 theming automatically picks a contrasting "on-primary" text color from the palette, so this should hold, but confirm visually).
+3. No visual regression in text contrast (white text should still be clearly readable on the new red toolbar/buttons - Material's M3 theming automatically picks a contrasting "on-primary" text color from the palette, so this should hold, but confirm visually).
 
 - [ ] **Step 6: Commit**
 
@@ -657,7 +657,7 @@ git commit -m "feat: retema Material para paleta vermelho/amarelo e carrega font
 
 ---
 
-### Task 18: App shell — Pokédex frame (desktop) / themed top bar (mobile)
+### Task 18: App shell - Pokédex frame (desktop) / themed top bar (mobile)
 
 **Files:**
 - Modify: `src/app/app.html`
@@ -666,7 +666,7 @@ git commit -m "feat: retema Material para paleta vermelho/amarelo e carrega font
 
 **Interfaces:**
 - Consumes: `--pokedex-red`, `--pokedex-red-dark`, `--pokedex-blue`, `--pokedex-yellow`, `--pokedex-green` CSS variables and the `Press Start 2P` font (Task 17).
-- Produces: nothing further tasks depend on — this is the final visual layer, wrapping every routed screen without changing any of them.
+- Produces: nothing further tasks depend on - this is the final visual layer, wrapping every routed screen without changing any of them.
 
 - [ ] **Step 1: Add the frame markup**
 
@@ -692,7 +692,7 @@ Replace it with:
 </div>
 ```
 
-Because `<router-outlet>` inserts the routed component as a sibling within its own parent element, nesting it inside `.pokedex-frame__screen` means every routed screen's content ends up inside that scrollable div — no changes to any routed component are needed for this to work.
+Because `<router-outlet>` inserts the routed component as a sibling within its own parent element, nesting it inside `.pokedex-frame__screen` means every routed screen's content ends up inside that scrollable div - no changes to any routed component are needed for this to work.
 
 - [ ] **Step 2: Confirm the root component has no extra state**
 
@@ -711,7 +711,7 @@ import { RouterOutlet } from '@angular/router';
 export class App {}
 ```
 
-No changes needed here — the new markup in Step 1 only uses `RouterOutlet`, which is already imported. Leave this file as-is.
+No changes needed here - the new markup in Step 1 only uses `RouterOutlet`, which is already imported. Leave this file as-is.
 
 - [ ] **Step 3: Write the frame styles**
 
@@ -792,24 +792,24 @@ Open `src/app/app.scss` (currently empty). Write:
 }
 ```
 
-The `min-height: 0` on `&__screen` is required — without it, a flex child with `overflow-y: auto` won't actually scroll internally inside a fixed-height flex column; it'll grow past its container instead.
+The `min-height: 0` on `&__screen` is required - without it, a flex child with `overflow-y: auto` won't actually scroll internally inside a fixed-height flex column; it'll grow past its container instead.
 
 - [ ] **Step 4: Verify it compiles**
 
 Run: `ng build`. Expected: zero errors.
 
-- [ ] **Step 5: Manual verification in the browser — desktop**
+- [ ] **Step 5: Manual verification in the browser - desktop**
 
 Run: `ng serve`, open at a normal desktop width. Verify:
 1. A red frame with rounded-ish white inner "screen" wraps the whole app, with 3 colored dots and "POKÉDEX" in a pixelated font in the top-left.
-2. Scrolling the pokémon list scrolls only the inner white area — the red frame and the "POKÉDEX" header stay fixed in place.
+2. Scrolling the pokémon list scrolls only the inner white area - the red frame and the "POKÉDEX" header stay fixed in place.
 3. The existing per-screen toolbar (the one with "Favoritos"/"Comparar" links) still appears at the top of the inner scrollable area, now red-tinted from Task 17, sitting just below the frame's "POKÉDEX" header.
-4. Infinite scroll (Task 6's `IntersectionObserver`) still works — this is important to check explicitly, since the scrolling container changed from the page body to this new inner div. If it stops working, do not attempt to guess a fix — report DONE_WITH_CONCERNS with exactly what you observed, since `IntersectionObserver`'s default root is the browser viewport regardless of DOM nesting and should keep working, but this needs an actual visual confirmation, not just code reasoning.
+4. Infinite scroll (Task 6's `IntersectionObserver`) still works - this is important to check explicitly, since the scrolling container changed from the page body to this new inner div. If it stops working, do not attempt to guess a fix - report DONE_WITH_CONCERNS with exactly what you observed, since `IntersectionObserver`'s default root is the browser viewport regardless of DOM nesting and should keep working, but this needs an actual visual confirmation, not just code reasoning.
 
-- [ ] **Step 6: Manual verification in the browser — mobile**
+- [ ] **Step 6: Manual verification in the browser - mobile**
 
 Using DevTools' device toolbar (or resizing the window below 768px width), verify:
-1. The red frame's side/bottom borders disappear — only a slim red top bar with the dots and "POKÉDEX" title remains.
+1. The red frame's side/bottom borders disappear - only a slim red top bar with the dots and "POKÉDEX" title remains.
 2. The app content fills the rest of the screen width with no wasted horizontal space.
 3. Scrolling still works the same way as desktop (inner content scrolls, top bar stays in place).
 
@@ -824,7 +824,7 @@ git commit -m "feat: adiciona moldura tematica da Pokedex (fixa no desktop, barr
 
 ### Task 19: Final full-theme smoke pass
 
-**Files:** None — verification only.
+**Files:** None - verification only.
 
 **Interfaces:** None.
 
@@ -832,21 +832,21 @@ git commit -m "feat: adiciona moldura tematica da Pokedex (fixa no desktop, barr
 
 Run: `ng build` from `/mnt/c/repositories/pokedex`. Expected: `Application bundle generation complete.` with zero errors and no new warnings.
 
-- [ ] **Step 2: Full manual walkthrough — desktop**
+- [ ] **Step 2: Full manual walkthrough - desktop**
 
 Run: `ng serve`, open `http://localhost:4200` at a normal desktop width, and walk through all 4 screens:
 1. **Lista:** red frame + pixel "POKÉDEX" title visible and fixed; scrolling the list only scrolls the inner area; cards show colored type badges; search and type-filter chips still work (now red/yellow-tinted); favoriting still works.
-2. **Detalhes:** click into a pokémon — colored type badges appear instead of the old plain chips; favorite button is red; "← Voltar" still works.
+2. **Detalhes:** click into a pokémon - colored type badges appear instead of the old plain chips; favorite button is red; "← Voltar" still works.
 3. **Favoritos:** favorited pokémon show colored type badges; un-favoriting still works.
 4. **Comparar:** autocomplete search still works for both fields; this screen intentionally has no type badges (confirms scope was respected) but does pick up the red/yellow Material retint on its buttons.
 
-- [ ] **Step 3: Full manual walkthrough — mobile**
+- [ ] **Step 3: Full manual walkthrough - mobile**
 
 Using DevTools' device toolbar at a width ≤768px, repeat the same walkthrough from Step 2, paying attention to:
 1. The frame reduces to a top bar (no side/bottom borders).
 2. No horizontal scrollbar appears on any of the 4 screens (a sign of unaccounted-for width from the old frame's padding leaking through).
-3. Autocomplete panels (compare screen) and dropdown chips (type filter) remain usable/tappable at this width — these existed before this plan and shouldn't regress, but confirm since the surrounding layout changed.
+3. Autocomplete panels (compare screen) and dropdown chips (type filter) remain usable/tappable at this width - these existed before this plan and shouldn't regress, but confirm since the surrounding layout changed.
 
 - [ ] **Step 4: Report findings**
 
-This task has no code to commit. If Steps 1-3 all pass cleanly, report DONE summarizing what was checked. If anything looks broken, report DONE_WITH_CONCERNS with a precise description (which screen, which viewport width, what you saw vs. expected) — do not attempt to fix issues found here; that's a follow-up task decision for the controller/human, since this task's job is verification, not further changes.
+This task has no code to commit. If Steps 1-3 all pass cleanly, report DONE summarizing what was checked. If anything looks broken, report DONE_WITH_CONCERNS with a precise description (which screen, which viewport width, what you saw vs. expected) - do not attempt to fix issues found here; that's a follow-up task decision for the controller/human, since this task's job is verification, not further changes.

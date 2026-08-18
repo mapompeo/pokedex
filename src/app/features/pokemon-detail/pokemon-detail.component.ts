@@ -6,7 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { EMPTY, Subscription, catchError, filter, forkJoin, map, of, switchMap } from 'rxjs';
+import { EMPTY, Subscription, catchError, filter, from, map, mergeMap, of, switchMap, toArray } from 'rxjs';
 import { MoveDetail, PokemonService } from '../../core/services/pokemon.service';
 import { FavoritesService } from '../../core/services/favorites.service';
 import { TeamService } from '../../core/services/team.service';
@@ -23,7 +23,15 @@ import { getEffectivenessSummary } from '../../shared/type-chart';
 import { tabFade } from '../../shared/animations';
 import * as fmt from '../../shared/format-utils';
 
+// Teto maior que o MAX_TOTAL_STAT usado em compare/team (150): aqui cada
+// stat tem sua própria barra grande, então uma escala mais generosa fica
+// visualmente melhor — não é o mesmo valor por design, não por descuido.
 const DETAIL_STAT_MAX = 300;
+
+// Limite de chamadas HTTP simultâneas ao buscar detalhe de golpes/habilidades
+// (podem ser dezenas por pokémon) — evita rajada descontrolada na PokéAPI e,
+// quando precisa traduzir, no MyMemory (gratuito e sujeito a rate limit).
+const DETAIL_FETCH_CONCURRENCY = 8;
 
 type DetailTab = 'sobre' | 'estatisticas' | 'evolucoes' | 'movimentos';
 
@@ -260,16 +268,27 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
         return;
       }
       // catchError por move: um move com erro (404, rede) não deve travar o
-      // loading para sempre nem impedir os demais de aparecer.
-      movesSub = forkJoin(
-        moveNames.map((name) => this.pokemonService.getMoveDetail(name).pipe(catchError(() => of(undefined))))
-      )
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((details) => {
+      // loading para sempre nem impedir os demais de aparecer. mergeMap com
+      // concorrência limitada evita disparar dezenas/centenas de requisições
+      // simultâneas (um pokémon pode ter 100+ golpes via TM/tutor/ovo).
+      movesSub = from(moveNames)
+        .pipe(
+          mergeMap(
+            (name) =>
+              this.pokemonService.getMoveDetail(name).pipe(
+                map((detail) => [name, detail] as const),
+                catchError(() => of([name, undefined] as const))
+              ),
+            DETAIL_FETCH_CONCURRENCY
+          ),
+          toArray(),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe((results) => {
           const map = new Map<string, MoveDetail>();
-          moveNames.forEach((name, i) => {
-            if (details[i]) map.set(name, details[i]!);
-          });
+          for (const [name, detail] of results) {
+            if (detail) map.set(name, detail);
+          }
           this.movesWithDetails.set(map);
           this.movesLoading.set(false);
         });
@@ -281,15 +300,24 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       const p = this.pokemon();
       abilitiesSub?.unsubscribe();
       if (!p || p.abilities.length === 0) return;
-      abilitiesSub = forkJoin(
-        p.abilities.map((name) => this.pokemonService.getAbilityDisplayName(name).pipe(catchError(() => of(undefined))))
-      )
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((names) => {
+      abilitiesSub = from(p.abilities)
+        .pipe(
+          mergeMap(
+            (name) =>
+              this.pokemonService.getAbilityDisplayName(name).pipe(
+                map((label) => [name, label] as const),
+                catchError(() => of([name, undefined] as const))
+              ),
+            DETAIL_FETCH_CONCURRENCY
+          ),
+          toArray(),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe((results) => {
           const map = new Map<string, string>();
-          p.abilities.forEach((name, i) => {
-            if (names[i]) map.set(name, names[i]!);
-          });
+          for (const [name, label] of results) {
+            if (label) map.set(name, label);
+          }
           this.abilityNames.set(map);
         });
     });
@@ -336,7 +364,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       return;
     }
     if (this.teamFull()) {
-      this.snackBar.open('Time cheio — remova um pokémon antes de adicionar', 'Fechar', {
+      this.snackBar.open('Time cheio - remova um pokémon antes de adicionar', 'Fechar', {
         duration: 3000,
         panelClass: 'app-snackbar',
       });
@@ -449,7 +477,7 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
       case 'physical': return 'Físico';
       case 'special': return 'Especial';
       case 'status': return 'Status';
-      default: return '—';
+      default: return '-';
     }
   }
 

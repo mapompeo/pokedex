@@ -108,18 +108,29 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // error: {} — o toast de erro já vem do interceptor global; os caches de
+    // getAllPokemonListItems/getTypesByPokemonId se auto-resetam em falha, então
+    // a próxima visita a esta tela (ou nova instância do componente) tenta de novo.
     if (this.allNames().length === 0) {
-      this.pokemonService.getAllPokemonListItems().subscribe((items) => this.allNames.set(items));
+      this.pokemonService.getAllPokemonListItems().subscribe({
+        next: (items) => this.allNames.set(items),
+        error: () => {},
+      });
     }
     if (this.typesById().size === 0) {
-      this.pokemonService.getTypesByPokemonId().subscribe((idToTypes) => this.typesById.set(idToTypes));
+      this.pokemonService.getTypesByPokemonId().subscribe({
+        next: (idToTypes) => this.typesById.set(idToTypes),
+        error: () => {},
+      });
     }
     if (this.availableTypes().length === 0) {
-      this.pokemonService.getTypes().subscribe((types) =>
-        this.availableTypes.set(
-          types.map((t) => ({ name: t.name, label: getTypeNamePt(t.name), color: getTypeColor(t.name) }))
-        )
-      );
+      this.pokemonService.getTypes().subscribe({
+        next: (types) =>
+          this.availableTypes.set(
+            types.map((t) => ({ name: t.name, label: getTypeNamePt(t.name), color: getTypeColor(t.name) }))
+          ),
+        error: () => {},
+      });
     }
     if (this.allItems().length === 0) {
       this.loadNextPage();

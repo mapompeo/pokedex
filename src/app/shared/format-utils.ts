@@ -23,7 +23,7 @@ export function formatGenderRate(rate: number): string {
   if (rate === -1) return 'Sem gênero';
   const female = (rate / 8) * 100;
   const male = 100 - female;
-  return `${male}% ♂ / ${female}% ♀`;
+  return `${formatDecimalPtBr(male)}% ♂ / ${formatDecimalPtBr(female)}% ♀`;
 }
 
 export function formatGrowthRate(rate: string): string {

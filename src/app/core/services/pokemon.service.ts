@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, shareReplay, switchMap, throwError } from 'rxjs';
 import {
   EvolutionNode,
   PokemonDetail,
@@ -133,6 +133,19 @@ export interface MoveDetail {
   damageClass: string | null;
 }
 
+const MAX_CACHE_SIZE = 500;
+
+/** Grava com um teto de tamanho simples (evicção FIFO): evita crescimento
+ * ilimitado dos caches em memória numa sessão longa navegando por muitos
+ * pokémons/golpes/habilidades. */
+function setWithCap<K, V>(map: Map<K, V>, key: K, value: V, maxSize = MAX_CACHE_SIZE): void {
+  if (map.size >= maxSize && !map.has(key)) {
+    const oldestKey = map.keys().next().value;
+    if (oldestKey !== undefined) map.delete(oldestKey);
+  }
+  map.set(key, value);
+}
+
 @Injectable({ providedIn: 'root' })
 export class PokemonService {
   private http = inject(HttpClient);
@@ -171,8 +184,8 @@ export class PokemonService {
     return this.http.get<RawPokemonDetail>(`${BASE_URL}/pokemon/${encodeURIComponent(nameOrId)}`).pipe(
       map((raw) => this.toDetail(raw)),
       map((detail) => {
-        this.detailCache.set(nameOrId, detail);
-        this.detailCache.set(String(detail.id), detail);
+        setWithCap(this.detailCache, nameOrId, detail);
+        setWithCap(this.detailCache, String(detail.id), detail);
         return detail;
       })
     );
@@ -185,6 +198,14 @@ export class PokemonService {
     if (!this.allListItems$) {
       this.allListItems$ = this.http.get<RawListResponse>(`${BASE_URL}/pokemon?limit=100000`).pipe(
         map((res) => res.results.map((r) => this.toListItem(r.name, r.url))),
+        // Sem isso, shareReplay guardaria o ERRO para sempre: qualquer nova
+        // assinatura (busca, filtro, picker) receberia o mesmo erro antigo
+        // na hora, sem nunca tentar de novo. Resetando a referência aqui,
+        // a próxima chamada a getAllPokemonListItems() dispara uma nova requisição.
+        catchError((err) => {
+          this.allListItems$ = null;
+          return throwError(() => err);
+        }),
         shareReplay({ bufferSize: 1, refCount: false })
       );
     }
@@ -233,6 +254,13 @@ export class PokemonService {
             types.sort((a, b) => (TYPE_PRIORITY[a] ?? 99) - (TYPE_PRIORITY[b] ?? 99));
           }
           return idToTypes;
+        }),
+        // Mesmo cuidado de getAllPokemonListItems(): reseta a referência em
+        // erro para permitir nova tentativa na próxima chamada, em vez de
+        // shareReplay travar reproduzindo o erro antigo pra sempre.
+        catchError((err) => {
+          this.idTypes$ = null;
+          return throwError(() => err);
         }),
         shareReplay({ bufferSize: 1, refCount: false })
       );
@@ -361,7 +389,7 @@ export class PokemonService {
               pp: raw.pp,
               damageClass: raw.damage_class?.name ?? null,
             };
-            this.moveCache.set(moveName, detail);
+            setWithCap(this.moveCache, moveName, detail);
             return detail;
           })
         );
@@ -383,7 +411,7 @@ export class PokemonService {
         const label$ = needsTranslation ? this.translation.translate(resolvedName) : of(resolvedName);
         return label$.pipe(
           map((label) => {
-            this.abilityCache.set(abilityName, label);
+            setWithCap(this.abilityCache, abilityName, label);
             return label;
           })
         );

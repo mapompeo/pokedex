@@ -412,7 +412,7 @@
 
 // O visual do slot preenchido (fundo pastel, watermark, hover, sprite,
 // nome, id, tipos) agora vem do PokemonCardComponent (shared/components/
-// pokemon-card) — só o que é específico do time (grip de arrastar, badge
+// pokemon-card) - só o que é específico do time (grip de arrastar, badge
 // de status, botões de ação) tem CSS próprio abaixo.
 .team__slot--filled {
   // .team__slot centraliza o filho via flex (bom pra caixa "Adicionar" do

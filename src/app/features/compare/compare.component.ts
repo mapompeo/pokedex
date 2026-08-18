@@ -12,6 +12,7 @@ import { MAX_TOTAL_STAT, getStatPercent } from '../../shared/stat-utils';
 import { getStatLabel } from '../../shared/stat-labels';
 import { formatDecimalPtBr, formatPokemonId } from '../../shared/format-utils';
 import { startTypewriter } from '../../shared/typewriter';
+import { loadJsonFromStorage, removeFromStorage, saveJsonToStorage } from '../../shared/storage-utils';
 
 @Component({
   selector: 'app-compare',
@@ -104,15 +105,20 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
     this.pokemonService
       .getAllPokemonListItems()
       .pipe(takeUntilDestroyed())
-      .subscribe((items) => {
-        this.allNames.set(items);
-        this.restoreFromStorage();
+      .subscribe({
+        next: (items) => {
+          this.allNames.set(items);
+          this.restoreFromStorage();
+        },
+        // Toast de erro já é mostrado pelo interceptor global; o cache do
+        // service se auto-reseta, então a próxima visita a esta tela tenta de novo.
+        error: () => {},
       });
   }
 
   private restoreFromStorage(): void {
-    const savedA = localStorage.getItem(CompareComponent.STORAGE_KEY_A);
-    const savedB = localStorage.getItem(CompareComponent.STORAGE_KEY_B);
+    const savedA = loadJsonFromStorage<string>(CompareComponent.STORAGE_KEY_A, '');
+    const savedB = loadJsonFromStorage<string>(CompareComponent.STORAGE_KEY_B, '');
     if (savedA) {
       this.queryA.set(savedA);
       this.loadPokemon('A', savedA);
@@ -157,7 +163,7 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
     this.queryA.set(value);
     if (!value) {
       this.pokemonA.set(null);
-      localStorage.removeItem(CompareComponent.STORAGE_KEY_A);
+      removeFromStorage(CompareComponent.STORAGE_KEY_A);
     }
   }
 
@@ -165,31 +171,31 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
     this.queryB.set(value);
     if (!value) {
       this.pokemonB.set(null);
-      localStorage.removeItem(CompareComponent.STORAGE_KEY_B);
+      removeFromStorage(CompareComponent.STORAGE_KEY_B);
     }
   }
 
   clearA(): void {
     this.queryA.set('');
     this.pokemonA.set(null);
-    localStorage.removeItem(CompareComponent.STORAGE_KEY_A);
+    removeFromStorage(CompareComponent.STORAGE_KEY_A);
   }
 
   clearB(): void {
     this.queryB.set('');
     this.pokemonB.set(null);
-    localStorage.removeItem(CompareComponent.STORAGE_KEY_B);
+    removeFromStorage(CompareComponent.STORAGE_KEY_B);
   }
 
   selectA(item: PokemonListItem): void {
     this.queryA.set(item.name);
-    localStorage.setItem(CompareComponent.STORAGE_KEY_A, item.name);
+    saveJsonToStorage(CompareComponent.STORAGE_KEY_A, item.name);
     this.loadPokemon('A', item.name);
   }
 
   selectB(item: PokemonListItem): void {
     this.queryB.set(item.name);
-    localStorage.setItem(CompareComponent.STORAGE_KEY_B, item.name);
+    saveJsonToStorage(CompareComponent.STORAGE_KEY_B, item.name);
     this.loadPokemon('B', item.name);
   }
 

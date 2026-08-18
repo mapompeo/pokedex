@@ -10,11 +10,11 @@
 
 ## Global Constraints
 
-- No automated tests in this v1 (per explicit user decision) — verification is done via `ng build` (compile correctness) and manual checks in the browser via `ng serve`.
+- No automated tests in this v1 (per explicit user decision) - verification is done via `ng build` (compile correctness) and manual checks in the browser via `ng serve`.
 - Project lives at `C:\repositories\pokedex` (Windows path; from WSL this is `/mnt/c/repositories/pokedex`).
-- Data source is exclusively the public PokéAPI base URL `https://pokeapi.co/api/v2` — no API key, no backend of our own.
-- State management is Services + Signals only — no NgRx, no RxJS `Subject`/`BehaviorSubject` for app state (RxJS is fine for one-shot HTTP calls).
-- UI components come from Angular Material — avoid hand-rolled buttons/inputs/cards where a Material equivalent exists.
+- Data source is exclusively the public PokéAPI base URL `https://pokeapi.co/api/v2` - no API key, no backend of our own.
+- State management is Services + Signals only - no NgRx, no RxJS `Subject`/`BehaviorSubject` for app state (RxJS is fine for one-shot HTTP calls).
+- UI components come from Angular Material - avoid hand-rolled buttons/inputs/cards where a Material equivalent exists.
 - Sprite images use `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id}.png` for list items (avoids an extra detail fetch per card); the detail screen uses the sprite returned by the detail endpoint.
 - Run all `node`/`npm`/`ng` commands with whichever Node.js installation is actually available. Check first with `node -v` in the current shell; if not found, prefix commands with `cmd.exe /c` (Windows Node install), matching how other projects on this machine run Node from WSL.
 
@@ -116,7 +116,7 @@ git commit -m "chore: scaffold Angular project with Material and folder skeleton
 - Create: `src/app/core/models/pokemon.model.ts`
 
 **Interfaces:**
-- Produces: `PokemonListItem`, `PokemonListPage`, `PokemonStat`, `PokemonDetail`, `PokemonType` — used by every service and component in later tasks.
+- Produces: `PokemonListItem`, `PokemonListPage`, `PokemonStat`, `PokemonDetail`, `PokemonType` - used by every service and component in later tasks.
 
 - [ ] **Step 1: Write the models file**
 
@@ -178,7 +178,7 @@ git commit -m "feat: add core Pokemon domain models"
 
 **Interfaces:**
 - Consumes: `PokemonListItem`, `PokemonListPage`, `PokemonDetail`, `PokemonStat`, `PokemonType` from `core/models/pokemon.model.ts` (Task 1)
-- Produces: `PokemonService` with methods `getPokemonPage(offset: number, limit: number): Observable<PokemonListPage>`, `getPokemonDetail(nameOrId: string): Observable<PokemonDetail>`, `getTypes(): Observable<PokemonType[]>`, `getPokemonIdsByTypes(typeNames: string[]): Observable<Set<number>>`, `extractIdFromUrl(url: string): number` — consumed by every feature component in later tasks.
+- Produces: `PokemonService` with methods `getPokemonPage(offset: number, limit: number): Observable<PokemonListPage>`, `getPokemonDetail(nameOrId: string): Observable<PokemonDetail>`, `getTypes(): Observable<PokemonType[]>`, `getPokemonIdsByTypes(typeNames: string[]): Observable<Set<number>>`, `extractIdFromUrl(url: string): number` - consumed by every feature component in later tasks.
 
 - [ ] **Step 1: Add HttpClient provider**
 
@@ -201,7 +201,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-(Keep whatever animations provider `ng add @angular/material` already set up — only ensure `provideHttpClient()` is present in the list.)
+(Keep whatever animations provider `ng add @angular/material` already set up - only ensure `provideHttpClient()` is present in the list.)
 
 - [ ] **Step 2: Write the service**
 
@@ -350,7 +350,7 @@ git commit -m "feat: add PokemonService with list, detail, types and type-filter
 - Create: `src/app/core/services/favorites.service.ts`
 
 **Interfaces:**
-- Produces: `FavoritesService` with `favoriteIds: Signal<Set<number>>`, `isFavorite(id: number): boolean`, `toggleFavorite(id: number): void` — consumed by `pokemon-card`, `pokemon-detail`, and `favorites` feature in later tasks.
+- Produces: `FavoritesService` with `favoriteIds: Signal<Set<number>>`, `isFavorite(id: number): boolean`, `toggleFavorite(id: number): void` - consumed by `pokemon-card`, `pokemon-detail`, and `favorites` feature in later tasks.
 
 - [ ] **Step 1: Write the service**
 
@@ -375,7 +375,7 @@ function saveToStorage(ids: Set<number>): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
   } catch {
-    // localStorage indisponível (ex: modo privado) — favorito não persiste, app segue funcional
+    // localStorage indisponível (ex: modo privado) - favorito não persiste, app segue funcional
   }
 }
 
@@ -499,8 +499,8 @@ git commit -m "feat: add global HTTP error interceptor with snackbar feedback"
 - Consumes: `PokemonListItem`, `PokemonType` from `core/models/pokemon.model.ts` (Task 1)
 - Produces:
   - `LoadingSpinnerComponent` (selector `app-loading-spinner`, no inputs/outputs)
-  - `PokemonCardComponent` (selector `app-pokemon-card`) — inputs `pokemon: PokemonListItem` (required), `isFavorite: boolean`, `isSelectedForCompare: boolean`, `compareDisabled: boolean`; outputs `favoriteToggled: EventEmitter<number>`, `compareToggled: EventEmitter<number>`
-  - `TypeChipComponent` (selector `app-type-chip-filter`) — inputs `types: PokemonType[]` (required), `selectedTypeNames: string[]`; output `selectionChanged: EventEmitter<string[]>`
+  - `PokemonCardComponent` (selector `app-pokemon-card`) - inputs `pokemon: PokemonListItem` (required), `isFavorite: boolean`, `isSelectedForCompare: boolean`, `compareDisabled: boolean`; outputs `favoriteToggled: EventEmitter<number>`, `compareToggled: EventEmitter<number>`
+  - `TypeChipComponent` (selector `app-type-chip-filter`) - inputs `types: PokemonType[]` (required), `selectedTypeNames: string[]`; output `selectionChanged: EventEmitter<string[]>`
   - All three consumed by `features/pokemon-list`, `features/pokemon-detail`, `features/favorites` in later tasks.
 
 - [ ] **Step 1: Write the loading spinner**
@@ -684,7 +684,7 @@ git commit -m "feat: add shared loading-spinner, pokemon-card and type-chip comp
 
 **Interfaces:**
 - Consumes: `PokemonService` (Task 2), `FavoritesService` (Task 3), `PokemonCardComponent`/`TypeChipComponent`/`LoadingSpinnerComponent` (Task 5), `PokemonListItem`/`PokemonType` (Task 1)
-- Produces: `PokemonListComponent`, routed at `/` — the app's home screen. No other task consumes this component directly (it's a route leaf), but Task 9's compare button navigates to `/comparar?a=ID&b=ID`, which Task 9 must accept as query params.
+- Produces: `PokemonListComponent`, routed at `/` - the app's home screen. No other task consumes this component directly (it's a route leaf), but Task 9's compare button navigates to `/comparar?a=ID&b=ID`, which Task 9 must accept as query params.
 
 - [ ] **Step 1: Write the component class**
 
@@ -967,7 +967,7 @@ git commit -m "feat: add pokemon list screen with infinite scroll, search, type 
 
 **Interfaces:**
 - Consumes: `PokemonService.getPokemonDetail` (Task 2), `FavoritesService` (Task 3), `LoadingSpinnerComponent` (Task 5), `PokemonDetail` (Task 1)
-- Produces: `PokemonDetailComponent`, routed at `/pokemon/:id` — reached by clicking a card's link in Task 6.
+- Produces: `PokemonDetailComponent`, routed at `/pokemon/:id` - reached by clicking a card's link in Task 6.
 
 - [ ] **Step 1: Write the component class**
 
@@ -1130,7 +1130,7 @@ git commit -m "feat: add pokemon detail screen"
 
 **Interfaces:**
 - Consumes: `FavoritesService.favoriteIds` (Task 3), `PokemonService.getPokemonDetail` (Task 2), `PokemonCardComponent`/`LoadingSpinnerComponent` (Task 5)
-- Produces: `FavoritesComponent`, routed at `/favoritos` — reached from the "Favoritos" link in Task 6's toolbar.
+- Produces: `FavoritesComponent`, routed at `/favoritos` - reached from the "Favoritos" link in Task 6's toolbar.
 
 - [ ] **Step 1: Write the component class**
 
@@ -1278,7 +1278,7 @@ git commit -m "feat: add favorites screen"
 
 **Interfaces:**
 - Consumes: `PokemonService.getPokemonDetail` (Task 2), `LoadingSpinnerComponent` (Task 5); query params `a` and `b` produced by Task 6's `goToCompare()`
-- Produces: `CompareComponent`, routed at `/comparar` — the last route; also adds the `**` wildcard redirect to `/`.
+- Produces: `CompareComponent`, routed at `/comparar` - the last route; also adds the `**` wildcard redirect to `/`.
 
 - [ ] **Step 1: Write the component class**
 
@@ -1439,11 +1439,11 @@ git commit -m "feat: add compare screen and wildcard route fallback"
 ### Task 10: Final wiring, README, and end-to-end smoke pass
 
 **Files:**
-- Modify: `src/app/app.component.ts` / `src/app/app.component.html` (ensure it's just a `<router-outlet>` shell — Angular CLI scaffolds this by default, confirm no leftover boilerplate content)
+- Modify: `src/app/app.component.ts` / `src/app/app.component.html` (ensure it's just a `<router-outlet>` shell - Angular CLI scaffolds this by default, confirm no leftover boilerplate content)
 - Create: `README.md` at the project root
 
 **Interfaces:**
-- Produces: nothing new for other tasks to consume — this is the final integration checkpoint for the whole app.
+- Produces: nothing new for other tasks to consume - this is the final integration checkpoint for the whole app.
 
 - [ ] **Step 1: Clean up the app shell**
 

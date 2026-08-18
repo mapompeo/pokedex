@@ -2,6 +2,7 @@ import { Component, NgZone, computed, effect, inject, signal } from '@angular/co
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { filter } from 'rxjs';
 import { FavoritesService } from './core/services/favorites.service';
@@ -43,6 +44,7 @@ export class App {
   private pageBackground = inject(PageBackgroundService);
   private navigationService = inject(NavigationService);
   private swUpdate = inject(SwUpdate);
+  private snackBar = inject(MatSnackBar);
 
   title = 'Pokédex';
   subtitle = signal('Seu guia completo do mundo pokémon');
@@ -62,14 +64,14 @@ export class App {
     history.scrollRestoration = 'manual';
 
     // Ao contrário dos outros serviços do app, essa leitura roda direto no
-    // bootstrap do componente raiz — sem try/catch, um localStorage bloqueado
+    // bootstrap do componente raiz - sem try/catch, um localStorage bloqueado
     // (política do navegador/empresa) travaria a inicialização do app inteiro.
     try {
       if (localStorage.getItem('pokedex-dark-mode') === 'true') {
         document.body.classList.add('dark-mode');
       }
     } catch {
-      // localStorage indisponível — segue com o tema padrão (claro).
+      // localStorage indisponível - segue com o tema padrão (claro).
     }
     this.isDarkMode.set(document.body.classList.contains('dark-mode'));
 
@@ -94,9 +96,17 @@ export class App {
     });
 
     if (this.swUpdate.isEnabled) {
+      // Não recarrega sozinho: um reload forçado sem aviso pode interromper
+      // o usuário no meio de uma ação (ex.: montando o time). Deixa a escolha
+      // por um snackbar, como o resto do app já faz para avisos.
       this.swUpdate.versionUpdates
         .pipe(filter((event): event is VersionReadyEvent => event.type === 'VERSION_READY'))
-        .subscribe(() => document.location.reload());
+        .subscribe(() => {
+          this.snackBar
+            .open('Nova versão disponível', 'Atualizar', { duration: 10000, panelClass: 'app-snackbar' })
+            .onAction()
+            .subscribe(() => document.location.reload());
+        });
     }
 
     this.router.events
@@ -132,7 +142,7 @@ export class App {
     try {
       localStorage.setItem('pokedex-dark-mode', String(isDark));
     } catch {
-      // localStorage indisponível — o tema não persiste, mas o toggle continua funcionando.
+      // localStorage indisponível - o tema não persiste, mas o toggle continua funcionando.
     }
   }
 }

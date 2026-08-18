@@ -140,13 +140,21 @@ export class TeamComponent {
       for (const member of team) {
         if (this.requestedStatIds.has(member.id)) continue;
         this.requestedStatIds.add(member.id);
-        this.pokemonService.getPokemonDetail(String(member.id)).subscribe((d) => {
-          this.statsById.update((map) => {
-            if (map.has(d.id)) return map;
-            const next = new Map(map);
-            next.set(d.id, d.stats);
-            return next;
-          });
+        this.pokemonService.getPokemonDetail(String(member.id)).subscribe({
+          next: (d) => {
+            this.statsById.update((map) => {
+              if (map.has(d.id)) return map;
+              const next = new Map(map);
+              next.set(d.id, d.stats);
+              return next;
+            });
+          },
+          // Libera o id para tentar de novo no próximo disparo do effect
+          // (ex.: membro removido e adicionado de volta), em vez de deixar
+          // o membro permanentemente sem stats após uma falha de rede.
+          error: () => {
+            this.requestedStatIds.delete(member.id);
+          },
         });
       }
     });

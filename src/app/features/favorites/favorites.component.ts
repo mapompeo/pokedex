@@ -22,7 +22,7 @@ export class FavoritesComponent {
   items = signal<PokemonListItem[]>([]);
   loading = signal(false);
   error = signal(false);
-  /** true quando 1+ favoritos (mas não todos) falharam ao carregar — não esconde os que carregaram. */
+  /** true quando 1+ favoritos (mas não todos) falharam ao carregar - não esconde os que carregaram. */
   partialError = signal(false);
   typesById = signal<Map<number, string[]>>(new Map());
   private reload = signal(0);
