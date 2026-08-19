@@ -1,0 +1,40 @@
+// ============================================================================
+// BREAKPOINTS — fonte única de verdade de responsividade.
+//
+// Só existem 3: sm (celular grande/tablet pequeno), md (tablet), lg (desktop).
+// Ficam em Sass (compile-time) e não em custom properties porque @media não
+// aceita var() — usar sempre os mixins abaixo em vez de min-width/max-width
+// literal em um componente.
+//
+// Uso:
+//   @use '../../styles/breakpoints' as bp;   // ajuste o caminho relativo
+//
+//   .card {
+//     padding: 12px;
+//     @include bp.up(md) { padding: 20px; }
+//   }
+// ============================================================================
+
+@use 'sass:map';
+
+$breakpoints: (
+  sm: 480px,
+  md: 768px,
+  lg: 1200px,
+);
+
+@function bp($name) {
+  @return map.get($breakpoints, $name);
+}
+
+@mixin up($name) {
+  @media (min-width: bp($name)) {
+    @content;
+  }
+}
+
+@mixin down($name) {
+  @media (max-width: bp($name) - 1px) {
+    @content;
+  }
+}

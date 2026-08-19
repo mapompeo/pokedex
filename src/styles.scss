@@ -1,5 +1,7 @@
 
 @use '@angular/material' as mat;
+@use 'styles/breakpoints' as bp;
+@forward 'styles/tokens';
 
 html {
   @include mat.theme((
@@ -12,101 +14,56 @@ html {
   ));
 }
 
-:root {
-  --pokedex-red: #FF0000;
-  --pokedex-red-dark: #A00000;
-  --pokedex-blue: #3B4CCA;
-  --pokedex-yellow: #FFDE00;
-  --pokedex-green: #2ECC71;
-
-  --dex-ink: #232333;
-  --dex-cream: #FFF6E9;
-  --dex-cream-deep: #F3E6CC;
-  --dex-gold: #E8B923;
-  --dex-bg: #fff;
-  --dex-bg-card: #f5f0eb;
-  --dex-text: #444;
-  --dex-text-muted: #7a7168;
-  --dex-nav-active: #332F99;
-  --dex-badge-baby-bg: #f8d5a0;
-  --dex-badge-baby-text: #7a5a20;
-  --dex-badge-legendary-bg: #e8c840;
-  --dex-badge-legendary-text: #6b5500;
-  --dex-badge-mythical-bg: #c8a0f8;
-  --dex-badge-mythical-text: #502a7a;
-
-  --dex-shadow-sm: 0 2px 8px color-mix(in srgb, var(--dex-ink) 10%, transparent);
-  --dex-shadow-md: 0 4px 12px color-mix(in srgb, var(--dex-ink) 14%, transparent);
-  --dex-shadow-lg: 0 8px 24px color-mix(in srgb, var(--dex-ink) 16%, transparent);
-  --dex-shadow-xl: 0 12px 32px color-mix(in srgb, var(--dex-ink) 18%, transparent);
-}
-
-.dark-mode {
-  --dex-ink: #e8e8f0;
-  --dex-cream: #2a2a35;
-  --dex-cream-deep: #333340;
-  --dex-gold: #d4a820;
-  --dex-bg: #1a1a24;
-  --dex-bg-card: #2a2a35;
-  --dex-text: #d0d0d8;
-  --dex-text-muted: #9a9ab0;
-  --dex-nav-active: #9999d0;
-  --dex-badge-baby-bg: #b89050;
-  --dex-badge-baby-text: #f0d0a0;
-  --dex-badge-legendary-bg: #a08820;
-  --dex-badge-legendary-text: #f0e080;
-  --dex-badge-mythical-bg: #8060a0;
-  --dex-badge-mythical-text: #d0b0f0;
-}
-
-// Tooltip padrão do projeto: sempre preto com texto branco, formato pill.
+// Tooltip padrão do projeto: sempre preto com texto branco, formato pill,
+// independente do tema claro/escuro (por isso usa --dex-black/--dex-white,
+// não --dex-ink/--dex-bg).
 .mat-mdc-tooltip {
-  --mdc-tooltip-container-color: #000000;
-  --mdc-tooltip-supporting-text-color: #ffffff;
-  --mdc-tooltip-container-shape: 999px;
-  --mdc-tooltip-supporting-text-size: 0.75rem;
-  --mdc-tooltip-supporting-text-line-height: 1.1;
+  --mdc-tooltip-container-color: var(--dex-black);
+  --mdc-tooltip-supporting-text-color: var(--dex-white);
+  --mdc-tooltip-container-shape: var(--dex-radius-pill);
+  --mdc-tooltip-supporting-text-size: var(--dex-font-xs);
+  --mdc-tooltip-supporting-text-line-height: var(--dex-leading-tight);
   --mdc-tooltip-supporting-text-font: 'Nunito Sans', sans-serif;
-  --mdc-tooltip-supporting-text-weight: 700;
+  --mdc-tooltip-supporting-text-weight: var(--dex-weight-bold);
 }
 
 .dex-page {
-  padding: 16px;
+  padding: var(--dex-space-6);
 
-  @media (min-width: 600px) {
-    padding: 20px;
+  @include bp.up(md) {
+    padding: var(--dex-space-7);
   }
 }
 
 .dex-back {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--dex-space-2);
   color: var(--pokedex-red);
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.8125rem;
-  margin-bottom: 12px;
+  font-weight: var(--dex-weight-bold);
+  font-size: var(--dex-font-sm);
+  margin-bottom: var(--dex-space-5);
 }
 
 .dex-title {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: var(--dex-font-xl);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
-  margin: 0 0 16px;
+  margin: 0 0 var(--dex-space-6);
 }
 
 .dex-search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dex-space-4);
   flex: 1 1 220px;
   background: var(--dex-bg);
   border: 2px solid color-mix(in srgb, var(--dex-ink) 12%, transparent);
-  border-radius: 999px;
-  padding: 8px 16px;
+  border-radius: var(--dex-radius-pill);
+  padding: var(--dex-space-4) var(--dex-space-6);
   color: var(--dex-ink);
-  transition: border-color 0.15s ease;
+  transition: border-color var(--dex-duration-fast) var(--dex-ease-standard);
 
   &:focus-within {
     border-color: var(--dex-gold);
@@ -117,8 +74,9 @@ html {
   border: none;
   outline: none;
   background: transparent;
-  // 16px é o mínimo para o Safari/iOS não aplicar zoom automático ao focar o input.
-  font-size: 1rem;
+  // 16px (--dex-font-base) é o mínimo para o Safari/iOS não aplicar zoom
+  // automático ao focar o input — não trocar por um token menor.
+  font-size: var(--dex-font-base);
   flex: 1;
   color: var(--dex-ink);
   font-family: inherit;
@@ -134,7 +92,8 @@ body {
   background: var(--dex-bg);
   overflow-x: hidden;
   overscroll-behavior: contain;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color var(--dex-duration-slow) var(--dex-ease-standard),
+              color var(--dex-duration-slow) var(--dex-ease-standard);
 }
 
 body.dark-mode {
@@ -149,13 +108,13 @@ app-root {
 * { scrollbar-width: none; -ms-overflow-style: none; }
 
 ::backdrop {
-  transition: background-color 0.3s ease;
+  transition: background-color var(--dex-duration-slow) var(--dex-ease-standard);
 }
 
 .app-snackbar {
   .mdc-snackbar__surface {
     background: var(--dex-bg) !important;
-    border-radius: 999px !important;
+    border-radius: var(--dex-radius-pill) !important;
     box-shadow: var(--dex-shadow-lg);
   }
 
@@ -177,7 +136,7 @@ app-root {
   }
 }
 
-@media (max-width: 767px) {
+@include bp.down(md) {
   .dex-search .dex-search__icon {
     display: none;
   }
@@ -187,5 +146,3 @@ app-root {
     padding: 0;
   }
 }
-
-
