@@ -16,6 +16,7 @@ import { PokemonDetail, PokemonExtras } from '../../core/models/pokemon.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 import { RadarChartComponent } from '../../shared/components/radar-chart/radar-chart.component';
+import { IconButtonComponent } from '../../shared/components/icon-button/icon-button.component';
 import { getPastelCardColor, getTypeColor } from '../../shared/type-colors';
 import { getStatPercent } from '../../shared/stat-utils';
 import { getStatColor, getStatLabel } from '../../shared/stat-labels';
@@ -53,7 +54,7 @@ const LEARN_METHOD_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-pokemon-detail',
   standalone: true,
-  imports: [RouterLink, MatIconModule, MatTooltipModule, LoadingSpinnerComponent, TypeBadgeComponent, RadarChartComponent],
+  imports: [RouterLink, MatIconModule, MatTooltipModule, LoadingSpinnerComponent, TypeBadgeComponent, RadarChartComponent, IconButtonComponent],
   animations: [tabFade],
   templateUrl: './pokemon-detail.component.html',
   styleUrl: './pokemon-detail.component.scss',

@@ -716,37 +716,6 @@
   margin-top: 4px;
 }
 
-.team__analysis-close {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border: none;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
-  color: var(--dex-ink);
-  cursor: pointer;
-
-  // Expande a área de toque para 44x44px sem aumentar o botão visualmente.
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -6px;
-  }
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover {
-    background: color-mix(in srgb, var(--dex-ink) 16%, transparent);
-  }
-}
 
 .team__analysis-stats {
   display: grid;

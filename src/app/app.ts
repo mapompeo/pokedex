@@ -9,6 +9,7 @@ import { FavoritesService } from './core/services/favorites.service';
 import { PageBackgroundService } from './core/services/page-background.service';
 import { NavigationService } from './core/services/navigation.service';
 import { routeFade } from './shared/animations';
+import { IconButtonComponent } from './shared/components/icon-button/icon-button.component';
 
 /**
  * Resolve qualquer cor CSS (color-mix(), color(srgb ...), etc.) para um
@@ -32,7 +33,7 @@ function resolveToRgb(cssColor: string): string {
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatIconModule, MatTooltipModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatIconModule, MatTooltipModule, IconButtonComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   animations: [routeFade],
