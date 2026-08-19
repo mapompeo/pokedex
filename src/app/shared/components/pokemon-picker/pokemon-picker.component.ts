@@ -11,13 +11,14 @@ import { loadDataParts } from '../../load-data-parts';
 import { formatPokemonId } from '../../format-utils';
 import { TypeBadgeComponent } from '../type-badge/type-badge.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { IconButtonComponent } from '../icon-button/icon-button.component';
 
 const ATTACKING_TYPES = Object.keys(TYPE_CHART);
 
 @Component({
   selector: 'app-pokemon-picker',
   standalone: true,
-  imports: [NgTemplateOutlet, MatIconModule, MatTooltipModule, TypeBadgeComponent, LoadingSpinnerComponent],
+  imports: [NgTemplateOutlet, MatIconModule, MatTooltipModule, TypeBadgeComponent, LoadingSpinnerComponent, IconButtonComponent],
   templateUrl: './pokemon-picker.component.html',
   styleUrl: './pokemon-picker.component.scss',
   host: {
