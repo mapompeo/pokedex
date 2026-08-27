@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .pdetail {
   display: flex;
   flex-direction: column;
@@ -93,25 +95,6 @@
     padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 14px;
   }
 
-  &__back {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border: none;
-    background: transparent;
-    padding: 0;
-    color: #fff;
-    cursor: pointer;
-    font-family: inherit;
-
-    &:focus-visible {
-      outline: 2px solid var(--dex-gold);
-      outline-offset: 2px;
-    }
-  }
-
   &__nav-arrows {
     display: flex;
     gap: 4px;
@@ -149,33 +132,6 @@
     gap: 4px;
   }
 
-  &__action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: color-mix(in srgb, #fff 20%, transparent);
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.15s ease;
-
-    &:focus-visible {
-      outline: 2px solid var(--dex-gold);
-      outline-offset: 2px;
-    }
-
-    &:hover {
-      background: color-mix(in srgb, #fff 35%, transparent);
-    }
-
-    &--active {
-      background: var(--dex-gold);
-      color: #000;
-    }
-  }
 
   &__fav {
     background: transparent;
@@ -1107,7 +1063,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@include bp.up(md) {
   .pdetail__sheet {
     padding: 12px 40px 40px;
   }
@@ -1128,7 +1084,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@include bp.up(lg) {
   .pdetail__actions {
     left: 50%;
     right: auto;

@@ -6,6 +6,9 @@
 /out-tsc
 /bazel-out
 
+# Claude Code worktrees (isolamento local de agente, nunca deve ir pro repo)
+.claude/worktrees/
+
 # Node
 /node_modules
 npm-debug.log

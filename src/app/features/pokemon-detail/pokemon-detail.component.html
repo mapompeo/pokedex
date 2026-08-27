@@ -35,9 +35,7 @@
         <div class="pdetail__hero-shimmer" [class.pdetail__hero-shimmer--active]="isShiny()"></div>
         <img src="/pokeball.png" alt="" class="pdetail__watermark" aria-hidden="true" loading="lazy" />
         <div class="pdetail__actions">
-          <button type="button" class="pdetail__back" (click)="goBack()" aria-label="Voltar" matTooltip="Voltar" matTooltipPosition="right">
-            <mat-icon>arrow_back</mat-icon>
-          </button>
+          <app-icon-button icon="arrow_back" ariaLabel="Voltar" tooltip="Voltar" tooltipPosition="right" tone="transparent" size="lg" (clicked)="goBack()" />
           <div class="pdetail__nav-arrows">
             <a [routerLink]="prevId() ? ['/pokemon', prevId()] : null" class="pdetail__nav-btn" [class.pdetail__nav-btn--disabled]="!prevId()" [attr.aria-disabled]="!prevId() || null" aria-label="Pokémon anterior" matTooltip="Pokémon anterior" matTooltipPosition="above">
               <mat-icon>chevron_left</mat-icon>
@@ -47,17 +45,16 @@
             </a>
           </div>
           <div class="pdetail__action-group">
-            <button
-              type="button"
-              class="pdetail__action-btn"
-              [class.pdetail__action-btn--active]="isInTeam()"
-              (click)="toggleTeam()"
-              [attr.aria-label]="teamButtonLabel()"
-              [matTooltip]="teamButtonLabel()"
-              matTooltipPosition="left"
-            >
-              <mat-icon>{{ isInTeam() ? 'groups' : 'group_add' }}</mat-icon>
-            </button>
+            <app-icon-button
+              [icon]="isInTeam() ? 'groups' : 'group_add'"
+              [ariaLabel]="teamButtonLabel()"
+              [tooltip]="teamButtonLabel()"
+              tooltipPosition="left"
+              tone="on-photo"
+              size="lg"
+              [active]="isInTeam()"
+              (clicked)="toggleTeam()"
+            />
             <button
               type="button"
               class="pdetail__fav"

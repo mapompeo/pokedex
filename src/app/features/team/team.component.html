@@ -351,9 +351,7 @@
               }
             </span>
           </div>
-          <button type="button" class="team__analysis-close" (click)="closeAnalysis()" aria-label="Fechar">
-            <mat-icon>close</mat-icon>
-          </button>
+          <app-icon-button icon="close" ariaLabel="Fechar" size="sm" (clicked)="closeAnalysis()" />
         </div>
 
         @if (statsById().get(id); as stats) {

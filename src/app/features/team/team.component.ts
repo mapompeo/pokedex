@@ -16,6 +16,7 @@ import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badg
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
 import { PokemonCardComponent } from '../../shared/components/pokemon-card/pokemon-card.component';
+import { IconButtonComponent } from '../../shared/components/icon-button/icon-button.component';
 
 const ATTACKING_TYPES = Object.keys(TYPE_CHART);
 
@@ -30,6 +31,7 @@ const ATTACKING_TYPES = Object.keys(TYPE_CHART);
     LoadingSpinnerComponent,
     PokemonPickerComponent,
     PokemonCardComponent,
+    IconButtonComponent,
   ],
   templateUrl: './team.component.html',
   styleUrl: './team.component.scss',

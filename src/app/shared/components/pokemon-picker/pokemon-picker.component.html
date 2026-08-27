@@ -9,9 +9,7 @@
               <p class="pp-hint">{{ hint() }}</p>
             }
           </div>
-          <button type="button" class="pp-close" (click)="dismiss()" aria-label="Fechar">
-            <mat-icon>close</mat-icon>
-          </button>
+          <app-icon-button icon="close" ariaLabel="Fechar" size="sm" (clicked)="dismiss()" />
         </div>
 
         <ng-container *ngTemplateOutlet="bodyTemplate"></ng-container>
@@ -40,9 +38,7 @@
         (blur)="onBlur()"
       />
       @if (clearable() && query()) {
-        <button type="button" class="pp-clear" (click)="clearQuery()" aria-label="Limpar busca">
-          <mat-icon>close</mat-icon>
-        </button>
+        <app-icon-button icon="close" ariaLabel="Limpar busca" size="xs" (clicked)="clearQuery()" />
       }
     </div>
     @if (filterButton()) {

@@ -71,16 +71,13 @@
       <span>Time</span>
     </a>
       <span class="pokedex-frame__nav-divider" aria-hidden="true"></span>
-      <button
-        type="button"
-        class="pokedex-frame__theme-btn"
-        (click)="toggleDarkMode()"
-        [attr.aria-label]="isDarkMode() ? 'Modo claro' : 'Modo escuro'"
-        [matTooltip]="isDarkMode() ? 'Modo claro' : 'Modo escuro'"
-        matTooltipPosition="above"
-      >
-        <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-      </button>
+      <app-icon-button
+        [icon]="isDarkMode() ? 'light_mode' : 'dark_mode'"
+        [ariaLabel]="isDarkMode() ? 'Modo claro' : 'Modo escuro'"
+        [tooltip]="isDarkMode() ? 'Modo claro' : 'Modo escuro'"
+        size="lg"
+        (clicked)="toggleDarkMode()"
+      />
   </nav>
   </div>
 </div>

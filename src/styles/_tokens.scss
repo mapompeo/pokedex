@@ -1,0 +1,129 @@
+// ============================================================================
+// DESIGN TOKENS — fonte única de verdade de estilo do projeto.
+//
+// Nenhuma cor, tamanho de fonte, espaçamento, radius, sombra ou duração de
+// transição deve ser escrito literal em um componente — sempre via var(--dex-*)
+// definida aqui. Breakpoints são a única exceção: como @media não aceita
+// custom properties, eles vivem em _breakpoints.scss como variáveis Sass.
+//
+// Convenção de nome: --dex-<categoria>-<escala>, escala sempre do menor pro
+// maior (3xs → 3xl, sm → xl). Cores de marca mantêm o prefixo --pokedex-*
+// já em uso no restante do projeto.
+// ============================================================================
+
+:root {
+  // ---- Cor de marca (Pokédex) ---------------------------------------------
+  --pokedex-red: #FF0000;
+  --pokedex-red-dark: #A00000;
+  --pokedex-blue: #3B4CCA;
+  --pokedex-yellow: #FFDE00;
+  --pokedex-green: #2ECC71;
+
+  // ---- Cor de superfície / tema (light) -----------------------------------
+  --dex-ink: #232333;
+  --dex-cream: #FFF6E9;
+  --dex-cream-deep: #F3E6CC;
+  --dex-gold: #E8B923;
+  --dex-bg: #fff;
+  --dex-bg-card: #f5f0eb;
+  --dex-text: #444;
+  --dex-text-muted: #7a7168;
+  --dex-nav-active: #332F99;
+  --dex-badge-baby-bg: #f8d5a0;
+  --dex-badge-baby-text: #7a5a20;
+  --dex-badge-legendary-bg: #e8c840;
+  --dex-badge-legendary-text: #6b5500;
+  --dex-badge-mythical-bg: #c8a0f8;
+  --dex-badge-mythical-text: #502a7a;
+
+  // ---- Cor "on-image" — independe do tema claro/escuro --------------------
+  // Usada quando o elemento fica sobre uma foto/artwork (ícone de favorito,
+  // texto sobre splash de pokémon), nunca sobre o fundo do app.
+  --dex-white: #ffffff;
+  --dex-black: #000000;
+  --dex-scrim: rgba(0, 0, 0, 0.45); // backdrop atrás de modal/bottom sheet
+  --dex-icon-on-photo: rgba(255, 255, 255, 0.9); // ícone sobre foto, estado ativo
+  --dex-icon-on-photo-muted: rgba(255, 255, 255, 0.5); // ícone sobre foto, estado inativo
+
+  // ---- Tipografia -----------------------------------------------------------
+  // Escala baseada nos valores já dominantes no projeto (rem, raiz 16px).
+  --dex-font-3xs: 0.625rem;  // 10px
+  --dex-font-2xs: 0.6875rem; // 11px
+  --dex-font-xs: 0.75rem;    // 12px
+  --dex-font-sm: 0.8125rem;  // 13px
+  --dex-font-md: 0.875rem;   // 14px
+  --dex-font-base: 1rem;     // 16px — corpo de texto
+  --dex-font-lg: 1.125rem;   // 18px
+  --dex-font-xl: 1.25rem;    // 20px
+  --dex-font-2xl: 1.5rem;    // 24px
+  --dex-font-3xl: 2rem;      // 32px
+
+  --dex-weight-regular: 400;
+  --dex-weight-semibold: 600;
+  --dex-weight-bold: 700;
+  --dex-weight-black: 800;
+
+  --dex-leading-tight: 1.1;
+  --dex-leading-snug: 1.25;
+  --dex-leading-normal: 1.5;
+  --dex-leading-relaxed: 1.6;
+
+  // ---- Espaçamento (base 2px/4px) -------------------------------------------
+  --dex-space-1: 2px;
+  --dex-space-2: 4px;
+  --dex-space-3: 6px;
+  --dex-space-4: 8px;
+  --dex-space-5: 12px;
+  --dex-space-6: 16px;
+  --dex-space-7: 20px;
+  --dex-space-8: 24px;
+  --dex-space-9: 32px;
+  --dex-space-10: 40px;
+  --dex-space-11: 48px;
+  --dex-space-12: 64px;
+
+  // ---- Border-radius ----------------------------------------------------
+  --dex-radius-sm: 4px;
+  --dex-radius-md: 8px;
+  --dex-radius-lg: 14px;
+  --dex-radius-xl: 20px;
+  --dex-radius-sheet: 32px; // topo de bottom sheet (padrão do projeto — ver STYLEGUIDE)
+  --dex-radius-pill: 999px;
+  --dex-radius-circle: 50%;
+
+  // ---- Sombra / elevação --------------------------------------------------
+  --dex-shadow-sm: 0 2px 8px color-mix(in srgb, var(--dex-ink) 10%, transparent);
+  --dex-shadow-md: 0 4px 12px color-mix(in srgb, var(--dex-ink) 14%, transparent);
+  --dex-shadow-lg: 0 8px 24px color-mix(in srgb, var(--dex-ink) 16%, transparent);
+  --dex-shadow-xl: 0 12px 32px color-mix(in srgb, var(--dex-ink) 18%, transparent);
+  // Glow por tipo de Pokémon — depende de --type-color setado localmente no elemento.
+  --dex-shadow-type: 0 2px 10px color-mix(in srgb, var(--type-color, var(--dex-ink)) 40%, transparent);
+
+  // ---- Transição / animação ------------------------------------------------
+  --dex-duration-fast: 150ms;
+  --dex-duration-base: 250ms;
+  --dex-duration-slow: 400ms;
+  --dex-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dex-ease-linear: linear;
+}
+
+.dark-mode {
+  --dex-ink: #e8e8f0;
+  --dex-cream: #2a2a35;
+  --dex-cream-deep: #333340;
+  --dex-gold: #d4a820;
+  --dex-bg: #1a1a24;
+  --dex-bg-card: #2a2a35;
+  --dex-text: #d0d0d8;
+  --dex-text-muted: #9a9ab0;
+  --dex-nav-active: #9999d0;
+  --dex-badge-baby-bg: #b89050;
+  --dex-badge-baby-text: #f0d0a0;
+  --dex-badge-legendary-bg: #a08820;
+  --dex-badge-legendary-text: #f0e080;
+  --dex-badge-mythical-bg: #8060a0;
+  --dex-badge-mythical-text: #d0b0f0;
+
+  // Tokens "on-image" não mudam com o tema — fotos/artworks têm o mesmo
+  // tratamento em light e dark — por isso não são redeclarados aqui.
+}

@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .pokemon-list {
   position: relative;
   overflow: hidden;
@@ -344,13 +346,16 @@
   to { transform: rotate(360deg); }
 }
 
-@media (min-width: 480px) {
+@include bp.up(sm) {
   .pokemon-list__grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 14px;
   }
 }
 
+// Literal (não bp.down) de propósito: o par com o breakpoint acima já era
+// max-width:480px, não 479px, e mantemos o valor original pra não mudar
+// o comportamento existente exatamente em 480px de largura.
 @media (max-width: 480px) {
   .pokemon-list__filters {
     padding: 12px 12px 6px;
@@ -372,7 +377,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@include bp.up(md) {
   .scroll-top-fab {
     right: 24px;
   }
