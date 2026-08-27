@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .pdetail {
   display: flex;
   flex-direction: column;
@@ -1061,7 +1063,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@include bp.up(md) {
   .pdetail__sheet {
     padding: 12px 40px 40px;
   }
@@ -1082,7 +1084,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@include bp.up(lg) {
   .pdetail__actions {
     left: 50%;
     right: auto;

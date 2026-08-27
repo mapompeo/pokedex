@@ -1,3 +1,5 @@
+@use '../styles/breakpoints' as bp;
+
 :host {
   display: block;
   min-height: 100dvh;
@@ -202,7 +204,7 @@
 
 }
 
-@media (min-width: 768px) {
+@include bp.up(md) {
   .pokedex-frame {
     &__content--sheet {
       padding-bottom: 32px;
@@ -248,7 +250,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@include bp.up(lg) {
   .pokedex-frame {
     max-width: 1200px;
     margin: 0 auto;

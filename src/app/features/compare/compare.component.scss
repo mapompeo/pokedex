@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .compare {
   position: relative;
   width: 100%;
@@ -352,7 +354,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@include bp.down(md) {
   .dex-search .dex-search__icon {
     display: inline-flex;
     flex-shrink: 0;
@@ -459,7 +461,7 @@
   }
 }
 
-@media (max-width: 767px) {
+@include bp.down(md) {
   .compare__search-row {
     gap: 6px;
 
@@ -469,7 +471,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@include bp.up(md) {
   .compare__hero-bg {
     height: 460px;
   }

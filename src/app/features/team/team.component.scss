@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .team-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -974,14 +976,14 @@
   50% { transform: translateY(-8px); }
 }
 
-@media (min-width: 480px) {
+@include bp.up(sm) {
   .team__grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
 }
 
-@media (min-width: 768px) {
+@include bp.up(md) {
   .team__coverage {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -998,7 +1000,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@include bp.up(lg) {
   .team__coverage {
     grid-template-columns: repeat(4, 1fr);
   }
