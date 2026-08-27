@@ -9,7 +9,7 @@
 
 **Pokédex completa em Angular, consumindo a PokéAPI em tempo real - sem backend próprio**
 
-[Sobre](#sobre) • [Stack](#stack) • [Como Usar](#-como-usar) • [Arquitetura](#-arquitetura) • [Decisões](#-decisões-de-arquitetura)
+[Sobre](#sobre) • [Stack](#stack) • [Como Usar](#-como-usar) • [Arquitetura](#-arquitetura) • [Decisões](#-decisões-de-arquitetura) • [Guia de Estilo](STYLEGUIDE.md)
 
 </div>
 
@@ -61,7 +61,7 @@ Template (Angular control flow: @if / @for / @switch)
 - **`core/services`** - `PokemonService` (toda a integração com a PokéAPI, incluindo cache e montagem da cadeia de evolução), `FavoritesService` e `TeamService` (persistidos em `localStorage`) e `TranslationService` (traduções sob demanda, com cache)
 - **`core/models`** - interfaces de domínio (`PokemonDetail`, `PokemonExtras`, `PokemonListItem`, ...), desacopladas do formato bruto da API
 - **`core/interceptors`** - interceptor HTTP global de erros
-- **`shared/components`** - componentes reutilizáveis (card, skeleton do card, badge de tipo, spinner, seletor de pokémon, gráfico de radar de stats)
+- **`shared/components`** - componentes reutilizáveis (card, skeleton do card, badge de tipo, spinner, seletor de pokémon, gráfico de radar de stats, botão-ícone) — tokens de design, breakpoints e convenções desses componentes ficam documentados no [Guia de Estilo](STYLEGUIDE.md)
 - **`shared/*.ts`** - helpers puros reutilizados entre features (formatação, cores/tradução de tipos, cálculo de efetividade, storage JSON, efeito de digitação do placeholder)
 - **`features`** - uma pasta por tela (`pokemon-list`, `pokemon-detail`, `favorites`, `compare`, `team`), cada uma isolada e lazy-loaded via rotas
 
