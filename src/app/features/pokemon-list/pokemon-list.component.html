@@ -44,6 +44,9 @@
     </div>
 
     @if (filtersOpen()) {
+      <!-- Backdrop só de conveniência do mouse: quem usa teclado fecha voltando
+           ao botão "Filtrar" (toggle) ou via Escape; não é um controle real. -->
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="pokemon-list__filters-backdrop" (click)="filtersOpen.set(false)"></div>
       <div class="pokemon-list__type-filters" role="dialog" aria-label="Filtros de tipo">
         @for (type of availableTypes(); track type.name) {

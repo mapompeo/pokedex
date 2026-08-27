@@ -498,6 +498,6 @@ export class PokemonDetailComponent implements OnDestroy, AfterViewInit {
     if (!p) return;
     const audio = new Audio(p.cryUrl);
     audio.volume = 0.5;
-    audio.play().catch(() => {});
+    audio.play().catch(() => { /* autoplay pode ser bloqueado sem gesto do usuário; ignorar */ });
   }
 }

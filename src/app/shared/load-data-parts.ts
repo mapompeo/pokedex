@@ -13,6 +13,11 @@ export interface DataPart<T = unknown> {
  * cancelar as demais).
  */
 export function loadDataParts(
+  // any é proposital aqui: o array é heterogêneo (cada parte tem seu próprio
+  // T — ex.: DataPart<PokemonListItem[]> e DataPart<Map<...>> juntos), e
+  // `apply` de cada item já garante type-safety no ponto de uso; `unknown`
+  // no lugar de `any` não compila por contravariância de `apply`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parts: DataPart<any>[],
   loading: WritableSignal<boolean>,
   error: WritableSignal<boolean>

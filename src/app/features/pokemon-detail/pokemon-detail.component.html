@@ -82,7 +82,18 @@
       </div>
     </div>
 
-    <img [src]="isShiny() ? p.shinyUrl : p.spriteUrl" [alt]="p.name" class="pdetail__sprite" (click)="playCry()" loading="lazy" />
+    <img
+      [src]="isShiny() ? p.shinyUrl : p.spriteUrl"
+      [alt]="p.name"
+      class="pdetail__sprite"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="'Tocar som de ' + p.name"
+      (click)="playCry()"
+      (keydown.enter)="playCry()"
+      (keydown.space)="playCry()"
+      loading="lazy"
+    />
 
     <div class="pdetail__sheet">
       <div class="pdetail__tabs-wrap">

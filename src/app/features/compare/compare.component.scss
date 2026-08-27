@@ -521,6 +521,29 @@
   }
 }
 
+// Literal (não bp.down) de propósito: 340px é um limiar específico dessa
+// tela (largura mínima pra caber nome+tipos+meta dos dois pokémon lado a
+// lado sem espremer demais), não um breakpoint reaproveitado em outro
+// lugar — o sistema de breakpoints compartilhado é deliberadamente só
+// sm/md/lg. Abaixo disso, empilha nome/tipos/meta e habilidades (a
+// comparação de status permanece lado a lado: virar duas barras cheias
+// empilhadas por pokémon é uma mudança de metáfora visual, não um ajuste
+// responsivo, e fica como decisão de design em aberto).
+@media (max-width: 339px) {
+  .compare__info-row,
+  .compare__abilities-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .compare__info-row .compare__info-divider,
+  .compare__abilities-row .compare__info-divider {
+    width: auto;
+    height: 1px;
+    margin: 16px 0;
+  }
+}
+
 @keyframes hero-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

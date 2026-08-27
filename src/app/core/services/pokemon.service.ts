@@ -337,7 +337,7 @@ export class PokemonService {
     };
   }
 
-  private flattenEvolutionStages(node: EvolutionNode, stage: number = 0): Map<number, EvolutionNode[]> {
+  private flattenEvolutionStages(node: EvolutionNode, stage = 0): Map<number, EvolutionNode[]> {
     const map = new Map<number, EvolutionNode[]>();
     const arr = map.get(stage) ?? [];
     arr.push(node);
