@@ -2,6 +2,7 @@ import { Component, computed, effect, HostListener, inject, signal } from '@angu
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TeamService, TEAM_MAX_SIZE } from '../../core/services/team.service';
 import { PokemonService } from '../../core/services/pokemon.service';
@@ -14,7 +15,7 @@ import { capitalizeFirst, formatPokemonId } from '../../shared/format-utils';
 import { getStatLabel } from '../../shared/stat-labels';
 import { TypeBadgeComponent } from '../../shared/components/type-badge/type-badge.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
-import { PokemonPickerComponent } from '../../shared/components/pokemon-picker/pokemon-picker.component';
+import { PokemonPickerDialogComponent } from '../../shared/components/pokemon-picker-dialog/pokemon-picker-dialog.component';
 import { PokemonCardComponent } from '../../shared/components/pokemon-card/pokemon-card.component';
 import { IconButtonComponent } from '../../shared/components/icon-button/icon-button.component';
 
@@ -29,7 +30,6 @@ const ATTACKING_TYPES = Object.keys(TYPE_CHART);
     TypeBadgeComponent,
     DragDropModule,
     LoadingSpinnerComponent,
-    PokemonPickerComponent,
     PokemonCardComponent,
     IconButtonComponent,
   ],
@@ -40,19 +40,17 @@ export class TeamComponent {
   teamService = inject(TeamService);
   private pokemonService = inject(PokemonService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   maxSize = TEAM_MAX_SIZE;
 
   typesById = signal<Map<number, string[]>>(new Map());
   allNames = signal<PokemonListItem[]>([]);
   statsById = signal<Map<number, PokemonStat[]>>(new Map());
-  pickerOpen = signal(false);
-  pickerPreselect = signal<string[]>([]);
   analysisId = signal<number | null>(null);
   surpriseLoading = signal(false);
   confirmClear = signal(false);
   typeTableOpen = signal(false);
-  replacingIndex = signal<number | null>(null);
   confirmRemoveId = signal<number | null>(null);
   dataLoading = signal(true);
   dataError = signal(false);
@@ -174,22 +172,36 @@ export class TeamComponent {
   }
 
   openPicker(): void {
-    this.replacingIndex.set(null);
-    this.pickerPreselect.set([]);
-    this.pickerOpen.set(true);
+    this.openPickerDialog(null, []);
   }
 
   openReplace(index: number): void {
-    this.replacingIndex.set(index);
-    this.pickerPreselect.set([]);
-    this.pickerOpen.set(true);
+    this.openPickerDialog(index, []);
   }
 
   /** Abre o picker já filtrado pelos tipos que cobrem a maior fraqueza do time. */
   openTipPicker(counters: string[]): void {
-    this.replacingIndex.set(null);
-    this.pickerPreselect.set(counters);
-    this.pickerOpen.set(true);
+    this.openPickerDialog(null, counters);
+  }
+
+  private openPickerDialog(replacingIndex: number | null, preselectTypes: string[]): void {
+    const ref = this.dialog.open(PokemonPickerDialogComponent, {
+      panelClass: 'pp-dialog-panel',
+      backdropClass: 'pp-dialog-backdrop',
+      autoFocus: '.dex-search__input',
+      data: {
+        title: replacingIndex !== null ? 'Trocar pokémon' : 'Escolher pokémon',
+        hint:
+          replacingIndex !== null
+            ? `O pokémon escolhido substituirá o slot ${replacingIndex + 1}.`
+            : '',
+        excludeIds: this.teamExcludeIds(),
+        preselectTypes,
+      },
+    });
+    ref.afterClosed().subscribe((item) => {
+      if (item) this.handlePicked(item, replacingIndex);
+    });
   }
 
   /** Preenche os slots vazios com Pokémon aleatórios ainda não usados. */
@@ -217,18 +229,11 @@ export class TeamComponent {
     this.surpriseLoading.set(false);
   }
 
-  closePicker(): void {
-    this.pickerOpen.set(false);
-    this.replacingIndex.set(null);
-    this.pickerPreselect.set([]);
-  }
-
   teamExcludeIds(): number[] {
     return this.teamService.team().map((m) => m.id);
   }
 
-  handlePicked(item: PokemonListItem): void {
-    const index = this.replacingIndex();
+  private handlePicked(item: PokemonListItem, replacingIndex: number | null): void {
     if (this.teamService.isInTeam(item.id)) {
       this.snackBar.open(`${capitalizeFirst(item.name)} já está no seu time`, 'Fechar', {
         duration: 2500,
@@ -236,9 +241,15 @@ export class TeamComponent {
       });
       return;
     }
-    const ok = index !== null ? this.teamService.replace(index, item) : this.teamService.add(item);
-    if (ok) {
-      this.closePicker();
+    const ok = replacingIndex !== null ? this.teamService.replace(replacingIndex, item) : this.teamService.add(item);
+    // Só pode falhar aqui por time cheio (já checamos "já está no time" acima).
+    // Antes o diálogo hand-rolled ficava aberto nesse caso sem avisar nada;
+    // agora que o MatDialog já fechou ao selecionar, precisa de feedback.
+    if (!ok) {
+      this.snackBar.open('Seu time já está cheio', 'Fechar', {
+        duration: 2500,
+        panelClass: 'app-snackbar',
+      });
     }
   }
 

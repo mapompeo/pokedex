@@ -282,18 +282,6 @@
     }
   </div>
 
-  @if (pickerOpen()) {
-    <app-pokemon-picker
-      [modal]="true"
-      [open]="pickerOpen()"
-      [title]="replacingIndex() !== null ? 'Trocar pokémon' : 'Escolher pokémon'"
-      [hint]="replacingIndex() !== null ? 'O pokémon escolhido substituirá o slot ' + (replacingIndex()! + 1) + '.' : ''"
-      [excludeIds]="teamExcludeIds()"
-      [preselectTypes]="pickerPreselect()"
-      (pokemonSelected)="handlePicked($event)"
-      (dismissed)="closePicker()"
-    ></app-pokemon-picker>
-  }
 
   @if (confirmRemoveId(); as id) {
     <!-- Overlay/stopPropagation são só conveniência do mouse: Escape (via

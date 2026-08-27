@@ -6,8 +6,12 @@
   width: 100%;
 }
 
-:host.pp--modal {
-  display: contents;
+// Usado dentro de PokemonPickerDialogComponent: o picker preenche o espaço
+// restante da coluna flex do diálogo, em vez de ser um dropdown flutuante.
+:host.pp--expanded {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .pp-root {
@@ -40,44 +44,14 @@
   max-height: 60vh;
 }
 
-.pp--modal {
-  .pp-panel {
-    position: static;
-    flex: 1 1 auto;
-    min-height: 0;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-  }
-}
-
-.pp-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-.pp-dialog {
-  width: 100%;
-  max-width: 480px;
-  // dvh (não vh) evita que o diálogo seja cortado quando a barra de
-  // endereço do navegador mobile aparece/some (ex.: Safari iOS).
-  max-height: 80dvh;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: var(--dex-bg);
-  border-radius: 20px;
-  box-shadow: var(--dex-shadow-xl);
-  padding: 16px;
-  box-sizing: border-box;
+:host.pp--expanded .pp-panel {
+  position: static;
+  flex: 1 1 auto;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .pp-head {
@@ -87,7 +61,7 @@
   gap: 12px;
 }
 
-:host:not(.pp--modal) .pp-root > .pp-head {
+.pp-root > .pp-head {
   flex-direction: column;
 }
 

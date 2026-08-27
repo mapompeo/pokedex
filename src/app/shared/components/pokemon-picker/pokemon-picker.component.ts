@@ -1,4 +1,3 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, ElementRef, HostListener, inject, input, output, signal, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,23 +14,30 @@ import { IconButtonComponent } from '../icon-button/icon-button.component';
 
 const ATTACKING_TYPES = Object.keys(TYPE_CHART);
 
+/**
+ * Busca/autocomplete de Pokémon. Uso padrão: dropdown inline sobre o campo
+ * de busca (ex.: compare). Para uso como diálogo modal, ver
+ * `PokemonPickerDialogComponent` — este componente não sabe mais nada sobre
+ * overlay/modal, só sobre "estou expandido preenchendo o espaço do meu pai
+ * ou sou um dropdown flutuante" (`alwaysOpen`).
+ */
 @Component({
   selector: 'app-pokemon-picker',
   standalone: true,
-  imports: [NgTemplateOutlet, MatIconModule, MatTooltipModule, TypeBadgeComponent, LoadingSpinnerComponent, IconButtonComponent],
+  imports: [MatIconModule, MatTooltipModule, TypeBadgeComponent, LoadingSpinnerComponent, IconButtonComponent],
   templateUrl: './pokemon-picker.component.html',
   styleUrl: './pokemon-picker.component.scss',
   host: {
-    '[class.pp--modal]': 'modal()',
+    '[class.pp--expanded]': 'alwaysOpen()',
   },
 })
 export class PokemonPickerComponent {
   private pokemonService = inject(PokemonService);
 
-  /** Modo de exibição. Default: dropdown (autocomplete inline). true = popup modal centralizado. */
-  modal = input(false);
-  /** Força a abertura do dropdown a partir do pai (ex.: escolha de slot no time). */
-  open = input(false);
+  /** Mantém a lista de resultados sempre visível, em vez de só ao focar/digitar
+   *  (uso: dentro de `PokemonPickerDialogComponent`, onde o painel é o próprio
+   *  conteúdo do diálogo, não um dropdown flutuante). */
+  alwaysOpen = input(false);
   /** Valor exibido no campo quando o usuário não está digitando (ex.: Pokémon já escolhido). */
   value = input('');
   /** IDs que não devem aparecer na lista (ex.: os que já estão no time). */
@@ -69,7 +75,7 @@ export class PokemonPickerComponent {
   /** Abre ao focar/digitar (uso como autocomplete). */
   show = signal(false);
   fieldFocused = signal(false);
-  panelVisible = computed(() => this.show() || this.open());
+  panelVisible = computed(() => this.show() || this.alwaysOpen());
 
   @ViewChild('root') root?: ElementRef<HTMLDivElement>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
@@ -91,19 +97,12 @@ export class PokemonPickerComponent {
 
   constructor() {
     this.loadData();
+    // Seed único na criação (não um effect): cada instância nasce e morre
+    // com uma "sessão" de busca — não deve resetar o filtro do usuário se
+    // o pai re-renderizar com o mesmo array por outro motivo.
+    this.typeFilter.set(this.preselectTypes());
 
     effect(() => {
-      if (this.modal()) {
-        if (this.open()) {
-          this.resetForOpen();
-        }
-      } else if (!this.open()) {
-        this.show.set(false);
-      }
-    });
-
-    effect(() => {
-      if (this.modal()) return;
       const v = this.value();
       if (v && !this.fieldFocused()) {
         this.query.set(v);
@@ -111,22 +110,15 @@ export class PokemonPickerComponent {
     });
   }
 
-  private resetForOpen(): void {
-    this.filtersOpen.set(false);
-    this.typeFilter.set(this.preselectTypes());
-    this.show.set(true);
-    setTimeout(() => this.searchInput?.nativeElement?.focus(), 0);
-  }
-
   onQueryInput(value: string): void {
     this.query.set(value);
-    if (!this.modal()) this.show.set(true);
+    this.show.set(true);
     this.queryChange.emit(value);
   }
 
   onFocus(): void {
     this.fieldFocused.set(true);
-    if (!this.modal()) this.show.set(true);
+    this.show.set(true);
   }
 
   onBlur(): void {
@@ -169,22 +161,21 @@ export class PokemonPickerComponent {
 
   dismiss(): void {
     this.show.set(false);
-    if (this.open()) {
-      this.dismissed.emit();
-    }
+    this.dismissed.emit();
   }
 
   @HostListener('document:pointerdown', ['$event'])
   onGlobalClick(event: PointerEvent): void {
-    if (this.modal()) return;
-    if ((this.show() || this.open()) && this.root && !this.root.nativeElement.contains(event.target as Node)) {
+    if (this.alwaysOpen()) return;
+    if (this.show() && this.root && !this.root.nativeElement.contains(event.target as Node)) {
       this.dismiss();
     }
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.show() || this.open()) {
+    if (this.alwaysOpen()) return;
+    if (this.show()) {
       this.dismiss();
     }
   }

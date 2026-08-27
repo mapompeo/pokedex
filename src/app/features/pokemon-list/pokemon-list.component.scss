@@ -26,14 +26,14 @@
   height: 44px;
   padding: 0 18px;
   border: 2px solid color-mix(in srgb, var(--dex-ink) 12%, transparent);
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   background: var(--dex-bg);
   color: var(--dex-ink);
   cursor: pointer;
   font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  transition: border-color 0.15s ease, background 0.2s ease;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-bold);
+  transition: border-color var(--dex-duration-fast) ease, background 0.2s ease;
 
   &:hover {
     border-color: var(--dex-gold);
@@ -60,11 +60,11 @@
   right: -4px;
   background: var(--pokedex-red);
   color: #fff;
-  font-size: 0.625rem;
-  font-weight: 800;
+  font-size: var(--dex-font-3xs);
+  font-weight: var(--dex-weight-black);
   min-width: 16px;
   height: 16px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,12 +102,12 @@
   align-items: center;
   gap: 4px;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   border: none;
   background: color-mix(in srgb, var(--type-color) 65%, white);
   color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-bold);
   cursor: pointer;
   transition: all 0.2s ease;
   text-shadow: 0 1px 2px color-mix(in srgb, #000 20%, transparent);
@@ -211,8 +211,8 @@
   gap: 8px;
   padding: 20px 16px;
   color: var(--dex-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-semibold);
 }
 
 .pokemon-list__loading-more-icon {
@@ -241,14 +241,14 @@
 
   &-text {
     color: var(--dex-text-muted);
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: var(--dex-font-base);
+    font-weight: var(--dex-weight-bold);
     margin: 0 0 4px;
   }
 
   &-hint {
     color: var(--dex-text-muted);
-    font-size: 0.8125rem;
+    font-size: var(--dex-font-sm);
     opacity: 0.7;
     margin: 0;
   }
@@ -272,8 +272,8 @@
 
   p {
     color: var(--dex-text-muted);
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: var(--dex-font-md);
+    font-weight: var(--dex-weight-semibold);
     margin: 0;
   }
 }
@@ -285,7 +285,7 @@
   z-index: 20;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--dex-radius-circle);
   border: none;
   background: var(--pokedex-red);
   color: #fff;
@@ -321,7 +321,7 @@
   align-items: flex-end;
   justify-content: center;
   overflow: hidden;
-  transition: height 0.15s ease;
+  transition: height var(--dex-duration-fast) ease;
   height: 0;
 
   mat-icon {
@@ -330,7 +330,7 @@
     width: 24px;
     height: 24px;
     margin-bottom: 4px;
-    transition: transform 0.15s ease;
+    transition: transform var(--dex-duration-fast) ease;
   }
 
   &--visible {
