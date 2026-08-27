@@ -1,32 +1,4 @@
-@if (modal()) {
-  @if (open()) {
-    <!-- Overlay/stopPropagation são só conveniência do mouse: Escape (via
-         @HostListener no .ts) e o botão de fechar já cobrem o teclado. -->
-    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-    <div class="pp-overlay" (click)="dismiss()">
-      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
-      <div class="pp-dialog" role="dialog" [attr.aria-label]="title()" (click)="$event.stopPropagation()">
-        <div class="pp-head">
-          <div class="pp-head-text">
-            <h3 class="pp-title">{{ title() }}</h3>
-            @if (hint()) {
-              <p class="pp-hint">{{ hint() }}</p>
-            }
-          </div>
-          <app-icon-button icon="close" ariaLabel="Fechar" size="sm" (clicked)="dismiss()" />
-        </div>
-
-        <ng-container *ngTemplateOutlet="bodyTemplate"></ng-container>
-      </div>
-    </div>
-  }
-} @else {
-  <div #root class="pp-root">
-    <ng-container *ngTemplateOutlet="bodyTemplate"></ng-container>
-  </div>
-}
-
-<ng-template #bodyTemplate>
+<div #root class="pp-root">
   <div class="pp-search-row">
     <div class="dex-search">
       <mat-icon>search</mat-icon>
@@ -88,7 +60,7 @@
     </div>
   }
 
-  @if (!modal() && (title() || hint())) {
+  @if (title() || hint()) {
     <div class="pp-head">
       @if (title()) {
         <h3 class="pp-title">{{ title() }}</h3>
@@ -149,4 +121,4 @@
       }
     </div>
   }
-</ng-template>
+</div>

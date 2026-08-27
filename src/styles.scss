@@ -127,6 +127,29 @@ app-root {
   }
 }
 
+// Diálogo do picker de Pokémon (ver PokemonPickerDialogComponent): a casca
+// comportamental (focus trap, Escape, clique fora, aria-modal, animação) é
+// do MatDialog; o card visual continua 100% controlado pelo componente —
+// aqui só neutralizamos o container/surface padrão do Material pra não
+// sobrepor esse visual com o dele (mesmo padrão do .app-snackbar acima).
+.pp-dialog-panel {
+  .mat-mdc-dialog-container,
+  .mdc-dialog__surface,
+  .mat-mdc-dialog-surface {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    overflow: visible;
+  }
+}
+
+// Mesma cor do antigo .pp-overlay hand-rolled (o backdrop escuro padrão do
+// CDK é mais claro).
+.pp-dialog-backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

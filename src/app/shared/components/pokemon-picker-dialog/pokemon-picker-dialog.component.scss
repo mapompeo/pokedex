@@ -1,0 +1,39 @@
+// Mesmos valores do antigo .pp-overlay/.pp-dialog hand-rolled — só migrou
+// de div fixa pra ser o conteúdo de um MatDialog (ver panelClass
+// 'pp-dialog-panel' em styles.scss, que neutraliza o container padrão do
+// Material pra este card visual mandar 100% na aparência).
+.pp-dialog {
+  width: 100%;
+  max-width: 480px;
+  // dvh (não vh) evita que o diálogo seja cortado quando a barra de
+  // endereço do navegador mobile aparece/some (ex.: Safari iOS).
+  max-height: 80dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--dex-bg);
+  border-radius: 20px;
+  box-shadow: var(--dex-shadow-xl);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.pp-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pp-dialog-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--dex-ink);
+}
+
+.pp-dialog-hint {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: var(--dex-text-muted);
+}
