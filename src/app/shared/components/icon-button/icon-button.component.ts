@@ -8,9 +8,7 @@ import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
  * team, pokemon-detail, pokemon-list e app.scss — ver STYLEGUIDE.md.
  *
  * Não cobre: botões de navegação que precisam ser `<a routerLink>` (ex.:
- * pdetail__nav-btn) — semântica de link importa (abrir em nova aba, SEO);
- * nem o par compacto de 28px com hover destrutivo do team__slot-action-btn
- * (variante de tamanho própria, migrada junto da Fase 4 de `team`).
+ * pdetail__nav-btn) — semântica de link importa (abrir em nova aba, SEO).
  *
  * Uso:
  *   <app-icon-button icon="close" ariaLabel="Fechar" (clicked)="dismiss()" />
@@ -18,6 +16,7 @@ import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
  *   <app-icon-button icon="favorite" ariaLabel="Favoritar" tone="on-photo" size="lg" (clicked)="toggle()" />
  *   <app-icon-button icon="dark_mode" ariaLabel="Modo escuro" tooltip="Modo escuro" (clicked)="toggle()" />
  *   <app-icon-button icon="group_add" ariaLabel="Adicionar ao time" tone="on-photo" [active]="isInTeam()" (clicked)="toggle()" />
+ *   <app-icon-button icon="close" ariaLabel="Remover" tone="on-photo" size="xxs" [dangerHover]="true" (clicked)="remove()" />
  */
 @Component({
   selector: 'app-icon-button',
@@ -29,6 +28,7 @@ import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
       class="dex-icon-btn"
       [class]="'dex-icon-btn--' + size() + ' dex-icon-btn--' + tone()"
       [class.dex-icon-btn--active]="active()"
+      [class.dex-icon-btn--danger-hover]="dangerHover()"
       [attr.aria-label]="ariaLabel()"
       [disabled]="disabled()"
       [matTooltip]="tooltip()"
@@ -77,6 +77,9 @@ import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
       }
 
       // ---- Tamanho -------------------------------------------------------
+      // xxs: par compacto de ação em card (ex.: slot do time) — não cabe
+      // o padding do xs, então tem sua própria área de toque expandida menor.
+      .dex-icon-btn--xxs { width: 28px; height: 28px; mat-icon { font-size: 16px; width: 16px; height: 16px; } &::before { inset: -8px; } }
       .dex-icon-btn--xs { width: 24px; height: 24px; mat-icon { font-size: 14px; width: 14px; height: 14px; } }
       .dex-icon-btn--sm { width: 32px; height: 32px; mat-icon { font-size: 18px; width: 18px; height: 18px; } }
       .dex-icon-btn--md { width: 40px; height: 40px; mat-icon { font-size: 20px; width: 20px; height: 20px; } }
@@ -136,6 +139,14 @@ import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
           background: color-mix(in srgb, var(--pokedex-red) 18%, transparent);
         }
       }
+
+      // Modificador ortogonal ao tom: hover vira vermelho independente da cor
+      // base (ex.: remover do time) — depois dos tons de propósito pra vencer
+      // no empate de especificidade.
+      .dex-icon-btn--danger-hover:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--pokedex-red) 30%, transparent);
+        color: var(--dex-white);
+      }
     `,
   ],
 })
@@ -144,11 +155,13 @@ export class IconButtonComponent {
   icon = input.required<string>();
   /** Obrigatório — botão-ícone não tem texto visível, precisa de label acessível. */
   ariaLabel = input.required<string>();
-  size = input<'xs' | 'sm' | 'md' | 'lg'>('sm');
+  size = input<'xxs' | 'xs' | 'sm' | 'md' | 'lg'>('sm');
   tone = input<'ghost' | 'on-photo' | 'solid-accent' | 'soft-accent' | 'transparent'>('ghost');
   disabled = input(false);
   /** Estado "ligado" de um botão que alterna (ex.: já favoritado/no time) — só visual no tom on-photo. */
   active = input(false);
+  /** Hover fica vermelho independente do tom — ações destrutivas (ex.: remover do time). */
+  dangerHover = input(false);
   /** Texto do tooltip do Material. Vazio = sem tooltip (padrão do próprio MatTooltip). */
   tooltip = input('');
   tooltipPosition = input<TooltipPosition>('above');

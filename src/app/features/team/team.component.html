@@ -231,36 +231,34 @@
             </span>
           }
           <div cardActions class="team__slot-actions">
-            <button
-              type="button"
-              class="team__slot-action-btn"
-              (click)="openAnalysis(item.id)"
-              [attr.aria-label]="'Ver análise de ' + item.name"
-              matTooltip="Ver análise"
-              matTooltipPosition="left"
-            >
-              <mat-icon>bar_chart</mat-icon>
-            </button>
-            <button
-              type="button"
-              class="team__slot-action-btn"
-              (click)="openReplace($index)"
-              [attr.aria-label]="'Trocar ' + item.name"
-              matTooltip="Trocar"
-              matTooltipPosition="left"
-            >
-              <mat-icon>swap_horiz</mat-icon>
-            </button>
-            <button
-              type="button"
-              class="team__slot-action-btn team__slot-action-btn--remove"
-              (click)="requestRemove(item.id)"
-              [attr.aria-label]="'Remover ' + item.name + ' do time'"
-              matTooltip="Remover do time"
-              matTooltipPosition="left"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
+            <app-icon-button
+              icon="bar_chart"
+              size="xxs"
+              tone="on-photo"
+              [ariaLabel]="'Ver análise de ' + item.name"
+              tooltip="Ver análise"
+              tooltipPosition="left"
+              (clicked)="openAnalysis(item.id)"
+            />
+            <app-icon-button
+              icon="swap_horiz"
+              size="xxs"
+              tone="on-photo"
+              [ariaLabel]="'Trocar ' + item.name"
+              tooltip="Trocar"
+              tooltipPosition="left"
+              (clicked)="openReplace($index)"
+            />
+            <app-icon-button
+              icon="close"
+              size="xxs"
+              tone="on-photo"
+              [dangerHover]="true"
+              [ariaLabel]="'Remover ' + item.name + ' do time'"
+              tooltip="Remover do time"
+              tooltipPosition="left"
+              (clicked)="requestRemove(item.id)"
+            />
           </div>
         </app-pokemon-card>
       } @else {
