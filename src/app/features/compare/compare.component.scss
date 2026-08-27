@@ -86,8 +86,8 @@
       &-value {
         flex: 1;
         min-width: 0;
-        font-size: 0.875rem;
-        font-weight: 700;
+        font-size: var(--dex-font-md);
+        font-weight: var(--dex-weight-bold);
         color: var(--dex-ink);
         white-space: nowrap;
         overflow: hidden;
@@ -97,7 +97,7 @@
       &-placeholder {
         flex: 1;
         min-width: 0;
-        font-size: 0.875rem;
+        font-size: var(--dex-font-md);
         color: var(--dex-text-muted);
         white-space: nowrap;
         overflow: hidden;
@@ -124,8 +124,8 @@
     cursor: pointer;
     color: var(--dex-text-muted);
     padding: 2px;
-    border-radius: 999px;
-    transition: color 0.15s ease, background 0.15s ease;
+    border-radius: var(--dex-radius-pill);
+    transition: color var(--dex-duration-fast) ease, background var(--dex-duration-fast) ease;
 
     mat-icon {
       font-size: 18px;
@@ -190,10 +190,10 @@
     justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: 50%;
+    border-radius: var(--dex-radius-circle);
     background: var(--pokedex-red);
     color: #fff;
-    font-size: 0.8125rem;
+    font-size: var(--dex-font-sm);
     font-weight: 900;
     letter-spacing: 0.04em;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
@@ -233,8 +233,8 @@
   }
 
   &__id {
-    font-size: 0.6875rem;
-    font-weight: 800;
+    font-size: var(--dex-font-2xs);
+    font-weight: var(--dex-weight-black);
     color: var(--dex-text-muted);
     letter-spacing: 0.04em;
   }
@@ -244,7 +244,7 @@
     color: var(--dex-ink);
     margin: 0;
     font-size: 1.0625rem;
-    font-weight: 800;
+    font-weight: var(--dex-weight-black);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -272,8 +272,8 @@
     align-items: center;
     gap: 3px;
     color: var(--dex-text-muted);
-    font-size: 0.6875rem;
-    font-weight: 700;
+    font-size: var(--dex-font-2xs);
+    font-weight: var(--dex-weight-bold);
   }
 
   &__meta-icon {
@@ -284,8 +284,8 @@
   }
 
   &__section-title {
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: var(--dex-font-xs);
+    font-weight: var(--dex-weight-black);
     color: var(--dex-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -318,10 +318,10 @@
   &__ability-pill {
     background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
     color: var(--dex-ink);
-    font-size: 0.6875rem;
-    font-weight: 700;
+    font-size: var(--dex-font-2xs);
+    font-weight: var(--dex-weight-bold);
     padding: 5px 14px;
-    border-radius: 999px;
+    border-radius: var(--dex-radius-pill);
     text-transform: capitalize;
     letter-spacing: 0.02em;
   }
@@ -347,8 +347,8 @@
     }
 
     p {
-      font-size: 0.875rem;
-      font-weight: 600;
+      font-size: var(--dex-font-md);
+      font-weight: var(--dex-weight-semibold);
       text-align: center;
     }
   }
@@ -376,8 +376,8 @@
 
 .compare-stat {
   padding: 5px 8px;
-  border-radius: 8px;
-  transition: background 0.15s ease;
+  border-radius: var(--dex-radius-md);
+  transition: background var(--dex-duration-fast) ease;
 
   &:hover {
     background: color-mix(in srgb, var(--dex-ink) 3%, transparent);
@@ -390,8 +390,8 @@
   }
 
   &__label {
-    font-size: 0.625rem;
-    font-weight: 800;
+    font-size: var(--dex-font-3xs);
+    font-weight: var(--dex-weight-black);
     color: var(--dex-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -418,8 +418,8 @@
 
   &__bar {
     height: 8px;
-    border-radius: 999px;
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--dex-radius-pill);
+    transition: width var(--dex-duration-slow) var(--dex-ease-standard);
     min-width: 4px;
     flex-shrink: 0;
 
@@ -428,8 +428,8 @@
   }
 
   &__value {
-    font-size: 0.6875rem;
-    font-weight: 800;
+    font-size: var(--dex-font-2xs);
+    font-weight: var(--dex-weight-black);
     color: var(--dex-ink);
     white-space: nowrap;
     flex-shrink: 0;
@@ -502,7 +502,7 @@
   }
 
   .compare__name {
-    font-size: 1.125rem;
+    font-size: var(--dex-font-lg);
   }
 
   .compare__sheet {
@@ -511,12 +511,12 @@
   }
 
   .compare-stat__label {
-    font-size: 0.6875rem;
+    font-size: var(--dex-font-2xs);
     min-width: 40px;
   }
 
   .compare-stat__value {
-    font-size: 0.75rem;
+    font-size: var(--dex-font-xs);
     min-width: 28px;
   }
 }

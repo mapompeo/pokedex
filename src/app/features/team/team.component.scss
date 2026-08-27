@@ -25,14 +25,14 @@
   align-items: center;
   gap: 6px;
   border: 1px solid color-mix(in srgb, var(--dex-gold) 40%, transparent);
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   padding: 6px 14px;
   background: color-mix(in srgb, var(--dex-gold) 14%, transparent);
   color: color-mix(in srgb, #a5760a 70%, var(--dex-ink));
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-black);
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background var(--dex-duration-fast) ease, transform var(--dex-duration-fast) ease;
 
   mat-icon {
     font-size: 18px;
@@ -58,11 +58,11 @@
   width: 34px;
   height: 34px;
   border: none;
-  border-radius: 50%;
+  border-radius: var(--dex-radius-circle);
   background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
   color: var(--dex-text-muted);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background var(--dex-duration-fast) ease, color var(--dex-duration-fast) ease;
 
   mat-icon {
     font-size: 20px;
@@ -77,29 +77,29 @@
 }
 
 .team__count {
-  font-size: 0.8125rem;
-  font-weight: 800;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-text-muted);
   background: color-mix(in srgb, var(--dex-ink) 6%, transparent);
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
 }
 
 .team__power {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-bold);
   color: color-mix(in srgb, var(--pokedex-red) 85%, var(--dex-ink));
   background: color-mix(in srgb, var(--pokedex-red) 12%, transparent);
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   border: 1px solid color-mix(in srgb, var(--pokedex-red) 30%, transparent);
 
   strong {
     font-size: 0.9rem;
-    font-weight: 800;
+    font-weight: var(--dex-weight-black);
   }
 }
 
@@ -122,15 +122,15 @@
 
 .team__coverage-title {
   margin: 0;
-  font-size: 0.875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-md);
+  font-weight: var(--dex-weight-black);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--dex-ink);
 }
 
 .team__coverage-sub {
-  font-size: 0.6875rem;
+  font-size: var(--dex-font-2xs);
   color: var(--dex-text-muted);
 }
 
@@ -142,8 +142,8 @@
 }
 
 .team__comp-label {
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-2xs);
+  font-weight: var(--dex-weight-black);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--dex-text-muted);
@@ -160,10 +160,10 @@
   align-items: center;
   gap: 4px;
   padding: 2px 8px 2px 2px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   background: color-mix(in srgb, var(--type-color) 12%, transparent);
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
 }
 
@@ -177,8 +177,8 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-2xs);
+  font-weight: var(--dex-weight-black);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
@@ -197,7 +197,7 @@
 
 .team__coverage-hint {
   font-size: 0.5625rem;
-  font-weight: 600;
+  font-weight: var(--dex-weight-semibold);
   color: var(--dex-text-muted);
   text-transform: none;
   letter-spacing: 0;
@@ -214,7 +214,7 @@
   align-items: center;
   gap: 6px;
   padding: 4px 6px 4px 4px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
 
   &--weak {
     background: color-mix(in srgb, var(--pokedex-red) 9%, transparent);
@@ -230,15 +230,15 @@
 }
 
 .team__coverage-count {
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-2xs);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
   padding-right: 4px;
 }
 
 .team__coverage-none {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--dex-font-xs);
   color: var(--dex-text-muted);
 }
 
@@ -253,7 +253,7 @@
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background var(--dex-duration-fast) ease, transform var(--dex-duration-fast) ease;
   color: var(--dex-ink);
 
   mat-icon {
@@ -282,7 +282,7 @@
 
 .team__coverage-tip-text {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--dex-font-xs);
   line-height: 1.6;
 
   ::ng-deep app-type-badge {
@@ -296,8 +296,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-2xs);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
   white-space: nowrap;
   flex-shrink: 0;
@@ -329,14 +329,14 @@
 }
 
 .team__empty-title {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: var(--dex-font-xl);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
   margin: 0 0 8px;
 }
 
 .team__empty-text {
-  font-size: 0.8125rem;
+  font-size: var(--dex-font-sm);
   color: var(--dex-text-muted);
   margin: 0;
   max-width: 240px;
@@ -349,14 +349,14 @@
   gap: 6px;
   margin-top: 20px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   padding: 10px 20px;
   background: color-mix(in srgb, var(--pokedex-red) 12%, transparent);
   color: color-mix(in srgb, var(--pokedex-red) 55%, var(--dex-bg));
-  font-size: 0.8125rem;
-  font-weight: 800;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-black);
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background var(--dex-duration-fast) ease, transform var(--dex-duration-fast) ease;
 
   mat-icon {
     font-size: 20px;
@@ -381,7 +381,7 @@
   justify-content: center;
   gap: 6px;
   margin: 0 0 12px;
-  font-size: 0.75rem;
+  font-size: var(--dex-font-xs);
   color: var(--dex-text-muted);
 
   mat-icon {
@@ -405,7 +405,7 @@
   justify-content: center;
   flex-direction: column;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--dex-radius-xl);
   min-height: 150px;
   box-sizing: border-box;
   text-decoration: none;
@@ -435,7 +435,7 @@
   color: var(--dex-text-muted);
   cursor: pointer;
   gap: 6px;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: background var(--dex-duration-fast) ease, border-color var(--dex-duration-fast) ease, color var(--dex-duration-fast) ease;
 
   mat-icon {
     font-size: 32px;
@@ -444,8 +444,8 @@
   }
 
   span {
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: var(--dex-font-xs);
+    font-weight: var(--dex-weight-black);
   }
 
   &:hover {
@@ -486,13 +486,13 @@
 :host ::ng-deep .cdk-drag-placeholder {
   opacity: 0.35;
   border: 2px dashed color-mix(in srgb, var(--dex-ink) 20%, transparent);
-  border-radius: 20px;
+  border-radius: var(--dex-radius-xl);
   background: color-mix(in srgb, var(--dex-ink) 5%, transparent);
 }
 
 .team__slot ::ng-deep .type-badge {
   padding: 1px 8px;
-  font-size: 0.625rem;
+  font-size: var(--dex-font-3xs);
   line-height: 1.5;
   border-radius: 10px;
 }
@@ -501,12 +501,12 @@
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
-  font-size: 0.625rem;
-  font-weight: 700;
+  font-size: var(--dex-font-3xs);
+  font-weight: var(--dex-weight-bold);
   color: rgba(255, 255, 255, 0.6);
 
   strong {
-    font-size: 0.75rem;
+    font-size: var(--dex-font-xs);
     font-weight: 900;
     color: #fff;
   }
@@ -533,7 +533,7 @@
   flex-direction: column;
   gap: 16px;
   background: var(--dex-bg);
-  border-radius: 20px;
+  border-radius: var(--dex-radius-xl);
   box-shadow: var(--dex-shadow-xl);
   padding: 16px;
   box-sizing: border-box;
@@ -551,7 +551,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--dex-radius-circle);
   background: color-mix(in srgb, var(--pokedex-red) 10%, transparent);
   color: color-mix(in srgb, var(--pokedex-red) 55%, var(--dex-bg));
   flex-shrink: 0;
@@ -565,14 +565,14 @@
 
 .team__confirm-title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: var(--dex-font-base);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
 }
 
 .team__confirm-text {
   margin: 2px 0 0;
-  font-size: 0.8125rem;
+  font-size: var(--dex-font-sm);
   color: var(--dex-text-muted);
 }
 
@@ -586,12 +586,12 @@
   padding: 10px 16px;
   border: none;
   border-radius: 12px;
-  font-size: 0.8125rem;
-  font-weight: 800;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-black);
   cursor: pointer;
   background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
   color: var(--dex-ink);
-  transition: background 0.15s ease;
+  transition: background var(--dex-duration-fast) ease;
 
   &:hover {
     background: color-mix(in srgb, var(--dex-ink) 16%, transparent);
@@ -633,7 +633,7 @@
   flex-direction: column;
   gap: 16px;
   background: var(--dex-bg);
-  border-radius: 20px;
+  border-radius: var(--dex-radius-xl);
   box-shadow: var(--dex-shadow-xl);
   padding: 16px;
   box-sizing: border-box;
@@ -652,7 +652,7 @@
   flex-shrink: 0;
   image-rendering: pixelated;
   background: color-mix(in srgb, var(--dex-ink) 5%, transparent);
-  border-radius: 14px;
+  border-radius: var(--dex-radius-lg);
   padding: 4px;
 }
 
@@ -667,13 +667,13 @@
 .team__analysis-name {
   margin: 0;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
 }
 
 .team__analysis-id {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-bold);
   color: var(--dex-text-muted);
 }
 
@@ -698,8 +698,8 @@
 }
 
 .team__analysis-stat-label {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-bold);
   color: var(--dex-text-muted);
   display: inline-flex;
   align-items: center;
@@ -708,7 +708,7 @@
 
 .team__analysis-stat--best .team__analysis-stat-label {
   color: color-mix(in srgb, var(--dex-gold) 80%, var(--dex-ink));
-  font-weight: 800;
+  font-weight: var(--dex-weight-black);
 }
 
 .team__analysis-stat-star {
@@ -720,33 +720,33 @@
 
 .team__analysis-bar {
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   background: color-mix(in srgb, var(--dex-ink) 10%, transparent);
   overflow: hidden;
 }
 
 .team__analysis-bar-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   background: linear-gradient(90deg, var(--pokedex-red), var(--dex-gold));
-  transition: width 0.4s ease;
+  transition: width var(--dex-duration-slow) ease;
 }
 
 .team__analysis-stat-value {
-  font-size: 0.8125rem;
-  font-weight: 800;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-ink);
   text-align: right;
 }
 
 .team__analysis-power {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--dex-font-sm);
   color: var(--dex-text-muted);
 
   strong {
     color: var(--dex-ink);
-    font-weight: 800;
+    font-weight: var(--dex-weight-black);
   }
 }
 
@@ -765,8 +765,8 @@
 }
 
 .team__analysis-coverage-label {
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-black);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 
@@ -788,7 +788,7 @@
 }
 
 .team__analysis-coverage-hint {
-  font-size: 0.6875rem;
+  font-size: var(--dex-font-2xs);
   color: var(--dex-text-muted);
   margin-top: -2px;
 }
@@ -804,13 +804,13 @@
   align-items: center;
   gap: 4px;
   padding: 2px 6px 2px 2px;
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   background: color-mix(in srgb, var(--dex-ink) 6%, transparent);
 }
 
 .team__analysis-chip-mult {
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-2xs);
+  font-weight: var(--dex-weight-black);
   color: var(--dex-text-muted);
 }
 
@@ -820,7 +820,7 @@
 
 .team__analysis-none {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--dex-font-xs);
   color: var(--dex-text-muted);
 }
 
@@ -840,12 +840,12 @@
   padding: 10px 16px;
   border: none;
   border-radius: 12px;
-  font-size: 0.8125rem;
-  font-weight: 800;
+  font-size: var(--dex-font-sm);
+  font-weight: var(--dex-weight-black);
   cursor: pointer;
   background: color-mix(in srgb, var(--dex-ink) 8%, transparent);
   color: var(--dex-ink);
-  transition: background 0.15s ease;
+  transition: background var(--dex-duration-fast) ease;
 
   mat-icon {
     font-size: 18px;
@@ -874,14 +874,14 @@
   gap: 6px;
   align-self: flex-start;
   border: 1px solid color-mix(in srgb, var(--dex-ink) 12%, transparent);
-  border-radius: 999px;
+  border-radius: var(--dex-radius-pill);
   padding: 6px 14px;
   background: var(--dex-bg);
   color: var(--dex-ink);
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: var(--dex-font-xs);
+  font-weight: var(--dex-weight-black);
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color var(--dex-duration-fast) ease, background var(--dex-duration-fast) ease;
 
   mat-icon {
     font-size: 18px;
@@ -907,7 +907,7 @@
   gap: 6px;
   padding: 10px;
   background: color-mix(in srgb, var(--dex-ink) 3%, transparent);
-  border-radius: 14px;
+  border-radius: var(--dex-radius-lg);
 }
 
 .team__table-cell {
@@ -932,8 +932,8 @@
 }
 
 .team__table-abbr {
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: var(--dex-font-2xs);
+  font-weight: var(--dex-weight-black);
 }
 
 @keyframes team-float {
