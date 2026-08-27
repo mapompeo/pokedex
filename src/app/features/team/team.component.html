@@ -298,7 +298,11 @@
   }
 
   @if (confirmRemoveId(); as id) {
+    <!-- Overlay/stopPropagation são só conveniência do mouse: Escape (via
+         @HostListener abaixo) e os botões focáveis já cobrem o teclado. -->
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
     <div class="team__overlay team__overlay--center" (click)="cancelRemove()">
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
       <div class="team__confirm" role="alertdialog" aria-label="Confirmar remoção" (click)="$event.stopPropagation()">
         <div class="team__confirm-head">
           <span class="team__confirm-icon">
@@ -318,7 +322,9 @@
   }
 
   @if (confirmClear()) {
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
     <div class="team__overlay team__overlay--center" (click)="cancelClear()">
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
       <div class="team__confirm" role="alertdialog" aria-label="Confirmar limpar time" (click)="$event.stopPropagation()">
         <div class="team__confirm-head">
           <span class="team__confirm-icon">
@@ -338,7 +344,9 @@
   }
 
   @if (analysisId(); as id) {
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
     <div class="team__overlay team__overlay--center" (click)="closeAnalysis()">
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
       <div class="team__analysis" role="dialog" aria-label="Análise do membro" (click)="$event.stopPropagation()">
         <div class="team__analysis-head">
           <img [src]="memberSprite(id)" [alt]="memberName(id)" class="team__analysis-sprite" loading="lazy" />

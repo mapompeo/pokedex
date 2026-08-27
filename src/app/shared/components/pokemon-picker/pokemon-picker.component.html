@@ -1,6 +1,10 @@
 @if (modal()) {
   @if (open()) {
+    <!-- Overlay/stopPropagation são só conveniência do mouse: Escape (via
+         @HostListener no .ts) e o botão de fechar já cobrem o teclado. -->
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
     <div class="pp-overlay" (click)="dismiss()">
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
       <div class="pp-dialog" role="dialog" [attr.aria-label]="title()" (click)="$event.stopPropagation()">
         <div class="pp-head">
           <div class="pp-head-text">

@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -114,13 +115,13 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.allNames().length === 0) {
       this.pokemonService.getAllPokemonListItems().subscribe({
         next: (items) => this.allNames.set(items),
-        error: () => {},
+        error: () => { /* erro já tratado pelo interceptor global/toast; cache se auto-reseta */ },
       });
     }
     if (this.typesById().size === 0) {
       this.pokemonService.getTypesByPokemonId().subscribe({
         next: (idToTypes) => this.typesById.set(idToTypes),
-        error: () => {},
+        error: () => { /* erro já tratado pelo interceptor global/toast; cache se auto-reseta */ },
       });
     }
     if (this.availableTypes().length === 0) {
@@ -129,7 +130,7 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
           this.availableTypes.set(
             types.map((t) => ({ name: t.name, label: getTypeNamePt(t.name), color: getTypeColor(t.name) }))
           ),
-        error: () => {},
+        error: () => { /* erro já tratado pelo interceptor global/toast; cache se auto-reseta */ },
       });
     }
     if (this.allItems().length === 0) {
@@ -198,6 +199,13 @@ export class PokemonListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onSearchChange(value: string): void {
     this.searchSubject.next(value);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.filtersOpen()) {
+      this.filtersOpen.set(false);
+    }
   }
 
   toggleTypeFilter(typeName: string): void {

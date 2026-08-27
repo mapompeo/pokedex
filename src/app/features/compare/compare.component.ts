@@ -110,9 +110,7 @@ export class CompareComponent implements AfterViewInit, OnDestroy {
           this.allNames.set(items);
           this.restoreFromStorage();
         },
-        // Toast de erro já é mostrado pelo interceptor global; o cache do
-        // service se auto-reseta, então a próxima visita a esta tela tenta de novo.
-        error: () => {},
+        error: () => { /* erro já tratado pelo interceptor global/toast; cache se auto-reseta */ },
       });
   }
 
