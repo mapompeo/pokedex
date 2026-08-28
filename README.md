@@ -9,7 +9,7 @@
 
 **Pokédex completa em Angular, consumindo a PokéAPI em tempo real - sem backend próprio**
 
-[Sobre](#sobre) • [Stack](#stack) • [Como Usar](#-como-usar) • [Arquitetura](#-arquitetura) • [Decisões](#-decisões-de-arquitetura) • [Guia de Estilo](STYLEGUIDE.md)
+[Sobre](#sobre) • [Stack](#stack) • [Como Usar](#como-usar) • [Arquitetura](#arquitetura) • [Decisões](#decisoes) • [Guia de Estilo](STYLEGUIDE.md)
 
 ![Preview da Pokédex](public/screenshots/pokedex.jpg)
 
@@ -46,6 +46,8 @@ Pokédex é um projeto de estudo em **Angular 20 + TypeScript**, construído par
 
 ---
 
+<a id="arquitetura"></a>
+
 ## 🏗️ Arquitetura
 
 ```
@@ -72,6 +74,8 @@ Template (Angular control flow: @if / @for / @switch)
 Para o tamanho deste projeto, um gerenciador de estado externo seria over-engineering: o estado inteiro cabe em dois services (`PokemonService`, `FavoritesService`) usando Signals nativos do Angular, sem o boilerplate de actions/reducers/selectors. Se a aplicação crescesse (múltiplas fontes de estado compartilhado, undo/redo, dev tools de time-travel), aí valeria reavaliar.
 
 ---
+
+<a id="como-usar"></a>
 
 ## 🚀 Como Usar
 
@@ -130,6 +134,8 @@ src/app/
 Cada feature é isolada e se comunica com as demais apenas através dos services e do roteamento - sem acoplamento direto entre telas.
 
 ---
+
+<a id="decisoes"></a>
 
 ## 💡 Decisões de Arquitetura
 
