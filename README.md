@@ -11,6 +11,8 @@
 
 [Sobre](#sobre) • [Stack](#stack) • [Como Usar](#-como-usar) • [Arquitetura](#-arquitetura) • [Decisões](#-decisões-de-arquitetura) • [Guia de Estilo](STYLEGUIDE.md)
 
+![Preview da Pokédex](public/screenshots/pokedex.jpg)
+
 </div>
 
 ---
