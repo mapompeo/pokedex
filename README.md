@@ -1,6 +1,6 @@
-# 🔴 Pokédex
-
 <div align="center">
+
+# Pokédex
 
 ![Angular](https://img.shields.io/badge/Angular-20-DD0031?style=for-the-badge&logo=angular)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript)
